@@ -1,0 +1,8 @@
+BasedOnStyle: WebKit
+ColumnLimit: 120
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+Language: Cpp
+IndentWidth: 4
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Left
