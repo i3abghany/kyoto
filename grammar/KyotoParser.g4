@@ -20,11 +20,16 @@ statement:
 expressionStatement: expression SEMICOLON;
 
 expression:
-	number
-	| unaryOp expression
-	| expression multOp expression
-	| expression addOp expression
-	| expression comparisonOp expression;
+	number #numberExpression
+	| CHAR_LITERAL #charExpression
+	| STRING_LITERAL #stringExpression
+	| IDENTIFIER #identifierExpression
+	| LPAREN expression RPAREN #parenthesizedExpression
+	| unaryOp expression #unaryExpression
+	| expression multOp expression #multiplicativeExpression
+	| expression addOp expression #additiveExpression
+	| expression comparisonOp expression #comparisonExpression
+	;
 
 unaryOp: MINUS | PLUS;
 
@@ -38,13 +43,6 @@ comparisonOp:
 	| GREATER_THAN
 	| GREATER_THAN_OR_EQUAL
 	| EQUALS;
-
-primaryExpression:
-	number
-	| CHAR_LITERAL
-	| STRING_LITERAL
-	| LPAREN expression RPAREN;
-
 number: INTEGER | FLOAT | TRUE | FALSE;
 
 fullDeclaration: type IDENTIFIER EQUAL expression SEMICOLON;
