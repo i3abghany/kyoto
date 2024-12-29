@@ -2,13 +2,10 @@
 #include <iostream>
 #include <string_view>
 
-#include "KyotoLexer.h"
-#include "KyotoParser.h"
-#include "antlr4-runtime.h"
-
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/ModuleCompiler.h"
+#include "kyoto/Visitor.h"
 
-using namespace antlrcpptest;
 using namespace antlr4;
 
 std::string get_source(std::string_view filename)
@@ -20,21 +17,10 @@ std::string get_source(std::string_view filename)
     return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 }
 
-int main(int, const char**)
+int main()
 {
     auto source = get_source("../examples/ex.kyo");
-    ANTLRInputStream input(source);
-    KyotoLexer lexer(&input);
-    CommonTokenStream tokens(&lexer);
-
-    tokens.fill();
-    for (auto token : tokens.getTokens()) {
-        std::cout << token->toString() << '\n';
-    }
-
-    KyotoParser parser(&tokens);
-    auto* tree = parser.program();
-    std::cout << std::endl << tree->toStringTree(&parser) << std::endl << std::endl;
-
+    ModuleCompiler compiler("main", source);
+    compiler.compile();
     return 0;
 }

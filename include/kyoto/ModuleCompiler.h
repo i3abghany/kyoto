@@ -1,3 +1,7 @@
+#pragma once
+
+#include <any>
+
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
@@ -10,15 +14,16 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
 
+#include "antlr4-runtime.h"
+
+#include "kyoto/AST/ASTNode.h"
+#include "kyoto/Visitor.h"
+
 class ModuleCompiler {
 public:
-    ModuleCompiler(const std::string& name = "main", const std::string& code = "")
-        : name(name)
-        , code(code)
-        , builder(context)
-        , module(std::make_unique<llvm::Module>(name, context))
-    {
-    }
+    ModuleCompiler(const std::string& name = "main", const std::string& code = "");
+
+    void compile();
 
     llvm::LLVMContext& get_context() { return context; }
 

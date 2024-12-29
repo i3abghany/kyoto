@@ -4,6 +4,7 @@ project(Kyoto)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_BUILD_TYPE Debug)
 add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 
@@ -24,11 +25,14 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 find_package(ANTLR REQUIRED)
 
 antlr_target(KyotoGrammarLexer ${PROJECT_SOURCE_DIR}/grammar/KyotoLexer.g4 LEXER
-             PACKAGE antlrcpptest)
+             PACKAGE kyoto
+             COMPILE_FLAGS -Dstd-cxx-any=false
+             )
 antlr_target(KyotoGrammarParser ${PROJECT_SOURCE_DIR}/grammar/KyotoParser.g4 PARSER
-             PACKAGE antlrcpptest
+             PACKAGE kyoto
              DEPENDS_ANTLR KyotoGrammarLexer
-             COMPILE_FLAGS -lib ${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
+             COMPILE_FLAGS -lib ${ANTLR_KyotoGrammarLexer_OUTPUT_DIR}
+             VISITOR)
 
 # include generated files in project environment
 include_directories(${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
@@ -36,6 +40,9 @@ include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 
 # add generated grammar to demo binary target
 add_executable(kyoto main.cpp
+               src/Visitor.cpp
+               src/AST/ASTNode.cpp
+               src/ModuleCompiler.cpp
                ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
                ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
 
