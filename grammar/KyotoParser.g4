@@ -14,6 +14,7 @@ statement:
 	expressionStatement
 	| declaration
 	| fullDeclaration
+	| returnStatement
 	| assignment;
 
 expressionStatement: expression SEMICOLON;
@@ -51,6 +52,8 @@ fullDeclaration: type IDENTIFIER EQUAL expression SEMICOLON;
 declaration: type IDENTIFIER SEMICOLON;
 
 assignment: IDENTIFIER EQUAL expression SEMICOLON;
+
+returnStatement: RETURN expression SEMICOLON;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

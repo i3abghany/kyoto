@@ -59,6 +59,8 @@ FN: 'fn';
 CDECL: 'cdecl';
 ELLIPSIS: '...';
 
+RETURN: 'return';
+
 // This has to be defined after all the keywords because it will match all of
 // them if defined first.
 IDENTIFIER: LETTER (LETTER | [0-9])*;
