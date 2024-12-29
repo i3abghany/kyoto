@@ -6,6 +6,8 @@
 #include "KyotoParser.h"
 #include "antlr4-runtime.h"
 
+#include "kyoto/AST/ASTNode.h"
+
 using namespace antlrcpptest;
 using namespace antlr4;
 
