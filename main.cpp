@@ -12,6 +12,9 @@ using namespace antlr4;
 std::string get_source(std::string_view filename)
 {
     std::ifstream ifs(filename.data());
+    if (!ifs.is_open()) {
+        throw std::runtime_error("Failed to open file");
+    }
     return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 }
 
