@@ -37,11 +37,11 @@ antlr_target(KyotoGrammarParser ${PROJECT_SOURCE_DIR}/grammar/KyotoParser.g4 PAR
 include_directories(${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
 include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 
-# add generated grammar to demo binary target
 add_executable(kyoto main.cpp
                src/Visitor.cpp
                src/AST/ASTNode.cpp
                src/AST/ASTBinaryArithNode.cpp
+               src/AST/NumberNode.cpp
                src/ModuleCompiler.cpp
                src/SymbolTable.cpp
                src/Type.cpp

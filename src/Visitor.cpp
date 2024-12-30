@@ -7,6 +7,7 @@
 
 #include "kyoto/AST/ASTBinaryArithNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/NumberNode.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/Visitor.h"
 
@@ -68,7 +69,7 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
 std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx)
 {
     // FIXME: only accounts for 4-byte signed integers
-    return (ASTNode*)new IntNode(std::stoi(ctx->getText()), 4, true, compiler);
+    return (ASTNode*)new NumberNode(std::stoi(ctx->getText()), 4, true, compiler);
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)

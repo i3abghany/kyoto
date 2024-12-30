@@ -4,18 +4,15 @@
 #include <fmt/core.h>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/ModuleCompiler.h"
 
-#include "llvm/ADT/APInt.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
@@ -68,41 +65,6 @@ llvm::Value* ProgramNode::gen()
     assert(compiler.n_scopes() == 1 && "Unbalanced scopes");
     compiler.pop_scope();
     return nullptr;
-}
-
-IntNode::IntNode(int64_t value, size_t width, bool sign, ModuleCompiler& compiler)
-    : value(value)
-    , width(width)
-    , sign(sign)
-    , compiler(compiler)
-{
-}
-
-std::string IntNode::to_string() const
-{
-    return fmt::format("{}Node({})", get_type(), value);
-}
-
-llvm::Value* IntNode::gen()
-{
-    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(width * 8, value, sign));
-}
-
-std::string_view IntNode::get_type() const
-{
-    switch (width) {
-    case 8:
-        return "I8";
-    case 16:
-        return "I16";
-    case 32:
-        return "I32";
-    case 64:
-        return "I64";
-    default:
-        assert(false && "Unknown width");
-    }
-    return "";
 }
 
 IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompiler& compiler)

@@ -16,7 +16,7 @@ class Value;
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
-    virtual std::string to_string() const = 0;
+    [[nodiscard]] virtual std::string to_string() const = 0;
     virtual llvm::Value* gen() = 0;
 
 protected:
@@ -30,24 +30,8 @@ class ProgramNode : public ASTNode {
 public:
     ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
-};
-
-class IntNode : public ASTNode {
-    int64_t value;
-    size_t width;
-    bool sign;
-    ModuleCompiler& compiler;
-
-public:
-    IntNode(int64_t value, size_t width, bool sign, ModuleCompiler& compiler);
-
-    std::string to_string() const override;
-    llvm::Value* gen() override;
-
-private:
-    std::string_view get_type() const;
 };
 
 class IdentifierExpressionNode : public ASTNode {
@@ -57,7 +41,7 @@ class IdentifierExpressionNode : public ASTNode {
 public:
     IdentifierExpressionNode(std::string name, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
@@ -69,7 +53,7 @@ class DeclarationStatementNode : public ASTNode {
 public:
     DeclarationStatementNode(std::string name, std::string type, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
@@ -82,7 +66,7 @@ class FullDeclarationStatementNode : public ASTNode {
 public:
     FullDeclarationStatementNode(std::string name, std::string type, ASTNode* expr, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
@@ -93,7 +77,7 @@ class ReturnStatementNode : public ASTNode {
 public:
     ReturnStatementNode(ASTNode* expr, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
@@ -105,7 +89,7 @@ class UnaryNode : public ASTNode {
 public:
     UnaryNode(ASTNode* expr, std::string op, ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
@@ -119,11 +103,11 @@ public:
     FunctionNode(const std::string& name, std::vector<Parameter> args, std::string ret_type, std::vector<ASTNode*> body,
                  ModuleCompiler& compiler);
 
-    std::string to_string() const override;
+    [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 
 private:
-    std::vector<llvm::Type*> get_arg_types() const;
+    [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;
 
     std::string name;
     std::vector<Parameter> args;
