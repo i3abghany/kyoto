@@ -25,17 +25,17 @@ expression:
 	| STRING_LITERAL #stringExpression
 	| IDENTIFIER #identifierExpression
 	| LPAREN expression RPAREN #parenthesizedExpression
-	| unaryOp expression #unaryExpression
-	| expression multOp expression #multiplicativeExpression
-	| expression addOp expression #additiveExpression
+	| MINUS expression #negationExpression
+	| PLUS expression #positiveExpression
+	| expression ASTERISK expression #multiplicationExpression
+	| expression SLASH expression #divisionExpression
+	| expression PERCENT expression #modulusExpression
+	| expression PLUS expression #additionExpression
+	| expression MINUS expression #subtractionExpression
 	| expression comparisonOp expression #comparisonExpression
 	;
 
 unaryOp: MINUS | PLUS;
-
-multOp: ASTERISK | SLASH | PERCENT;
-
-addOp: PLUS | MINUS;
 
 comparisonOp:
 	LESS_THAN
@@ -45,9 +45,9 @@ comparisonOp:
 	| EQUALS;
 number: INTEGER | FLOAT | TRUE | FALSE;
 
-fullDeclaration: type IDENTIFIER EQUAL expression SEMICOLON;
+fullDeclaration: VAR IDENTIFIER COLON type EQUAL expression SEMICOLON;
 
-declaration: type IDENTIFIER SEMICOLON;
+declaration: VAR IDENTIFIER COLON type SEMICOLON;
 
 assignment: IDENTIFIER EQUAL expression SEMICOLON;
 

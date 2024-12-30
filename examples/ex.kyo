@@ -1,3 +1,4 @@
 fn main() i32 {
-    return 1 * 2 * 3;
+    var x: i32 = 3 * 4;
+    return x;
 }
