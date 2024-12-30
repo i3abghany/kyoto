@@ -67,7 +67,11 @@ size_t ModuleCompiler::n_scopes() const
 
 void ModuleCompiler::verify_module() const
 {
-    if (!verifyModule(*module, nullptr))
+    if (verifyModule(*module, nullptr)) {
         std::cerr << "Module verification failed" << std::endl;
-    module->print(llvm::errs(), nullptr);
+        llvm::errs() << "Error(s) in module " << module->getName() << ":\n";
+        llvm::verifyModule(*module, &llvm::errs());
+    } else {
+        module->print(llvm::errs(), nullptr);
+    }
 }
