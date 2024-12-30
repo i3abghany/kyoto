@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 
 #include "llvm/ADT/ArrayRef.h"
@@ -24,17 +25,39 @@ namespace llvm {
 class LLVMContext;
 }
 
-llvm::Type* ASTNode::get_type(const std::string& type, llvm::LLVMContext& context)
+llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
 {
-    if (type == "i8") {
+    auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
+    assert(primitive_type && "Only primitive types are supported");
+
+    switch (primitive_type->get_kind()) {
+    case PrimitiveType::Kind::Boolean:
+        return llvm::Type::getInt1Ty(context);
+    case PrimitiveType::Kind::Char:
         return llvm::Type::getInt8Ty(context);
-    } else if (type == "i16") {
+    case PrimitiveType::Kind::I8:
+        return llvm::Type::getInt8Ty(context);
+    case PrimitiveType::Kind::I16:
         return llvm::Type::getInt16Ty(context);
-    } else if (type == "i32") {
+    case PrimitiveType::Kind::I32:
         return llvm::Type::getInt32Ty(context);
-    } else if (type == "i64") {
+    case PrimitiveType::Kind::I64:
         return llvm::Type::getInt64Ty(context);
-    } else {
+    case PrimitiveType::Kind::U8:
+        return llvm::Type::getInt8Ty(context);
+    case PrimitiveType::Kind::U16:
+        return llvm::Type::getInt16Ty(context);
+    case PrimitiveType::Kind::U32:
+        return llvm::Type::getInt32Ty(context);
+    case PrimitiveType::Kind::U64:
+        return llvm::Type::getInt64Ty(context);
+    case PrimitiveType::Kind::F32:
+        return llvm::Type::getFloatTy(context);
+    case PrimitiveType::Kind::F64:
+        return llvm::Type::getDoubleTy(context);
+    case PrimitiveType::Kind::Void:
+        return llvm::Type::getVoidTy(context);
+    case PrimitiveType::Kind::Unknown:
         assert(false && "Unknown type");
     }
     return nullptr;
@@ -88,30 +111,30 @@ llvm::Value* IdentifierExpressionNode::gen()
     return compiler.get_builder().CreateLoad(symbol.value()->getAllocatedType(), symbol.value(), name);
 }
 
-DeclarationStatementNode::DeclarationStatementNode(std::string name, std::string type, ModuleCompiler& compiler)
+DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler)
     : name(name)
-    , type(type)
+    , type(ktype)
     , compiler(compiler)
 {
 }
 
 std::string DeclarationStatementNode::to_string() const
 {
-    return fmt::format("DeclarationNode({}, {})", name, type);
+    return fmt::format("DeclarationNode({}, {})", name, type->to_string());
 }
 
 llvm::Value* DeclarationStatementNode::gen()
 {
-    auto* type = get_type(this->type, compiler.get_context());
-    auto* val = new llvm::AllocaInst(type, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* ltype = get_llvm_type(type, compiler.get_context());
+    auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     compiler.add_symbol(name, val);
     return val;
 }
 
-FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, std::string type, ASTNode* expr,
+FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KType* ktype, ASTNode* expr,
                                                            ModuleCompiler& compiler)
     : name(name)
-    , type(type)
+    , type(ktype)
     , expr(expr)
     , compiler(compiler)
 {
@@ -119,13 +142,13 @@ FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, std
 
 std::string FullDeclarationStatementNode::to_string() const
 {
-    return fmt::format("FullDeclarationNode({}, {}, {})", name, type, expr->to_string());
+    return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
 llvm::Value* FullDeclarationStatementNode::gen()
 {
-    auto* type = get_type(this->type, compiler.get_context());
-    auto* alloca = new llvm::AllocaInst(type, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* ltype = get_llvm_type(this->type, compiler.get_context());
+    auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = expr->gen();
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, alloca);
@@ -172,11 +195,11 @@ llvm::Value* UnaryNode::gen()
     return nullptr;
 }
 
-FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, std::string ret_type,
+FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type,
                            std::vector<ASTNode*> body, ModuleCompiler& compiler)
     : name(name)
     , args(std::move(args))
-    , ret_type(std::move(ret_type))
+    , ret_type(ret_type)
     , body(std::move(body))
     , compiler(compiler)
 {
@@ -186,7 +209,7 @@ std::string FunctionNode::to_string() const
 {
     std::string args_str;
     for (const auto& arg : args) {
-        args_str += arg.name + ": " + arg.type + ", ";
+        args_str += arg.name + ": " + arg.type->to_string() + ", ";
     }
     std::string body_str;
     for (const auto* node : body) {
@@ -197,8 +220,8 @@ std::string FunctionNode::to_string() const
 
 llvm::Value* FunctionNode::gen()
 {
-    auto* return_type = get_type(ret_type, compiler.get_context());
-    auto* func_type = llvm::FunctionType::get(return_type, get_arg_types(), false);
+    auto* return_ltype = get_llvm_type(ret_type, compiler.get_context());
+    auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), false);
     auto* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
     auto* entry = llvm::BasicBlock::Create(compiler.get_context(), "func_entry", func);
     compiler.get_builder().SetInsertPoint(entry);
@@ -214,8 +237,8 @@ std::vector<llvm::Type*> FunctionNode::get_arg_types() const
 {
     std::vector<llvm::Type*> types;
     for (const auto& arg : args) {
-        auto* type = get_type(arg.type, compiler.get_context());
-        types.push_back(type);
+        auto* ltype = get_llvm_type(arg.type, compiler.get_context());
+        types.push_back(ltype);
     }
     return types;
 }

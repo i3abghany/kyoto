@@ -5,6 +5,8 @@
 
 #include "llvm/IR/Type.h"
 
+#include "kyoto/KType.h"
+
 class ModuleCompiler;
 namespace llvm {
 class LLVMContext;
@@ -20,7 +22,7 @@ public:
     virtual llvm::Value* gen() = 0;
 
 protected:
-    static llvm::Type* get_type(const std::string& type, llvm::LLVMContext& context);
+    static llvm::Type* get_llvm_type(const KType* type, llvm::LLVMContext& context);
 };
 
 class ProgramNode : public ASTNode {
@@ -47,11 +49,11 @@ public:
 
 class DeclarationStatementNode : public ASTNode {
     std::string name;
-    std::string type;
+    KType* type;
     ModuleCompiler& compiler;
 
 public:
-    DeclarationStatementNode(std::string name, std::string type, ModuleCompiler& compiler);
+    DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -59,12 +61,12 @@ public:
 
 class FullDeclarationStatementNode : public ASTNode {
     std::string name;
-    std::string type;
+    KType* type;
     ASTNode* expr;
     ModuleCompiler& compiler;
 
 public:
-    FullDeclarationStatementNode(std::string name, std::string type, ASTNode* expr, ModuleCompiler& compiler);
+    FullDeclarationStatementNode(std::string name, KType* type, ASTNode* expr, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -97,10 +99,10 @@ class FunctionNode : public ASTNode {
 public:
     struct Parameter {
         std::string name;
-        std::string type;
+        KType* type;
     };
 
-    FunctionNode(const std::string& name, std::vector<Parameter> args, std::string ret_type, std::vector<ASTNode*> body,
+    FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, std::vector<ASTNode*> body,
                  ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
@@ -111,7 +113,7 @@ private:
 
     std::string name;
     std::vector<Parameter> args;
-    std::string ret_type;
+    KType* ret_type;
     std::vector<ASTNode*> body;
     ModuleCompiler& compiler;
 };

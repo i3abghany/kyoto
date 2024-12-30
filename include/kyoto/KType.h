@@ -1,12 +1,14 @@
+#pragma once
+
 #include <string>
 
-class Type {
+class KType {
 public:
-    virtual ~Type() = default;
+    virtual ~KType() = default;
     virtual std::string to_string() const = 0;
 };
 
-class PrimitiveType : public Type {
+class PrimitiveType : public KType {
 public:
     enum class Kind { Boolean, Char, I8, I16, I32, I64, U8, U16, U32, U64, F32, F64, String, Void, Unknown };
 
@@ -21,6 +23,11 @@ public:
     bool is_boolean() const;
     bool is_numeric() const;
     bool is_char() const;
+
+    size_t width() const;
+    size_t sign() const;
+
+    Kind get_kind() const;
 
 private:
     PrimitiveType::Kind kind;

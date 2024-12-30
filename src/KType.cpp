@@ -1,4 +1,4 @@
-#include "kyoto/Type.h"
+#include "kyoto/KType.h"
 
 PrimitiveType::PrimitiveType(Kind kind)
     : kind(kind)
@@ -73,4 +73,41 @@ bool PrimitiveType::is_numeric() const
 bool PrimitiveType::is_char() const
 {
     return kind == Kind::Char;
+}
+
+size_t PrimitiveType::width() const
+{
+    switch (kind) {
+    case Kind::Boolean:
+    case Kind::Char:
+    case Kind::I8:
+    case Kind::U8:
+        return 1;
+
+    case Kind::I16:
+    case Kind::U16:
+        return 2;
+
+    case Kind::I32:
+    case Kind::U32:
+    case Kind::F32:
+        return 4;
+
+    case Kind::I64:
+    case Kind::U64:
+    case Kind::F64:
+        return 8;
+    }
+
+    return 0;
+}
+
+size_t PrimitiveType::sign() const
+{
+    return is_signed();
+}
+
+PrimitiveType::Kind PrimitiveType::get_kind() const
+{
+    return kind;
 }

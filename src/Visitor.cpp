@@ -32,10 +32,14 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
     std::vector<FunctionNode::Parameter> args;
 
     for (auto paramCtx : ctx->parameterList()->parameter()) {
-        args.push_back({ paramCtx->IDENTIFIER()->getText(), paramCtx->type()->getText() });
+        auto type_str = paramCtx->type()->getText();
+        // FIXME: only accounts for primitive types
+        auto type = parse_primitive_type(type_str);
+        args.push_back({ paramCtx->IDENTIFIER()->getText(), new PrimitiveType(type) });
     }
 
-    std::string ret_type = ctx->type() ? ctx->type()->getText() : "void";
+    std::string ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
+    auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
     std::vector<ASTNode*> body;
     compiler.push_scope();
     for (auto stmt : ctx->block()->statement()) {
@@ -47,14 +51,16 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
 std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx)
 {
-    std::string type = ctx->type()->getText();
+    std::string type_str = ctx->type()->getText();
+    auto type = new PrimitiveType(parse_primitive_type(type_str));
     std::string name = ctx->IDENTIFIER()->getText();
     return (ASTNode*)new DeclarationStatementNode(name, type, compiler);
 }
 
 std::any ASTBuilderVisitor::visitFullDeclaration(kyoto::KyotoParser::FullDeclarationContext* ctx)
 {
-    std::string type = ctx->type()->getText();
+    std::string type_str = ctx->type()->getText();
+    auto type = new PrimitiveType(parse_primitive_type(type_str));
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
@@ -68,8 +74,20 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
 
 std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx)
 {
-    // FIXME: only accounts for 4-byte signed integers
-    return (ASTNode*)new NumberNode(std::stoi(ctx->getText()), 4, true, compiler);
+    auto txt = ctx->getText();
+
+    if (auto num = parse_signed_integer_into(txt, PrimitiveType::Kind::I32); num.has_value()) {
+        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
+    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U32); num.has_value()) {
+        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U32), compiler);
+    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::I64); num.has_value()) {
+        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I64), compiler);
+    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U64); num.has_value()) {
+        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U64), compiler);
+    }
+
+    assert(false && "Unknown Integer type");
+    return {};
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
@@ -159,4 +177,64 @@ PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& t
     if (type == "void")
         return PrimitiveType::Kind::Void;
     return PrimitiveType::Kind::Unknown;
+}
+
+std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,
+                                                                    const PrimitiveType::Kind kind)
+{
+    try {
+        switch (kind) {
+        case PrimitiveType::Kind::I8:
+            return std::stoi(str);
+        case PrimitiveType::Kind::I16:
+            return std::stoi(str);
+        case PrimitiveType::Kind::I32:
+            return std::stoi(str);
+        case PrimitiveType::Kind::I64:
+            return std::stoll(str);
+        default:
+            return std::nullopt;
+        }
+    } catch (std::invalid_argument&) {
+        return std::nullopt;
+    }
+}
+
+std::optional<uint64_t> ASTBuilderVisitor::parse_unsigned_integer_into(const std::string& str,
+                                                                       const PrimitiveType::Kind kind)
+{
+    try {
+        switch (kind) {
+        case PrimitiveType::Kind::U8:
+            return std::stoul(str);
+        case PrimitiveType::Kind::U16:
+            return std::stoul(str);
+        case PrimitiveType::Kind::U32:
+            return std::stoul(str);
+        case PrimitiveType::Kind::U64:
+            return std::stoull(str);
+        default:
+            return std::nullopt;
+        }
+    } catch (std::invalid_argument&) {
+        return std::nullopt;
+    }
+}
+
+std::optional<double> ASTBuilderVisitor::parse_double(const std::string& str)
+{
+    try {
+        return std::stod(str);
+    } catch (std::invalid_argument&) {
+        return std::nullopt;
+    }
+}
+
+std::optional<float> ASTBuilderVisitor::parse_float(const std::string& str)
+{
+    try {
+        return std::stof(str);
+    } catch (std::invalid_argument&) {
+        return std::nullopt;
+    }
 }
