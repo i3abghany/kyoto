@@ -41,6 +41,7 @@ add_executable(kyoto main.cpp
                src/Visitor.cpp
                src/AST/ASTNode.cpp
                src/AST/ASTBinaryArithNode.cpp
+               src/AST/ASTBinaryCmpNode.cpp
                src/AST/NumberNode.cpp
                src/ModuleCompiler.cpp
                src/SymbolTable.cpp

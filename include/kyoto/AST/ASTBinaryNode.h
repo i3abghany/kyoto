@@ -10,7 +10,7 @@ namespace llvm {
 class Value;
 }
 
-#define ARITH_BINARY_NODE_INTERFACE(name)                                         \
+#define BINARY_NODE_INTERFACE(name)                                               \
     class name : public ExpressionNode {                                          \
         ExpressionNode *lhs, *rhs;                                                \
         ModuleCompiler& compiler;                                                 \
@@ -22,8 +22,17 @@ class Value;
         llvm::Type* get_type(llvm::LLVMContext& context) const override;          \
     }
 
-ARITH_BINARY_NODE_INTERFACE(AddNode);
-ARITH_BINARY_NODE_INTERFACE(SubNode);
-ARITH_BINARY_NODE_INTERFACE(MulNode);
-ARITH_BINARY_NODE_INTERFACE(DivNode);
-ARITH_BINARY_NODE_INTERFACE(ModNode);
+BINARY_NODE_INTERFACE(AddNode);
+BINARY_NODE_INTERFACE(SubNode);
+BINARY_NODE_INTERFACE(MulNode);
+BINARY_NODE_INTERFACE(DivNode);
+BINARY_NODE_INTERFACE(ModNode);
+
+BINARY_NODE_INTERFACE(EqNode);
+BINARY_NODE_INTERFACE(NotEqNode);
+BINARY_NODE_INTERFACE(LessNode);
+BINARY_NODE_INTERFACE(GreaterNode);
+BINARY_NODE_INTERFACE(LessEqNode);
+BINARY_NODE_INTERFACE(GreaterEqNode);
+
+#undef BINARY_NODE_INTERFACE

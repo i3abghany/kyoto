@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-#include "kyoto/AST/ASTBinaryArithNode.h"
+#include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

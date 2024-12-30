@@ -13,6 +13,7 @@ LESS_THAN_OR_EQUAL: '<=';
 GREATER_THAN: '>';
 GREATER_THAN_OR_EQUAL: '>=';
 EQUALS: '==';
+NOT_EQUALS: '!=';
 
 PLUS: '+';
 MINUS: '-';
@@ -62,6 +63,9 @@ ELLIPSIS: '...';
 RETURN: 'return';
 
 VAR: 'var';
+
+IF: 'if';
+ELSE: 'else';
 
 // This has to be defined after all the keywords because it will match all of
 // them if defined first.

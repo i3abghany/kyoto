@@ -32,6 +32,12 @@ expression:
 	| expression PERCENT expression #modulusExpression
 	| expression PLUS expression #additionExpression
 	| expression MINUS expression #subtractionExpression
+	| expression LESS_THAN expression #lessThanExpression
+	| expression LESS_THAN_OR_EQUAL expression #lessThanOrEqualExpression
+	| expression GREATER_THAN expression #greaterThanExpression
+	| expression GREATER_THAN_OR_EQUAL expression #greaterThanOrEqualExpression
+	| expression EQUALS expression #equalsExpression
+	| expression NOT_EQUALS expression #notEqualsExpression
 	| expression comparisonOp expression #comparisonExpression
 	;
 
@@ -51,6 +57,10 @@ declaration: VAR IDENTIFIER COLON type SEMICOLON;
 assignment: IDENTIFIER EQUAL expression SEMICOLON;
 
 returnStatement: RETURN expression SEMICOLON;
+
+ifStatement: IF LPAREN expression RPAREN block_or_statement (ELSE block_or_statement)?;
+
+block_or_statement: block | statement;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

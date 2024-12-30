@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "KyotoParser.h"
-#include "kyoto/AST/ASTBinaryArithNode.h"
+#include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/KType.h"
@@ -143,6 +143,49 @@ std::any ASTBuilderVisitor::visitSubtractionExpression(kyoto::KyotoParser::Subtr
     auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
     auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
     return (ExpressionNode*)new SubNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitLessThanExpression(kyoto::KyotoParser::LessThanExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new LessNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitGreaterThanExpression(kyoto::KyotoParser::GreaterThanExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new GreaterNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitLessThanOrEqualExpression(kyoto::KyotoParser::LessThanOrEqualExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new LessEqNode(lhs, rhs, compiler);
+}
+
+std::any
+ASTBuilderVisitor::visitGreaterThanOrEqualExpression(kyoto::KyotoParser::GreaterThanOrEqualExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new GreaterEqNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitEqualsExpression(kyoto::KyotoParser::EqualsExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new EqNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitNotEqualsExpression(kyoto::KyotoParser::NotEqualsExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new NotEqNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)

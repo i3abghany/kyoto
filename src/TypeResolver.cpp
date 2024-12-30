@@ -12,6 +12,14 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveT
     return std::nullopt;
 }
 
+std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_cmp(PrimitiveType::Kind lhs,
+                                                                    PrimitiveType::Kind rhs) const
+{
+    if (lhs == rhs)
+        return PrimitiveType::Kind::Boolean;
+    return std::nullopt;
+}
+
 bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind to) const
 {
     auto pfrom = PrimitiveType(from);

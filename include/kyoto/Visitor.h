@@ -19,13 +19,23 @@ public:
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
+
     std::any visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx) override;
     std::any visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx) override;
+
     std::any visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx) override;
     std::any visitDivisionExpression(kyoto::KyotoParser::DivisionExpressionContext* ctx) override;
     std::any visitModulusExpression(kyoto::KyotoParser::ModulusExpressionContext* ctx) override;
+
     std::any visitAdditionExpression(kyoto::KyotoParser::AdditionExpressionContext* ctx) override;
     std::any visitSubtractionExpression(kyoto::KyotoParser::SubtractionExpressionContext* ctx) override;
+
+    std::any visitLessThanExpression(kyoto::KyotoParser::LessThanExpressionContext* ctx) override;
+    std::any visitGreaterThanExpression(kyoto::KyotoParser::GreaterThanExpressionContext* ctx) override;
+    std::any visitLessThanOrEqualExpression(kyoto::KyotoParser::LessThanOrEqualExpressionContext* ctx) override;
+    std::any visitGreaterThanOrEqualExpression(kyoto::KyotoParser::GreaterThanOrEqualExpressionContext* ctx) override;
+    std::any visitEqualsExpression(kyoto::KyotoParser::EqualsExpressionContext* ctx) override;
+    std::any visitNotEqualsExpression(kyoto::KyotoParser::NotEqualsExpressionContext* ctx) override;
 
 private:
     PrimitiveType::Kind parse_primitive_type(const std::string& type);
