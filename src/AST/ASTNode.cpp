@@ -77,7 +77,10 @@ IntNode::IntNode(int64_t value, size_t width, ModuleCompiler& compiler)
 {
 }
 
-std::string IntNode::to_string() const { return fmt::format("{}Node({})", get_type(), value); }
+std::string IntNode::to_string() const
+{
+    return fmt::format("{}Node({})", get_type(), value);
+}
 
 llvm::Value* IntNode::gen()
 {
@@ -106,7 +109,10 @@ IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompi
 {
 }
 
-std::string IdentifierExpressionNode::to_string() const { return fmt::format("IdentifierNode({})", name); }
+std::string IdentifierExpressionNode::to_string() const
+{
+    return fmt::format("IdentifierNode({})", name);
+}
 
 llvm::Value* IdentifierExpressionNode::gen()
 {
@@ -125,7 +131,10 @@ DeclarationStatementNode::DeclarationStatementNode(std::string name, std::string
 {
 }
 
-std::string DeclarationStatementNode::to_string() const { return fmt::format("DeclarationNode({}, {})", name, type); }
+std::string DeclarationStatementNode::to_string() const
+{
+    return fmt::format("DeclarationNode({}, {})", name, type);
+}
 
 llvm::Value* DeclarationStatementNode::gen()
 {
@@ -165,7 +174,10 @@ ReturnStatementNode::ReturnStatementNode(ASTNode* expr, ModuleCompiler& compiler
 {
 }
 
-std::string ReturnStatementNode::to_string() const { return fmt::format("ReturnNode({})", expr->to_string()); }
+std::string ReturnStatementNode::to_string() const
+{
+    return fmt::format("ReturnNode({})", expr->to_string());
+}
 
 llvm::Value* ReturnStatementNode::gen()
 {
@@ -180,7 +192,10 @@ UnaryNode::UnaryNode(ASTNode* expr, std::string op, ModuleCompiler& compiler)
 {
 }
 
-std::string UnaryNode::to_string() const { return fmt::format("UnaryNode({}, {})", op, expr->to_string()); }
+std::string UnaryNode::to_string() const
+{
+    return fmt::format("UnaryNode({}, {})", op, expr->to_string());
+}
 
 llvm::Value* UnaryNode::gen()
 {

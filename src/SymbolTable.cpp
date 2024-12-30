@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <map>
 #include <optional>
 #include <ranges>
@@ -14,7 +15,10 @@ namespace llvm {
 class Module;
 }
 
-void Scope::add_symbol(const std::string& name, llvm::AllocaInst* value) { symbols[name] = value; }
+void Scope::add_symbol(const std::string& name, llvm::AllocaInst* value)
+{
+    symbols[name] = value;
+}
 
 std::optional<llvm::AllocaInst*> Scope::get_symbol(const std::string& name)
 {
@@ -27,9 +31,15 @@ SymbolTable::SymbolTable(ModuleCompiler& compiler, llvm::Module* module)
 {
 }
 
-void SymbolTable::push_scope() { scopes.push_back(Scope {}); }
+void SymbolTable::push_scope()
+{
+    scopes.push_back(Scope {});
+}
 
-void SymbolTable::pop_scope() { scopes.pop_back(); }
+void SymbolTable::pop_scope()
+{
+    scopes.pop_back();
+}
 
 void SymbolTable::add_symbol(const std::string& name, llvm::AllocaInst* value)
 {
@@ -46,4 +56,7 @@ std::optional<llvm::AllocaInst*> SymbolTable::get_symbol(const std::string& name
     return std::nullopt;
 }
 
-size_t SymbolTable::n_scopes() const { return scopes.size(); }
+size_t SymbolTable::n_scopes() const
+{
+    return scopes.size();
+}

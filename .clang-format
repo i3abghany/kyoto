@@ -7,3 +7,4 @@ IndentWidth: 4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
 AlignEscapedNewlines: Left
+AllowShortFunctionsOnASingleLine: Inline

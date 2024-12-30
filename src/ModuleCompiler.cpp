@@ -1,7 +1,6 @@
 #include "kyoto/ModuleCompiler.h"
 
 #include <any>
-#include <iostream>
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
@@ -33,12 +32,40 @@ void ModuleCompiler::compile()
     kyoto::KyotoParser parser(&tokens);
     auto* tree = parser.program();
 
-    std::cout << tree->toStringTree(&parser) << std::endl;
-
     ASTBuilderVisitor visitor(*this);
     auto* program = std::any_cast<ASTNode*>(visitor.visit(tree));
     program->gen();
 
+    verify_module();
+}
+
+std::optional<llvm::AllocaInst*> ModuleCompiler::get_symbol(const std::string& name)
+{
+    return symbol_table.get_symbol(name);
+}
+
+void ModuleCompiler::add_symbol(const std::string& name, llvm::AllocaInst* value)
+{
+    symbol_table.add_symbol(name, value);
+}
+
+void ModuleCompiler::push_scope()
+{
+    symbol_table.push_scope();
+}
+
+void ModuleCompiler::pop_scope()
+{
+    symbol_table.pop_scope();
+}
+
+size_t ModuleCompiler::n_scopes() const
+{
+    return symbol_table.n_scopes();
+}
+
+void ModuleCompiler::verify_module()
+{
     llvm::verifyModule(*module);
     module->print(llvm::errs(), nullptr);
 }

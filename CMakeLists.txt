@@ -26,7 +26,6 @@ find_package(ANTLR REQUIRED)
 
 antlr_target(KyotoGrammarLexer ${PROJECT_SOURCE_DIR}/grammar/KyotoLexer.g4 LEXER
              PACKAGE kyoto
-             COMPILE_FLAGS -Dstd-cxx-any=false
              )
 antlr_target(KyotoGrammarParser ${PROJECT_SOURCE_DIR}/grammar/KyotoParser.g4 PARSER
              PACKAGE kyoto
