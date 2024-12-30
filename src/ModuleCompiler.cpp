@@ -1,8 +1,18 @@
 #include "kyoto/ModuleCompiler.h"
 
+#include <any>
+#include <iostream>
+
+#include "ANTLRInputStream.h"
+#include "CommonTokenStream.h"
 #include "KyotoLexer.h"
 #include "KyotoParser.h"
-#include "antlr4-runtime.h"
+
+#include "kyoto/AST/ASTNode.h"
+#include "kyoto/Visitor.h"
+
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/raw_ostream.h"
 
 ModuleCompiler::ModuleCompiler(const std::string& name, const std::string& code)
     : name(name)

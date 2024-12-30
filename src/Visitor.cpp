@@ -1,4 +1,9 @@
 #include <any>
+#include <string>
+#include <vector>
+
+#include "KyotoParser.h"
+#include "tree/TerminalNode.h"
 
 #include "kyoto/AST/ASTBinaryArithNode.h"
 #include "kyoto/AST/ASTNode.h"

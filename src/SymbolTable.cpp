@@ -1,11 +1,18 @@
+#include <map>
+#include <optional>
 #include <ranges>
+#include <string>
 #include <vector>
 
-#include "kyoto/ModuleCompiler.h"
 #include "kyoto/SymbolTable.h"
 
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Module.h"
+class ModuleCompiler;
+namespace llvm {
+class AllocaInst;
+}
+namespace llvm {
+class Module;
+}
 
 void Scope::add_symbol(const std::string& name, llvm::AllocaInst* value) { symbols[name] = value; }
 

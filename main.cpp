@@ -1,10 +1,11 @@
 #include <fstream>
-#include <iostream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
 #include <string_view>
 
-#include "kyoto/AST/ASTNode.h"
 #include "kyoto/ModuleCompiler.h"
-#include "kyoto/Visitor.h"
+#include "support/Declarations.h"
 
 using namespace antlr4;
 

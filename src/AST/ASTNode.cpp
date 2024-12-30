@@ -1,5 +1,31 @@
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <fmt/core.h>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/ModuleCompiler.h"
+
+#include "llvm/ADT/APInt.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Instruction.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Type.h"
+
+namespace llvm {
+class LLVMContext;
+}
 
 llvm::Type* ASTNode::get_type(const std::string& type, llvm::LLVMContext& context)
 {
