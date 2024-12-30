@@ -17,7 +17,7 @@ class AllocaInst;
 
 class ModuleCompiler {
 public:
-    ModuleCompiler(const std::string& code, const std::string& name = "main");
+    explicit ModuleCompiler(const std::string& code, const std::string& name = "main");
 
     void compile();
 
@@ -36,7 +36,7 @@ public:
     size_t n_scopes() const;
 
 private:
-    void verify_module();
+    void verify_module() const;
 
 private:
     std::string code;

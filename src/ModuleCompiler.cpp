@@ -64,8 +64,9 @@ size_t ModuleCompiler::n_scopes() const
     return symbol_table.n_scopes();
 }
 
-void ModuleCompiler::verify_module()
+void ModuleCompiler::verify_module() const
 {
-    llvm::verifyModule(*module);
+    if (!verifyModule(*module, nullptr))
+        std::cerr << "Module verification failed" << std::endl;
     module->print(llvm::errs(), nullptr);
 }

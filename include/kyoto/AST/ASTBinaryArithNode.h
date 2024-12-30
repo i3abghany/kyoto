@@ -20,8 +20,8 @@ class Value;
         llvm::Value* gen() override;                                \
     }
 
-ARITH_BINARY_NODE_INTERFACE(MulNode);
 ARITH_BINARY_NODE_INTERFACE(AddNode);
 ARITH_BINARY_NODE_INTERFACE(SubNode);
+ARITH_BINARY_NODE_INTERFACE(MulNode);
 ARITH_BINARY_NODE_INTERFACE(DivNode);
 ARITH_BINARY_NODE_INTERFACE(ModNode);
