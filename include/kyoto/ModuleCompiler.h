@@ -17,7 +17,7 @@ class AllocaInst;
 
 class ModuleCompiler {
 public:
-    ModuleCompiler(const std::string& name = "main", const std::string& code = "");
+    ModuleCompiler(const std::string& code, const std::string& name = "main");
 
     void compile();
 
@@ -39,8 +39,8 @@ private:
     void verify_module();
 
 private:
-    std::string name;
     std::string code;
+    std::string name;
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
     std::unique_ptr<llvm::Module> module;

@@ -13,9 +13,9 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
 
-ModuleCompiler::ModuleCompiler(const std::string& name, const std::string& code)
-    : name(name)
-    , code(code)
+ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
+    : code(code)
+    , name(name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
     , symbol_table(*this, module.get())

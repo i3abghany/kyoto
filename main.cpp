@@ -21,7 +21,7 @@ std::string get_source(std::string_view filename)
 int main()
 {
     auto source = get_source("../examples/ex.kyo");
-    ModuleCompiler compiler("main", source);
+    ModuleCompiler compiler(source);
     compiler.compile();
     return 0;
 }
