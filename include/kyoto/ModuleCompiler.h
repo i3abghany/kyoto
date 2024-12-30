@@ -35,6 +35,9 @@ public:
     std::optional<llvm::AllocaInst*> get_symbol(const std::string& name) { return symbol_table.get_symbol(name); }
     void add_symbol(const std::string& name, llvm::AllocaInst* value) { symbol_table.add_symbol(name, value); }
 
+    void push_scope() { symbol_table.push_scope(); }
+    void pop_scope() { symbol_table.pop_scope(); }
+
 private:
     std::string name;
     std::string code;

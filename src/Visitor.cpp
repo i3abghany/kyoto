@@ -2,6 +2,7 @@
 
 #include "kyoto/AST/ASTBinaryArithNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/ModuleCompiler.h"
 #include "kyoto/Visitor.h"
 
 ASTBuilderVisitor::ASTBuilderVisitor(ModuleCompiler& compiler)
@@ -30,9 +31,11 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
     std::string ret_type = ctx->type() ? ctx->type()->getText() : "void";
     std::vector<ASTNode*> body;
+    compiler.push_scope();
     for (auto stmt : ctx->block()->statement()) {
         body.push_back(std::any_cast<ASTNode*>(visit(stmt)));
     }
+    compiler.pop_scope();
     return (ASTNode*)new FunctionNode(name, args, ret_type, body, compiler);
 }
 
