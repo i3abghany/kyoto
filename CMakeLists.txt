@@ -44,6 +44,7 @@ add_executable(kyoto main.cpp
                src/AST/ASTBinaryArithNode.cpp
                src/ModuleCompiler.cpp
                src/SymbolTable.cpp
+               src/Type.cpp
                ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
                ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
 
