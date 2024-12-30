@@ -13,12 +13,18 @@ public:
     std::any visitProgram(kyoto::KyotoParser::ProgramContext* ctx) override;
     std::any visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx) override;
     std::any visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx) override;
+    std::any visitFullDeclaration(kyoto::KyotoParser::FullDeclarationContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
-    std::any visitUnaryExpression(kyoto::KyotoParser::UnaryExpressionContext* ctx) override;
-    std::any visitAdditiveExpression(kyoto::KyotoParser::AdditiveExpressionContext* ctx) override;
-    std::any visitMultiplicativeExpression(kyoto::KyotoParser::MultiplicativeExpressionContext* ctx) override;
+    std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
+    std::any visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx) override;
+    std::any visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx) override;
+    std::any visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx) override;
+    std::any visitDivisionExpression(kyoto::KyotoParser::DivisionExpressionContext* ctx) override;
+    std::any visitModulusExpression(kyoto::KyotoParser::ModulusExpressionContext* ctx) override;
+    std::any visitAdditionExpression(kyoto::KyotoParser::AdditionExpressionContext* ctx) override;
+    std::any visitSubtractionExpression(kyoto::KyotoParser::SubtractionExpressionContext* ctx) override;
 
 private:
     ModuleCompiler& compiler;

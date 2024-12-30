@@ -70,37 +70,22 @@ std::string_view IntNode::get_type() const
     }
 }
 
-AddNode::AddNode(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler)
-    : lhs(lhs)
-    , rhs(rhs)
+IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompiler& compiler)
+    : name(name)
     , compiler(compiler)
 {
 }
 
-std::string AddNode::to_string() const { return fmt::format("AddNode({}, {})", lhs->to_string(), rhs->to_string()); }
+std::string IdentifierExpressionNode::to_string() const { return fmt::format("IdentifierNode({})", name); }
 
-llvm::Value* AddNode::gen()
+llvm::Value* IdentifierExpressionNode::gen()
 {
-    auto* lhs_val = lhs->gen();
-    auto* rhs_val = rhs->gen();
-    return compiler.get_builder().CreateAdd(lhs_val, rhs_val, "addval");
-}
+    auto symbol = compiler.get_symbol(name);
+    if (!symbol.has_value()) {
+        assert(false && "Unknown symbol");
+    }
 
-MulNode::MulNode(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler)
-    : lhs(lhs)
-    , rhs(rhs)
-    , compiler(compiler)
-{
-}
-
-std::string MulNode::to_string() const { return fmt::format("MulNode({}, {})", lhs->to_string(), rhs->to_string()); }
-
-llvm::Value* MulNode::gen()
-{
-    auto* lhs_val = lhs->gen();
-    auto* rhs_val = rhs->gen();
-    // FIXME: assumes that lhs and rhs are integers
-    return compiler.get_builder().CreateMul(lhs_val, rhs_val, "mulval");
+    return compiler.get_builder().CreateLoad(symbol.value()->getAllocatedType(), symbol.value(), name);
 }
 
 DeclarationStatementNode::DeclarationStatementNode(std::string name, std::string type, ModuleCompiler& compiler)
@@ -115,7 +100,33 @@ std::string DeclarationStatementNode::to_string() const { return fmt::format("De
 llvm::Value* DeclarationStatementNode::gen()
 {
     auto* type = get_type(this->type, compiler.get_context());
-    return new llvm::AllocaInst(type, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* val = new llvm::AllocaInst(type, 0, name, compiler.get_builder().GetInsertBlock());
+    compiler.add_symbol(name, val);
+    return val;
+}
+
+FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, std::string type, ASTNode* expr,
+                                                           ModuleCompiler& compiler)
+    : name(name)
+    , type(type)
+    , expr(expr)
+    , compiler(compiler)
+{
+}
+
+std::string FullDeclarationStatementNode::to_string() const
+{
+    return fmt::format("FullDeclarationNode({}, {}, {})", name, type, expr->to_string());
+}
+
+llvm::Value* FullDeclarationStatementNode::gen()
+{
+    auto* type = get_type(this->type, compiler.get_context());
+    auto* alloca = new llvm::AllocaInst(type, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* expr_val = expr->gen();
+    compiler.get_builder().CreateStore(expr_val, alloca);
+    compiler.add_symbol(name, alloca);
+    return alloca;
 }
 
 ReturnStatementNode::ReturnStatementNode(ASTNode* expr, ModuleCompiler& compiler)

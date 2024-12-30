@@ -1,5 +1,7 @@
 #include <any>
 
+#include "kyoto/AST/ASTBinaryArithNode.h"
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/Visitor.h"
 
 ASTBuilderVisitor::ASTBuilderVisitor(ModuleCompiler& compiler)
@@ -41,6 +43,14 @@ std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationCont
     return (ASTNode*)new DeclarationStatementNode(name, type, compiler);
 }
 
+std::any ASTBuilderVisitor::visitFullDeclaration(kyoto::KyotoParser::FullDeclarationContext* ctx)
+{
+    std::string type = ctx->type()->getText();
+    std::string name = ctx->IDENTIFIER()->getText();
+    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
+    return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
+}
+
 std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx)
 {
     auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
@@ -52,24 +62,55 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
     return (ASTNode*)new IntNode(std::stoi(ctx->getText()), 4, compiler);
 }
 
-std::any ASTBuilderVisitor::visitUnaryExpression(kyoto::KyotoParser::UnaryExpressionContext* ctx)
+std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
 {
-    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
-    return (ASTNode*)new UnaryNode(expr, ctx->unaryOp()->getText(), compiler);
+    return (ASTNode*)new IdentifierExpressionNode(ctx->IDENTIFIER()->getText(), compiler);
 }
 
-std::any ASTBuilderVisitor::visitAdditiveExpression(kyoto::KyotoParser::AdditiveExpressionContext* ctx)
+std::any ASTBuilderVisitor::visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->expression(0)));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->expression(1)));
+    return visit(ctx->expression());
+}
+
+std::any ASTBuilderVisitor::visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx)
+{
+    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
+    return (ASTNode*)new UnaryNode(expr, "-", compiler);
+}
+
+std::any ASTBuilderVisitor::visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
+    return (ASTNode*)new MulNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitDivisionExpression(kyoto::KyotoParser::DivisionExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
+    return (ASTNode*)new DivNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitModulusExpression(kyoto::KyotoParser::ModulusExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
+    return (ASTNode*)new ModNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitAdditionExpression(kyoto::KyotoParser::AdditionExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
     return (ASTNode*)new AddNode(lhs, rhs, compiler);
 }
 
-std::any ASTBuilderVisitor::visitMultiplicativeExpression(kyoto::KyotoParser::MultiplicativeExpressionContext* ctx)
+std::any ASTBuilderVisitor::visitSubtractionExpression(kyoto::KyotoParser::SubtractionExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->expression(0)));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->expression(1)));
-    return (ASTNode*)new MulNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
+    return (ASTNode*)new SubNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)

@@ -17,6 +17,7 @@
 #include "antlr4-runtime.h"
 
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/SymbolTable.h"
 #include "kyoto/Visitor.h"
 
 class ModuleCompiler {
@@ -31,10 +32,14 @@ public:
 
     llvm::Module* get_module() { return module.get(); }
 
+    std::optional<llvm::AllocaInst*> get_symbol(const std::string& name) { return symbol_table.get_symbol(name); }
+    void add_symbol(const std::string& name, llvm::AllocaInst* value) { symbol_table.add_symbol(name, value); }
+
 private:
     std::string name;
     std::string code;
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
     std::unique_ptr<llvm::Module> module;
+    SymbolTable symbol_table;
 };

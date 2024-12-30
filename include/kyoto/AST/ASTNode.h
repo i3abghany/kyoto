@@ -53,26 +53,12 @@ private:
     std::string_view get_type() const;
 };
 
-// FIXME: We should have a template for binary operations because they are very similar
-class AddNode : public ASTNode {
-    ASTNode* lhs;
-    ASTNode* rhs;
+class IdentifierExpressionNode : public ASTNode {
+    std::string name;
     ModuleCompiler& compiler;
 
 public:
-    AddNode(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler);
-
-    std::string to_string() const override;
-    llvm::Value* gen() override;
-};
-
-class MulNode : public ASTNode {
-    ASTNode* lhs;
-    ASTNode* rhs;
-    ModuleCompiler& compiler;
-
-public:
-    MulNode(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler);
+    IdentifierExpressionNode(std::string name, ModuleCompiler& compiler);
 
     std::string to_string() const override;
     llvm::Value* gen() override;
@@ -85,6 +71,19 @@ class DeclarationStatementNode : public ASTNode {
 
 public:
     DeclarationStatementNode(std::string name, std::string type, ModuleCompiler& compiler);
+
+    std::string to_string() const override;
+    llvm::Value* gen() override;
+};
+
+class FullDeclarationStatementNode : public ASTNode {
+    std::string name;
+    std::string type;
+    ASTNode* expr;
+    ModuleCompiler& compiler;
+
+public:
+    FullDeclarationStatementNode(std::string name, std::string type, ASTNode* expr, ModuleCompiler& compiler);
 
     std::string to_string() const override;
     llvm::Value* gen() override;

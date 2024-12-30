@@ -42,7 +42,9 @@ include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 add_executable(kyoto main.cpp
                src/Visitor.cpp
                src/AST/ASTNode.cpp
+               src/AST/ASTBinaryArithNode.cpp
                src/ModuleCompiler.cpp
+               src/SymbolTable.cpp
                ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
                ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
 

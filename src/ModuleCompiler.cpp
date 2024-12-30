@@ -9,7 +9,10 @@ ModuleCompiler::ModuleCompiler(const std::string& name, const std::string& code)
     , code(code)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
+    , symbol_table(*this, module.get())
 {
+    // Start with one slot for global scope
+    symbol_table.push_scope();
 }
 
 void ModuleCompiler::compile()
@@ -22,10 +25,10 @@ void ModuleCompiler::compile()
     kyoto::KyotoParser parser(&tokens);
     auto* tree = parser.program();
 
+    std::cout << tree->toStringTree(&parser) << std::endl;
+
     ASTBuilderVisitor visitor(*this);
-
     auto* program = std::any_cast<ASTNode*>(visitor.visit(tree));
-
     program->gen();
 
     llvm::verifyModule(*module);
