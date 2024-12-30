@@ -29,7 +29,7 @@ llvm::Value* NumberNode::gen()
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(width * 8, value, sign));
 }
 
-llvm::Type* NumberNode::get_type(llvm::LLVMContext& context)
+llvm::Type* NumberNode::get_type(llvm::LLVMContext& context) const
 {
     return ASTNode::get_llvm_type(type.get(), context);
 }

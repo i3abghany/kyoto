@@ -62,13 +62,13 @@ std::any ASTBuilderVisitor::visitFullDeclaration(kyoto::KyotoParser::FullDeclara
     std::string type_str = ctx->type()->getText();
     auto type = new PrimitiveType(parse_primitive_type(type_str));
     std::string name = ctx->IDENTIFIER()->getText();
-    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx)
 {
-    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new ReturnStatementNode(expr, compiler);
 }
 
@@ -77,13 +77,13 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
     auto txt = ctx->getText();
 
     if (auto num = parse_signed_integer_into(txt, PrimitiveType::Kind::I32); num.has_value()) {
-        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
+        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
     } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U32); num.has_value()) {
-        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U32), compiler);
+        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U32), compiler);
     } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::I64); num.has_value()) {
-        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I64), compiler);
+        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I64), compiler);
     } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U64); num.has_value()) {
-        return (ASTNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U64), compiler);
+        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U64), compiler);
     }
 
     assert(false && "Unknown Integer type");
@@ -92,7 +92,7 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
 {
-    return (ASTNode*)new IdentifierExpressionNode(ctx->IDENTIFIER()->getText(), compiler);
+    return (ExpressionNode*)new IdentifierExpressionNode(ctx->IDENTIFIER()->getText(), compiler);
 }
 
 std::any ASTBuilderVisitor::visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx)
@@ -102,43 +102,43 @@ std::any ASTBuilderVisitor::visitPositiveExpression(kyoto::KyotoParser::Positive
 
 std::any ASTBuilderVisitor::visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx)
 {
-    auto* expr = std::any_cast<ASTNode*>(visit(ctx->expression()));
-    return (ASTNode*)new UnaryNode(expr, "-", compiler);
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new UnaryNode(expr, "-", compiler);
 }
 
 std::any ASTBuilderVisitor::visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
-    return (ASTNode*)new MulNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new MulNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitDivisionExpression(kyoto::KyotoParser::DivisionExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
-    return (ASTNode*)new DivNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new DivNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitModulusExpression(kyoto::KyotoParser::ModulusExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
-    return (ASTNode*)new ModNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new ModNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitAdditionExpression(kyoto::KyotoParser::AdditionExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
-    return (ASTNode*)new AddNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new AddNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitSubtractionExpression(kyoto::KyotoParser::SubtractionExpressionContext* ctx)
 {
-    auto* lhs = std::any_cast<ASTNode*>(visit(ctx->children[0]));
-    auto* rhs = std::any_cast<ASTNode*>(visit(ctx->children[2]));
-    return (ASTNode*)new SubNode(lhs, rhs, compiler);
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new SubNode(lhs, rhs, compiler);
 }
 
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)

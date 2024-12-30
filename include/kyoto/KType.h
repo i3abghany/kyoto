@@ -2,6 +2,10 @@
 
 #include <string>
 
+namespace llvm {
+class Type;
+}
+
 class KType {
 public:
     virtual ~KType() = default;
@@ -28,6 +32,8 @@ public:
     size_t sign() const;
 
     Kind get_kind() const;
+
+    static PrimitiveType from_llvm_type(const llvm::Type* type);
 
 private:
     PrimitiveType::Kind kind;

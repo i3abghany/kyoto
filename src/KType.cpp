@@ -1,5 +1,7 @@
 #include "kyoto/KType.h"
 
+#include "llvm/IR/Type.h"
+
 PrimitiveType::PrimitiveType(Kind kind)
     : kind(kind)
 {
@@ -110,4 +112,23 @@ size_t PrimitiveType::sign() const
 PrimitiveType::Kind PrimitiveType::get_kind() const
 {
     return kind;
+}
+
+PrimitiveType PrimitiveType::from_llvm_type(const llvm::Type* type)
+{
+    if (type->isIntegerTy(1))
+        return PrimitiveType(Kind::Boolean);
+    if (type->isIntegerTy(8))
+        return PrimitiveType(Kind::I8);
+    if (type->isIntegerTy(16))
+        return PrimitiveType(Kind::I16);
+    if (type->isIntegerTy(32))
+        return PrimitiveType(Kind::I32);
+    if (type->isIntegerTy(64))
+        return PrimitiveType(Kind::I64);
+    if (type->isFloatTy())
+        return PrimitiveType(Kind::F32);
+    if (type->isDoubleTy())
+        return PrimitiveType(Kind::F64);
+    return PrimitiveType(Kind::Unknown);
 }

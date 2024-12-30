@@ -25,6 +25,14 @@ protected:
     static llvm::Type* get_llvm_type(const KType* type, llvm::LLVMContext& context);
 };
 
+class ExpressionNode : public ASTNode {
+public:
+    virtual ~ExpressionNode() = default;
+    [[nodiscard]] virtual std::string to_string() const = 0;
+    virtual llvm::Value* gen() = 0;
+    virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
+};
+
 class ProgramNode : public ASTNode {
     std::vector<ASTNode*> nodes;
     ModuleCompiler& compiler;
@@ -36,7 +44,7 @@ public:
     llvm::Value* gen() override;
 };
 
-class IdentifierExpressionNode : public ASTNode {
+class IdentifierExpressionNode : public ExpressionNode {
     std::string name;
     ModuleCompiler& compiler;
 
@@ -45,6 +53,7 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
+    llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
 class DeclarationStatementNode : public ASTNode {
@@ -62,34 +71,34 @@ public:
 class FullDeclarationStatementNode : public ASTNode {
     std::string name;
     KType* type;
-    ASTNode* expr;
+    ExpressionNode* expr;
     ModuleCompiler& compiler;
 
 public:
-    FullDeclarationStatementNode(std::string name, KType* type, ASTNode* expr, ModuleCompiler& compiler);
+    FullDeclarationStatementNode(std::string name, KType* type, ExpressionNode* expr, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
 class ReturnStatementNode : public ASTNode {
-    ASTNode* expr;
+    ExpressionNode* expr;
     ModuleCompiler& compiler;
 
 public:
-    ReturnStatementNode(ASTNode* expr, ModuleCompiler& compiler);
+    ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
 };
 
 class UnaryNode : public ASTNode {
-    ASTNode* expr;
+    ExpressionNode* expr;
     std::string op;
     ModuleCompiler& compiler;
 
 public:
-    UnaryNode(ASTNode* expr, std::string op, ModuleCompiler& compiler);
+    UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;

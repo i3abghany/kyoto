@@ -45,6 +45,7 @@ add_executable(kyoto main.cpp
                src/ModuleCompiler.cpp
                src/SymbolTable.cpp
                src/KType.cpp
+               src/TypeResolver.cpp
                ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
                ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
 

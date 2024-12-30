@@ -7,6 +7,8 @@
 #include "kyoto/ModuleCompiler.h"
 #include "support/Declarations.h"
 
+#include "kyoto/TypeResolver.h"
+
 using namespace antlr4;
 
 std::string get_source(const std::string_view filename)
@@ -23,5 +25,6 @@ int main()
     const auto source = get_source("../examples/ex.kyo");
     ModuleCompiler compiler(source);
     compiler.compile();
+
     return 0;
 }

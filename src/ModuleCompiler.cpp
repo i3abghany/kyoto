@@ -19,6 +19,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
     , symbol_table(*this, module.get())
+    , type_resolver()
 {
 }
 

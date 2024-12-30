@@ -111,6 +111,16 @@ llvm::Value* IdentifierExpressionNode::gen()
     return compiler.get_builder().CreateLoad(symbol.value()->getAllocatedType(), symbol.value(), name);
 }
 
+llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
+{
+    auto symbol = compiler.get_symbol(name);
+    if (!symbol.has_value()) {
+        assert(false && "Unknown symbol");
+    }
+
+    return symbol.value()->getAllocatedType();
+}
+
 DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler)
     : name(name)
     , type(ktype)
@@ -131,7 +141,7 @@ llvm::Value* DeclarationStatementNode::gen()
     return val;
 }
 
-FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KType* ktype, ASTNode* expr,
+FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KType* ktype, ExpressionNode* expr,
                                                            ModuleCompiler& compiler)
     : name(name)
     , type(ktype)
@@ -150,12 +160,16 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* ltype = get_llvm_type(this->type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = expr->gen();
+
+    auto expr_type = expr->get_type(compiler.get_context());
+    assert(ltype == expr_type && "Type mismatch");
+
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, alloca);
     return alloca;
 }
 
-ReturnStatementNode::ReturnStatementNode(ASTNode* expr, ModuleCompiler& compiler)
+ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)
     , compiler(compiler)
 {
@@ -172,7 +186,7 @@ llvm::Value* ReturnStatementNode::gen()
     return compiler.get_builder().CreateRet(expr_val);
 }
 
-UnaryNode::UnaryNode(ASTNode* expr, std::string op, ModuleCompiler& compiler)
+UnaryNode::UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compiler)
     : expr(expr)
     , op(op)
     , compiler(compiler)
