@@ -32,4 +32,5 @@ public:
     void pop_scope();
     void add_symbol(const std::string& name, llvm::AllocaInst* value);
     std::optional<llvm::AllocaInst*> get_symbol(const std::string& name);
+    size_t n_scopes() const;
 };

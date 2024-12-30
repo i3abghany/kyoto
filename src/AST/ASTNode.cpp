@@ -60,9 +60,13 @@ std::string ProgramNode::to_string() const
 
 llvm::Value* ProgramNode::gen()
 {
-    for (auto* node : nodes) {
+    compiler.push_scope();
+
+    for (auto* node : nodes)
         node->gen();
-    }
+
+    assert(compiler.n_scopes() == 1 && "Unbalanced scopes");
+    compiler.pop_scope();
     return nullptr;
 }
 

@@ -21,8 +21,6 @@ ModuleCompiler::ModuleCompiler(const std::string& name, const std::string& code)
     , module(std::make_unique<llvm::Module>(name, context))
     , symbol_table(*this, module.get())
 {
-    // Start with one slot for global scope
-    symbol_table.push_scope();
 }
 
 void ModuleCompiler::compile()

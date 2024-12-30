@@ -32,6 +32,8 @@ public:
     void push_scope() { symbol_table.push_scope(); }
     void pop_scope() { symbol_table.pop_scope(); }
 
+    size_t n_scopes() const;
+
 private:
     std::string name;
     std::string code;

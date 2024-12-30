@@ -45,3 +45,5 @@ std::optional<llvm::AllocaInst*> SymbolTable::get_symbol(const std::string& name
     }
     return std::nullopt;
 }
+
+size_t SymbolTable::n_scopes() const { return scopes.size(); }
