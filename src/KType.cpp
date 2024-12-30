@@ -1,5 +1,7 @@
 #include "kyoto/KType.h"
 
+#include <assert.h>
+
 #include "llvm/IR/Type.h"
 
 PrimitiveType::PrimitiveType(Kind kind)
@@ -38,6 +40,8 @@ std::string PrimitiveType::to_string() const
         return "String";
     case Kind::Void:
         return "Void";
+    case Kind::Unknown:
+        return "Unknown";
     }
     return "Unknown";
 }
@@ -99,9 +103,12 @@ size_t PrimitiveType::width() const
     case Kind::U64:
     case Kind::F64:
         return 8;
+
+    default:
+        assert(false && "Unknown type");
     }
 
-    return 0;
+    assert(false && "Unknown type");
 }
 
 size_t PrimitiveType::sign() const

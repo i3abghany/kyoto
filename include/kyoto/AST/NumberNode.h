@@ -1,15 +1,13 @@
 #pragma once
 
+#include <memory>
+#include <stdint.h>
 #include <string>
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 
 class ModuleCompiler;
-
-namespace llvm {
-class Value;
-}
 
 class NumberNode : public ExpressionNode {
     int64_t value;

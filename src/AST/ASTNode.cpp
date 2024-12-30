@@ -1,6 +1,4 @@
 #include <cassert>
-#include <cstddef>
-#include <cstdint>
 #include <fmt/core.h>
 #include <optional>
 #include <string>
@@ -10,7 +8,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
-
+#include "kyoto/TypeResolver.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/BasicBlock.h"
@@ -162,7 +160,11 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* expr_val = expr->gen();
 
     auto expr_type = expr->get_type(compiler.get_context());
-    assert(ltype == expr_type && "Type mismatch");
+    auto expr_kind = PrimitiveType::from_llvm_type(expr_type).get_kind();
+    auto type_kind = dynamic_cast<PrimitiveType*>(type)->get_kind();
+    bool is_castable = compiler.get_type_resolver().promotable_to(expr_kind, type_kind);
+    if (!is_castable)
+        assert(false && "Incompatible types in declaration");
 
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, alloca);

@@ -1,12 +1,12 @@
 #include "kyoto/AST/NumberNode.h"
 
-#include <string_view>
-
-#include "llvm/ADT/APInt.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/Value.h"
+#include <assert.h>
+#include <fmt/core.h>
+#include <stddef.h>
 
 #include "kyoto/ModuleCompiler.h"
+#include "llvm/ADT/APInt.h"
+#include "llvm/IR/Constants.h"
 
 NumberNode::NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler)
     : value(value)

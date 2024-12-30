@@ -1,11 +1,14 @@
+#include <assert.h>
 #include <fmt/core.h>
+#include <optional>
 #include <string>
-
-#include "kyoto/ModuleCompiler.h"
-#include "llvm/IR/IRBuilder.h"
 
 #include "kyoto/AST/ASTBinaryArithNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/KType.h"
+#include "kyoto/ModuleCompiler.h"
+#include "kyoto/TypeResolver.h"
+#include "llvm/IR/IRBuilder.h"
 
 #define ARITH_BINARY_NODE_IMPL(name, op, llvm_op)                                                               \
     name::name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)                              \
@@ -22,6 +25,11 @@
     {                                                                                                           \
         auto* lhs_val = lhs->gen();                                                                             \
         auto* rhs_val = rhs->gen();                                                                             \
+        auto lhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(compiler.get_context()));                  \
+        auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(compiler.get_context()));                  \
+        auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
+        if (!t.has_value())                                                                                     \
+            assert(false && "Binary arithmetic operation type mismatch");                                       \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                     \
     }                                                                                                           \
     llvm::Type* name::get_type(llvm::LLVMContext& context) const                                                \
@@ -29,7 +37,9 @@
         auto lhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(context));                                 \
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(context));                                 \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
-        auto ktype = new PrimitiveType(t);                                                                      \
+        if (!t.has_value())                                                                                     \
+            assert(false && "Binary arithmetic operation type mismatch");                                       \
+        auto ktype = new PrimitiveType(t.value());                                                              \
         auto res = ASTNode::get_llvm_type(ktype, context);                                                      \
         delete ktype;                                                                                           \
         return res;                                                                                             \
