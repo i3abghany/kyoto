@@ -23,5 +23,5 @@ public:
     bool is_char() const;
 
 private:
-    PrimitiveTypeKind kind;
+    PrimitiveType::Kind kind;
 };

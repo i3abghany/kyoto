@@ -67,7 +67,8 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
 
 std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx)
 {
-    return (ASTNode*)new IntNode(std::stoi(ctx->getText()), 4, compiler);
+    // FIXME: only accounts for 4-byte signed integers
+    return (ASTNode*)new IntNode(std::stoi(ctx->getText()), 4, true, compiler);
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
@@ -124,4 +125,37 @@ std::any ASTBuilderVisitor::visitSubtractionExpression(kyoto::KyotoParser::Subtr
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)
 {
     return visit(ctx->expression());
+}
+
+PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type)
+{
+    if (type == "bool")
+        return PrimitiveType::Kind::Boolean;
+    if (type == "char")
+        return PrimitiveType::Kind::Char;
+    if (type == "i8")
+        return PrimitiveType::Kind::I8;
+    if (type == "i16")
+        return PrimitiveType::Kind::I16;
+    if (type == "i32")
+        return PrimitiveType::Kind::I32;
+    if (type == "i64")
+        return PrimitiveType::Kind::I64;
+    if (type == "u8")
+        return PrimitiveType::Kind::U8;
+    if (type == "u16")
+        return PrimitiveType::Kind::U16;
+    if (type == "u32")
+        return PrimitiveType::Kind::U32;
+    if (type == "u64")
+        return PrimitiveType::Kind::U64;
+    if (type == "f32")
+        return PrimitiveType::Kind::F32;
+    if (type == "f64")
+        return PrimitiveType::Kind::F64;
+    if (type == "string")
+        return PrimitiveType::Kind::String;
+    if (type == "void")
+        return PrimitiveType::Kind::Void;
+    return PrimitiveType::Kind::Unknown;
 }

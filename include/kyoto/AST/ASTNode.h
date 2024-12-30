@@ -37,10 +37,11 @@ public:
 class IntNode : public ASTNode {
     int64_t value;
     size_t width;
+    bool sign;
     ModuleCompiler& compiler;
 
 public:
-    IntNode(int64_t value, size_t width, ModuleCompiler& compiler);
+    IntNode(int64_t value, size_t width, bool sign, ModuleCompiler& compiler);
 
     std::string to_string() const override;
     llvm::Value* gen() override;

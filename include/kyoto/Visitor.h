@@ -4,6 +4,7 @@
 
 #include "KyotoParserBaseVisitor.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/Type.h"
 
 class ModuleCompiler;
 
@@ -25,6 +26,9 @@ public:
     std::any visitModulusExpression(kyoto::KyotoParser::ModulusExpressionContext* ctx) override;
     std::any visitAdditionExpression(kyoto::KyotoParser::AdditionExpressionContext* ctx) override;
     std::any visitSubtractionExpression(kyoto::KyotoParser::SubtractionExpressionContext* ctx) override;
+
+private:
+    PrimitiveType::Kind parse_primitive_type(const std::string& type);
 
 private:
     ModuleCompiler& compiler;

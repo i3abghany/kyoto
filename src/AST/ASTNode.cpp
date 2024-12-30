@@ -70,9 +70,10 @@ llvm::Value* ProgramNode::gen()
     return nullptr;
 }
 
-IntNode::IntNode(int64_t value, size_t width, ModuleCompiler& compiler)
+IntNode::IntNode(int64_t value, size_t width, bool sign, ModuleCompiler& compiler)
     : value(value)
     , width(width)
+    , sign(sign)
     , compiler(compiler)
 {
 }
@@ -84,7 +85,7 @@ std::string IntNode::to_string() const
 
 llvm::Value* IntNode::gen()
 {
-    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(width * 8, value, true));
+    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(width * 8, value, sign));
 }
 
 std::string_view IntNode::get_type() const
@@ -99,8 +100,9 @@ std::string_view IntNode::get_type() const
     case 64:
         return "I64";
     default:
-        return "I64";
+        assert(false && "Unknown width");
     }
+    return "";
 }
 
 IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompiler& compiler)
