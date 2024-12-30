@@ -35,14 +35,13 @@ expression:
 	| expression comparisonOp expression #comparisonExpression
 	;
 
-unaryOp: MINUS | PLUS;
-
 comparisonOp:
 	LESS_THAN
 	| LESS_THAN_OR_EQUAL
 	| GREATER_THAN
 	| GREATER_THAN_OR_EQUAL
 	| EQUALS;
+
 number: INTEGER | FLOAT | TRUE | FALSE;
 
 fullDeclaration: VAR IDENTIFIER COLON type EQUAL expression SEMICOLON;
