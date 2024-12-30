@@ -6,3 +6,4 @@ Language: Cpp
 IndentWidth: 4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
+AlignEscapedNewlines: Left

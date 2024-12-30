@@ -7,22 +7,22 @@
 #include "kyoto/AST/ASTBinaryArithNode.h"
 #include "kyoto/AST/ASTNode.h"
 
-#define ARITH_BINARY_NODE_IMPL(name, op, llvm_op)                                                                      \
-    name::name(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler)                                                   \
-        : lhs(lhs)                                                                                                     \
-        , rhs(rhs)                                                                                                     \
-        , compiler(compiler)                                                                                           \
-    {                                                                                                                  \
-    }                                                                                                                  \
-    std::string name::to_string() const                                                                                \
-    {                                                                                                                  \
-        return fmt::format("{}Node({}, {})", #name, lhs->to_string(), rhs->to_string());                               \
-    }                                                                                                                  \
-    llvm::Value* name::gen()                                                                                           \
-    {                                                                                                                  \
-        auto* lhs_val = lhs->gen();                                                                                    \
-        auto* rhs_val = rhs->gen();                                                                                    \
-        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                            \
+#define ARITH_BINARY_NODE_IMPL(name, op, llvm_op)                                        \
+    name::name(ASTNode* lhs, ASTNode* rhs, ModuleCompiler& compiler)                     \
+        : lhs(lhs)                                                                       \
+        , rhs(rhs)                                                                       \
+        , compiler(compiler)                                                             \
+    {                                                                                    \
+    }                                                                                    \
+    std::string name::to_string() const                                                  \
+    {                                                                                    \
+        return fmt::format("{}Node({}, {})", #name, lhs->to_string(), rhs->to_string()); \
+    }                                                                                    \
+    llvm::Value* name::gen()                                                             \
+    {                                                                                    \
+        auto* lhs_val = lhs->gen();                                                      \
+        auto* rhs_val = rhs->gen();                                                      \
+        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");              \
     }
 
 ARITH_BINARY_NODE_IMPL(MulNode, "mul", CreateMul);
