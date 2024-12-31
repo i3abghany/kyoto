@@ -14,12 +14,15 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constant.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Type.h"
+#include "llvm/Support/Casting.h"
 
 namespace llvm {
 class LLVMContext;
@@ -171,8 +174,13 @@ llvm::Value* FullDeclarationStatementNode::gen()
         assert(constant_int && "Trivial value must be a constant int");
         auto int_val = constant_int->getSExtValue();
         if (!compiler.get_type_resolver().fits_in(int_val, lhs_ktype->get_kind())) {
-            throw std::runtime_error(
-                fmt::format("Value of RHS `{}` does not fit in type `{}`", expr->to_string(), lhs_ktype->to_string()));
+            throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in variable `{}` of type `{}`",
+                                                 expr->to_string(), int_val, name, lhs_ktype->to_string()));
+        }
+        expr_val = llvm::ConstantInt::get(ltype, int_val, true);
+    } else {
+        if (expr_ktype.get_kind() > lhs_ktype->get_kind()) {
+            expr_val = compiler.get_builder().CreateTrunc(expr_val, ltype);
         }
     }
 

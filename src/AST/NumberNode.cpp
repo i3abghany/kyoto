@@ -17,7 +17,7 @@ NumberNode::NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler)
 
 std::string NumberNode::to_string() const
 {
-    return fmt::format("{}Node({})", type->to_string(), value);
+    return fmt::format("{}({})", type->to_string(), value);
 }
 
 llvm::Value* NumberNode::gen()

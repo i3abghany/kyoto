@@ -10,7 +10,7 @@
 #include "kyoto/TypeResolver.h"
 #include "llvm/IR/IRBuilder.h"
 
-#define ARITH_BINARY_NODE_IMPL(name, op, llvm_op)                                                               \
+#define ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                                                          \
     name::name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)                              \
         : lhs(lhs)                                                                                              \
         , rhs(rhs)                                                                                              \
@@ -19,7 +19,7 @@
     }                                                                                                           \
     std::string name::to_string() const                                                                         \
     {                                                                                                           \
-        return fmt::format("{}Node({}, {})", #name, lhs->to_string(), rhs->to_string());                        \
+        return fmt::format("{}({}, {})", #name, lhs->to_string(), rhs->to_string());                            \
     }                                                                                                           \
     llvm::Value* name::gen()                                                                                    \
     {                                                                                                           \
@@ -45,10 +45,37 @@
         return res;                                                                                             \
     }
 
-ARITH_BINARY_NODE_IMPL(MulNode, Mul, CreateMul);
-ARITH_BINARY_NODE_IMPL(AddNode, Add, CreateAdd);
-ARITH_BINARY_NODE_IMPL(SubNode, Sub, CreateSub);
-ARITH_BINARY_NODE_IMPL(DivNode, Div, CreateSDiv);
-ARITH_BINARY_NODE_IMPL(ModNode, Mod, CreateSRem);
+#define ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(name, op, llvm_op)            \
+    ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                             \
+    llvm::Value* name::trivial_gen()                                           \
+    {                                                                          \
+        assert(is_trivially_evaluable());                                      \
+        auto* lhs_val = lhs->trivial_gen();                                    \
+        auto* rhs_val = rhs->trivial_gen();                                    \
+        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");    \
+    }                                                                          \
+    bool name::is_trivially_evaluable() const                                  \
+    {                                                                          \
+        return lhs->is_trivially_evaluable() && rhs->is_trivially_evaluable(); \
+    }
 
-#undef ARITH_BINARY_NODE_IMPL
+#define ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL(name, op, llvm_op) \
+    ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                \
+    llvm::Value* name::trivial_gen()                              \
+    {                                                             \
+        return nullptr;                                           \
+    }                                                             \
+    bool name::is_trivially_evaluable() const                     \
+    {                                                             \
+        return false;                                             \
+    }
+
+ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(MulNode, Mul, CreateMul);
+ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(AddNode, Add, CreateAdd);
+ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(SubNode, Sub, CreateSub);
+ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL(DivNode, Div, CreateSDiv);
+ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL(ModNode, Mod, CreateSRem);
+
+#undef ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL
+#undef ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL
+#undef ARITH_BINARY_NODE_IMPL_BASE

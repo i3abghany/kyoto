@@ -20,6 +20,8 @@ class Value;
         std::string to_string() const override;                                   \
         llvm::Value* gen() override;                                              \
         llvm::Type* get_type(llvm::LLVMContext& context) const override;          \
+        llvm::Value* trivial_gen() override;                                      \
+        bool is_trivially_evaluable() const;                                      \
     }
 
 BINARY_NODE_INTERFACE(AddNode);

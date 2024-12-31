@@ -21,7 +21,7 @@
     }                                                                                                         \
     std::string name::to_string() const                                                                       \
     {                                                                                                         \
-        return fmt::format("{}Node({}, {})", #name, lhs->to_string(), rhs->to_string());                      \
+        return fmt::format("{}({}, {})", #name, lhs->to_string(), rhs->to_string());                          \
     }                                                                                                         \
     llvm::Value* name::gen()                                                                                  \
     {                                                                                                         \
@@ -37,6 +37,17 @@
     llvm::Type* name::get_type(llvm::LLVMContext& context) const                                              \
     {                                                                                                         \
         return llvm::Type::getInt1Ty(context);                                                                \
+    }                                                                                                         \
+    bool name::is_trivially_evaluable() const                                                                 \
+    {                                                                                                         \
+        return lhs->is_trivially_evaluable() && rhs->is_trivially_evaluable();                                \
+    }                                                                                                         \
+    llvm::Value* name::trivial_gen()                                                                          \
+    {                                                                                                         \
+        assert(is_trivially_evaluable());                                                                     \
+        auto* lhs_val = lhs->trivial_gen();                                                                   \
+        auto* rhs_val = rhs->trivial_gen();                                                                   \
+        return compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                                  \
     }
 
 CMP_BINARY_NODE_IMPL(EqNode, eq, CreateICmpEQ);

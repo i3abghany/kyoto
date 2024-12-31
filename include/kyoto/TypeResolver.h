@@ -1,7 +1,7 @@
 #pragma once
 
 #include <optional>
-#include <utility>
+#include <stdint.h>
 
 #include "kyoto/KType.h"
 
