@@ -23,7 +23,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
 {
 }
 
-void ModuleCompiler::compile()
+ASTNode* ModuleCompiler::parse_program()
 {
     antlr4::ANTLRInputStream input(code);
     kyoto::KyotoLexer lexer(&input);
@@ -34,10 +34,21 @@ void ModuleCompiler::compile()
     auto* tree = parser.program();
 
     ASTBuilderVisitor visitor(*this);
-    auto* program = std::any_cast<ASTNode*>(visitor.visit(tree));
-    program->gen();
+    return std::any_cast<ASTNode*>(visitor.visit(tree));
+}
 
-    verify_module();
+std::optional<std::string> ModuleCompiler::gen_ir()
+{
+    auto program = parse_program();
+    program->gen();
+    if (verify_module()) {
+        std::string str;
+        llvm::raw_string_ostream os(str);
+        module->print(os, nullptr);
+        return os.str();
+    } else {
+        return std::nullopt;
+    }
 }
 
 std::optional<Symbol> ModuleCompiler::get_symbol(const std::string& name)
@@ -65,13 +76,13 @@ size_t ModuleCompiler::n_scopes() const
     return symbol_table.n_scopes();
 }
 
-void ModuleCompiler::verify_module() const
+bool ModuleCompiler::verify_module() const
 {
-    if (verifyModule(*module, nullptr)) {
+    auto err = llvm::verifyModule(*module, nullptr);
+    if (err) {
         std::cerr << "Module verification failed" << std::endl;
         llvm::errs() << "Error(s) in module " << module->getName() << ":\n";
         llvm::verifyModule(*module, &llvm::errs());
-    } else {
-        module->print(llvm::errs(), nullptr);
     }
+    return err == false;
 }

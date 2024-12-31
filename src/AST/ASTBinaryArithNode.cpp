@@ -2,6 +2,7 @@
 #include <fmt/core.h>
 #include <optional>
 #include <string>
+#include <stdexcept>
 
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
