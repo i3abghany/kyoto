@@ -149,17 +149,31 @@ std::string FullDeclarationStatementNode::to_string() const
 
 llvm::Value* FullDeclarationStatementNode::gen()
 {
-    auto* ltype = get_llvm_type(this->type, compiler.get_context());
+    auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = expr->gen();
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
     auto* lhs_ktype = dynamic_cast<PrimitiveType*>(type);
     bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), lhs_ktype->get_kind());
+    bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
-    if (!is_compatible) {
+    if (!is_compatible && !is_trivially_evaluable) {
         auto err = fmt::format("Cannot assign value of type `{}` to `{}` of type `{}`", expr_ktype.to_string(), name,
                                lhs_ktype->to_string());
+        if (!is_trivially_evaluable)
+            throw std::runtime_error(err + " (non-trivially evaluable)");
         throw std::runtime_error(err);
+    }
+
+    if (is_trivially_evaluable) {
+        auto trivial_val = expr->trivial_gen();
+        auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
+        assert(constant_int && "Trivial value must be a constant int");
+        auto int_val = constant_int->getSExtValue();
+        if (!compiler.get_type_resolver().fits_in(int_val, lhs_ktype->get_kind())) {
+            throw std::runtime_error(
+                fmt::format("Value of RHS `{}` does not fit in type `{}`", expr->to_string(), lhs_ktype->to_string()));
+        }
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);

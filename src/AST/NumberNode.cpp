@@ -32,3 +32,13 @@ llvm::Type* NumberNode::get_type(llvm::LLVMContext& context) const
 {
     return ASTNode::get_llvm_type(type.get(), context);
 }
+
+bool NumberNode::is_trivially_evaluable() const
+{
+    return true;
+}
+
+llvm::Value* NumberNode::trivial_gen()
+{
+    return gen();
+}

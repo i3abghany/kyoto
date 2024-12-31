@@ -1,6 +1,6 @@
 fn main() i32 {
-    var a: i32 = 2;
-    var b: i32 = 3;
-    var c: bool = a != b;
-    return a + b;
+    var x: i32 = 1;
+    var y: i8 = 127;
+    var z: i16 = 32767;
+    return x;
 }

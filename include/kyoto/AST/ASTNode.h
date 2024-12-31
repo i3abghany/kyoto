@@ -31,6 +31,8 @@ public:
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual llvm::Value* gen() = 0;
     [[nodiscard]] virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
+    [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
 };
 
 class ProgramNode : public ASTNode {

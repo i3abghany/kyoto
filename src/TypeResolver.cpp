@@ -1,5 +1,7 @@
 #include "kyoto/TypeResolver.h"
 
+#include <assert.h>
+
 TypeResolver::TypeResolver() { }
 
 std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveType::Kind lhs,
@@ -26,4 +28,22 @@ bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind t
     auto pto = PrimitiveType(to);
     return pfrom.is_integer() && pto.is_integer() && pfrom.width() <= pto.width()
         || pfrom.is_floating_point() && pto.is_floating_point();
+}
+
+bool TypeResolver::fits_in(int64_t val, PrimitiveType::Kind kind) const
+{
+    auto pkind = PrimitiveType(kind);
+    switch (pkind.get_kind()) {
+    case PrimitiveType::Kind::I8:
+        return val >= INT8_MIN && val <= INT8_MAX;
+    case PrimitiveType::Kind::I16:
+        return val >= INT16_MIN && val <= INT16_MAX;
+    case PrimitiveType::Kind::I32:
+        return val >= INT32_MIN && val <= INT32_MAX;
+    case PrimitiveType::Kind::I64:
+        return val >= INT64_MIN && val <= INT64_MAX;
+    default:
+        break;
+    }
+    return false;
 }
