@@ -2,6 +2,7 @@
 
 #include <any>
 #include <iostream>
+#include <utility>
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
@@ -39,14 +40,14 @@ void ModuleCompiler::compile()
     verify_module();
 }
 
-std::optional<llvm::AllocaInst*> ModuleCompiler::get_symbol(const std::string& name)
+std::optional<Symbol> ModuleCompiler::get_symbol(const std::string& name)
 {
     return symbol_table.get_symbol(name);
 }
 
-void ModuleCompiler::add_symbol(const std::string& name, llvm::AllocaInst* value)
+void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 {
-    symbol_table.add_symbol(name, value);
+    symbol_table.add_symbol(name, std::move(symbol));
 }
 
 void ModuleCompiler::push_scope()

@@ -4,15 +4,15 @@
 #include <string>
 
 #include "kyoto/AST/ASTBinaryNode.h"
-#include "kyoto/ModuleCompiler.h"
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
+#include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Type.h"
 
-#define CMP_BINARY_NODE_IMPL(name, op, llvm_op)                                                               \
+#define CMP_BINARY_NODE_IMPL(name, op, llvm_sop)                                                              \
     name::name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)                            \
         : lhs(lhs)                                                                                            \
         , rhs(rhs)                                                                                            \
@@ -32,7 +32,7 @@
         auto t = compiler.get_type_resolver().resolve_binary_cmp(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
         if (!t.has_value())                                                                                   \
             assert(false && "Binary comparison operation type mismatch");                                     \
-        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                   \
+        return compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                                  \
     }                                                                                                         \
     llvm::Type* name::get_type(llvm::LLVMContext& context) const                                              \
     {                                                                                                         \

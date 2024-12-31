@@ -45,8 +45,10 @@
         return res;                                                                                             \
     }
 
-ARITH_BINARY_NODE_IMPL(MulNode, mul, CreateMul);
-ARITH_BINARY_NODE_IMPL(AddNode, add, CreateAdd);
-ARITH_BINARY_NODE_IMPL(SubNode, sub, CreateSub);
-ARITH_BINARY_NODE_IMPL(DivNode, div, CreateSDiv);
-ARITH_BINARY_NODE_IMPL(ModNode, mod, CreateSRem);
+ARITH_BINARY_NODE_IMPL(MulNode, Mul, CreateMul);
+ARITH_BINARY_NODE_IMPL(AddNode, Add, CreateAdd);
+ARITH_BINARY_NODE_IMPL(SubNode, Sub, CreateSub);
+ARITH_BINARY_NODE_IMPL(DivNode, Div, CreateSDiv);
+ARITH_BINARY_NODE_IMPL(ModNode, Mod, CreateSRem);
+
+#undef ARITH_BINARY_NODE_IMPL

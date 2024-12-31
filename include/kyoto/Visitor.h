@@ -40,7 +40,6 @@ public:
 private:
     PrimitiveType::Kind parse_primitive_type(const std::string& type);
     std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind);
-    std::optional<uint64_t> parse_unsigned_integer_into(const std::string& str, const PrimitiveType::Kind kind);
     std::optional<double> parse_double(const std::string& str);
     std::optional<float> parse_float(const std::string& str);
 

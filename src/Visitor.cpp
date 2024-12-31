@@ -82,15 +82,9 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
 
     if (auto num = parse_signed_integer_into(txt, PrimitiveType::Kind::I32); num.has_value()) {
         return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
-    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U32); num.has_value()) {
-        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U32), compiler);
-    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::I64); num.has_value()) {
-        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I64), compiler);
-    } else if (auto num = parse_unsigned_integer_into(txt, PrimitiveType::Kind::U64); num.has_value()) {
-        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::U64), compiler);
+    } else {
+        assert(false && "Unknown Integer type");
     }
-
-    assert(false && "Unknown Integer type");
     return {};
 }
 
@@ -207,14 +201,6 @@ PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& t
         return PrimitiveType::Kind::I32;
     if (type == "i64")
         return PrimitiveType::Kind::I64;
-    if (type == "u8")
-        return PrimitiveType::Kind::U8;
-    if (type == "u16")
-        return PrimitiveType::Kind::U16;
-    if (type == "u32")
-        return PrimitiveType::Kind::U32;
-    if (type == "u64")
-        return PrimitiveType::Kind::U64;
     if (type == "f32")
         return PrimitiveType::Kind::F32;
     if (type == "f64")
@@ -239,27 +225,6 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
             return std::stoi(str);
         case PrimitiveType::Kind::I64:
             return std::stoll(str);
-        default:
-            return std::nullopt;
-        }
-    } catch (std::invalid_argument&) {
-        return std::nullopt;
-    }
-}
-
-std::optional<uint64_t> ASTBuilderVisitor::parse_unsigned_integer_into(const std::string& str,
-                                                                       const PrimitiveType::Kind kind)
-{
-    try {
-        switch (kind) {
-        case PrimitiveType::Kind::U8:
-            return std::stoul(str);
-        case PrimitiveType::Kind::U16:
-            return std::stoul(str);
-        case PrimitiveType::Kind::U32:
-            return std::stoul(str);
-        case PrimitiveType::Kind::U64:
-            return std::stoull(str);
         default:
             return std::nullopt;
         }

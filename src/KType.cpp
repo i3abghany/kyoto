@@ -24,14 +24,6 @@ std::string PrimitiveType::to_string() const
         return "I32";
     case Kind::I64:
         return "I64";
-    case Kind::U8:
-        return "U8";
-    case Kind::U16:
-        return "U16";
-    case Kind::U32:
-        return "U32";
-    case Kind::U64:
-        return "U64";
     case Kind::F32:
         return "F32";
     case Kind::F64:
@@ -48,17 +40,7 @@ std::string PrimitiveType::to_string() const
 
 bool PrimitiveType::is_integer() const
 {
-    return is_signed() || is_unsigned() || is_boolean() || is_char();
-}
-
-bool PrimitiveType::is_signed() const
-{
     return kind == Kind::I8 || kind == Kind::I16 || kind == Kind::I32 || kind == Kind::I64;
-}
-
-bool PrimitiveType::is_unsigned() const
-{
-    return kind == Kind::U8 || kind == Kind::U16 || kind == Kind::U32 || kind == Kind::U64;
 }
 
 bool PrimitiveType::is_floating_point() const
@@ -87,33 +69,24 @@ size_t PrimitiveType::width() const
     case Kind::Boolean:
     case Kind::Char:
     case Kind::I8:
-    case Kind::U8:
         return 1;
 
     case Kind::I16:
-    case Kind::U16:
         return 2;
 
     case Kind::I32:
-    case Kind::U32:
     case Kind::F32:
         return 4;
 
     case Kind::I64:
-    case Kind::U64:
     case Kind::F64:
         return 8;
 
     default:
-        assert(false && "Unknown type");
+        break;
     }
 
     assert(false && "Unknown type");
-}
-
-size_t PrimitiveType::sign() const
-{
-    return is_signed();
 }
 
 PrimitiveType::Kind PrimitiveType::get_kind() const
@@ -133,9 +106,11 @@ PrimitiveType PrimitiveType::from_llvm_type(const llvm::Type* type)
         return PrimitiveType(Kind::I32);
     if (type->isIntegerTy(64))
         return PrimitiveType(Kind::I64);
+
     if (type->isFloatTy())
         return PrimitiveType(Kind::F32);
     if (type->isDoubleTy())
         return PrimitiveType(Kind::F64);
+
     return PrimitiveType(Kind::Unknown);
 }

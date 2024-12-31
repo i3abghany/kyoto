@@ -29,8 +29,8 @@ class ExpressionNode : public ASTNode {
 public:
     virtual ~ExpressionNode() = default;
     [[nodiscard]] virtual std::string to_string() const = 0;
-    virtual llvm::Value* gen() = 0;
-    virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Value* gen() = 0;
+    [[nodiscard]] virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
 };
 
 class ProgramNode : public ASTNode {
@@ -41,7 +41,7 @@ public:
     ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen() override;
 };
 
 class IdentifierExpressionNode : public ExpressionNode {
@@ -52,8 +52,8 @@ public:
     IdentifierExpressionNode(std::string name, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
-    llvm::Type* get_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
 class DeclarationStatementNode : public ASTNode {
@@ -92,7 +92,7 @@ public:
     llvm::Value* gen() override;
 };
 
-class UnaryNode : public ASTNode {
+class UnaryNode : public ExpressionNode {
     ExpressionNode* expr;
     std::string op;
     ModuleCompiler& compiler;
@@ -101,7 +101,8 @@ public:
     UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
 class FunctionNode : public ASTNode {

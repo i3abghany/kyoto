@@ -24,5 +24,6 @@ bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind t
 {
     auto pfrom = PrimitiveType(from);
     auto pto = PrimitiveType(to);
-    return pfrom.is_integer() && pto.is_integer() || pfrom.is_floating_point() && pto.is_floating_point();
+    return pfrom.is_integer() && pto.is_integer() && pfrom.width() <= pto.width()
+        || pfrom.is_floating_point() && pto.is_floating_point();
 }

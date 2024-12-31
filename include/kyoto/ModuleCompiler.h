@@ -5,16 +5,11 @@
 #include <optional>
 #include <string>
 
+#include "kyoto/SymbolTable.h"
+#include "kyoto/TypeResolver.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
-
-#include "kyoto/SymbolTable.h"
-#include "kyoto/TypeResolver.h"
-
-namespace llvm {
-class AllocaInst;
-}
 
 class ModuleCompiler {
 public:
@@ -30,8 +25,8 @@ public:
 
     TypeResolver& get_type_resolver() { return type_resolver; }
 
-    std::optional<llvm::AllocaInst*> get_symbol(const std::string& name);
-    void add_symbol(const std::string& name, llvm::AllocaInst* value);
+    std::optional<Symbol> get_symbol(const std::string& name);
+    void add_symbol(const std::string& name, Symbol symbol);
 
     void push_scope();
     void pop_scope();

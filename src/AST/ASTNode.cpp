@@ -1,6 +1,7 @@
 #include <cassert>
 #include <fmt/core.h>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -8,6 +9,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
+#include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Twine.h"
@@ -40,14 +42,6 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context
     case PrimitiveType::Kind::I32:
         return llvm::Type::getInt32Ty(context);
     case PrimitiveType::Kind::I64:
-        return llvm::Type::getInt64Ty(context);
-    case PrimitiveType::Kind::U8:
-        return llvm::Type::getInt8Ty(context);
-    case PrimitiveType::Kind::U16:
-        return llvm::Type::getInt16Ty(context);
-    case PrimitiveType::Kind::U32:
-        return llvm::Type::getInt32Ty(context);
-    case PrimitiveType::Kind::U64:
         return llvm::Type::getInt64Ty(context);
     case PrimitiveType::Kind::F32:
         return llvm::Type::getFloatTy(context);
@@ -101,12 +95,12 @@ std::string IdentifierExpressionNode::to_string() const
 
 llvm::Value* IdentifierExpressionNode::gen()
 {
-    auto symbol = compiler.get_symbol(name);
-    if (!symbol.has_value()) {
+    auto symbol_opt = compiler.get_symbol(name);
+    if (!symbol_opt.has_value()) {
         assert(false && "Unknown symbol");
     }
-
-    return compiler.get_builder().CreateLoad(symbol.value()->getAllocatedType(), symbol.value(), name);
+    auto symbol = symbol_opt.value();
+    return compiler.get_builder().CreateLoad(symbol.alloc->getAllocatedType(), symbol.alloc, name);
 }
 
 llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
@@ -115,8 +109,8 @@ llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
     if (!symbol.has_value()) {
         assert(false && "Unknown symbol");
     }
-
-    return symbol.value()->getAllocatedType();
+    auto stored_type = symbol.value().kind;
+    return symbol.value().alloc->getAllocatedType();
 }
 
 DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler)
@@ -135,7 +129,7 @@ llvm::Value* DeclarationStatementNode::gen()
 {
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-    compiler.add_symbol(name, val);
+    compiler.add_symbol(name, Symbol::primitive(val, dynamic_cast<PrimitiveType*>(type)->get_kind()));
     return val;
 }
 
@@ -158,16 +152,18 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* ltype = get_llvm_type(this->type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = expr->gen();
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+    auto* lhs_ktype = dynamic_cast<PrimitiveType*>(type);
+    bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), lhs_ktype->get_kind());
 
-    auto expr_type = expr->get_type(compiler.get_context());
-    auto expr_kind = PrimitiveType::from_llvm_type(expr_type).get_kind();
-    auto type_kind = dynamic_cast<PrimitiveType*>(type)->get_kind();
-    bool is_castable = compiler.get_type_resolver().promotable_to(expr_kind, type_kind);
-    if (!is_castable)
-        assert(false && "Incompatible types in declaration");
+    if (!is_compatible) {
+        auto err = fmt::format("Cannot assign value of type `{}` to `{}` of type `{}`", expr_ktype.to_string(), name,
+                               lhs_ktype->to_string());
+        throw std::runtime_error(err);
+    }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
-    compiler.add_symbol(name, alloca);
+    compiler.add_symbol(name, Symbol::primitive(alloca, lhs_ktype->get_kind()));
     return alloca;
 }
 
@@ -203,12 +199,20 @@ std::string UnaryNode::to_string() const
 llvm::Value* UnaryNode::gen()
 {
     auto* expr_val = expr->gen();
-    if (op == "-") {
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (op == "-")
         return compiler.get_builder().CreateNeg(expr_val, "negval");
-    } else if (op == "+") {
+    else if (op == "+")
         return expr_val;
-    }
+
     return nullptr;
+}
+
+llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
+{
+    return expr->get_type(context);
 }
 
 FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type,
