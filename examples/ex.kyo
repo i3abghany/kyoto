@@ -1,6 +1,4 @@
 fn main() i32 {
-    var x: i32 = 1;
-    var y: i8 = 127;
-    var z: i16 = 32767;
-    return x;
+    var x: bool = 1 < 2;
+    return 1;
 }

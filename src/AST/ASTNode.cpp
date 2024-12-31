@@ -163,8 +163,6 @@ llvm::Value* FullDeclarationStatementNode::gen()
     if (!is_compatible && !is_trivially_evaluable) {
         auto err = fmt::format("Cannot assign value of type `{}` to `{}` of type `{}`", expr_ktype.to_string(), name,
                                lhs_ktype->to_string());
-        if (!is_trivially_evaluable)
-            throw std::runtime_error(err + " (non-trivially evaluable)");
         throw std::runtime_error(err);
     }
 
@@ -172,7 +170,7 @@ llvm::Value* FullDeclarationStatementNode::gen()
         auto trivial_val = expr->trivial_gen();
         auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
         assert(constant_int && "Trivial value must be a constant int");
-        auto int_val = constant_int->getSExtValue();
+        auto int_val = lhs_ktype->is_boolean() ? constant_int->getZExtValue() : constant_int->getSExtValue();
         if (!compiler.get_type_resolver().fits_in(int_val, lhs_ktype->get_kind())) {
             throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in variable `{}` of type `{}`",
                                                  expr->to_string(), int_val, name, lhs_ktype->to_string()));

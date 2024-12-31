@@ -82,6 +82,8 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
 
     if (auto num = parse_signed_integer_into(txt, PrimitiveType::Kind::I32); num.has_value()) {
         return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
+    } else if (auto b = parse_bool(txt); b.has_value()) {
+        return (ExpressionNode*)new NumberNode(b.value(), new PrimitiveType(PrimitiveType::Kind::Boolean), compiler);
     } else {
         assert(false && "Unknown Integer type");
     }
@@ -187,7 +189,7 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
     return visit(ctx->expression());
 }
 
-PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type)
+PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type) const
 {
     if (type == "bool")
         return PrimitiveType::Kind::Boolean;
@@ -213,7 +215,7 @@ PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& t
 }
 
 std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,
-                                                                    const PrimitiveType::Kind kind)
+                                                                    const PrimitiveType::Kind kind) const
 {
     try {
         switch (kind) {
@@ -233,7 +235,7 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
     }
 }
 
-std::optional<double> ASTBuilderVisitor::parse_double(const std::string& str)
+std::optional<double> ASTBuilderVisitor::parse_double(const std::string& str) const
 {
     try {
         return std::stod(str);
@@ -242,11 +244,20 @@ std::optional<double> ASTBuilderVisitor::parse_double(const std::string& str)
     }
 }
 
-std::optional<float> ASTBuilderVisitor::parse_float(const std::string& str)
+std::optional<float> ASTBuilderVisitor::parse_float(const std::string& str) const
 {
     try {
         return std::stof(str);
     } catch (std::invalid_argument&) {
         return std::nullopt;
     }
+}
+
+std::optional<bool> ASTBuilderVisitor::parse_bool(const std::string& str) const
+{
+    if (str == "true")
+        return true;
+    if (str == "false")
+        return false;
+    return std::nullopt;
 }

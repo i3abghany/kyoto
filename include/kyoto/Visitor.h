@@ -38,10 +38,11 @@ public:
     std::any visitNotEqualsExpression(kyoto::KyotoParser::NotEqualsExpressionContext* ctx) override;
 
 private:
-    PrimitiveType::Kind parse_primitive_type(const std::string& type);
-    std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind);
-    std::optional<double> parse_double(const std::string& str);
-    std::optional<float> parse_float(const std::string& str);
+    PrimitiveType::Kind parse_primitive_type(const std::string& type) const;
+    std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind) const;
+    std::optional<double> parse_double(const std::string& str) const;
+    std::optional<float> parse_float(const std::string& str) const;
+    std::optional<bool> parse_bool(const std::string& str) const;
 
 private:
     ModuleCompiler& compiler;

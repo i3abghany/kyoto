@@ -7,7 +7,7 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveT
 {
     // FIXME: figure out whether we want to do an elaborate promotion scheme
     // like the C standard mandates
-    if (lhs == rhs)
+    if (lhs == rhs && lhs != PrimitiveType::Kind::Boolean)
         return lhs;
     return std::nullopt;
 }
@@ -24,7 +24,8 @@ bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind t
 {
     auto pfrom = PrimitiveType(from);
     auto pto = PrimitiveType(to);
-    return pfrom.is_integer() && pto.is_integer() || pfrom.is_floating_point() && pto.is_floating_point();
+    return pfrom.is_integer() && pto.is_integer() || pfrom.is_boolean() && pto.is_boolean()
+        || pfrom.is_floating_point() && pto.is_floating_point();
 }
 
 bool TypeResolver::fits_in(int64_t val, PrimitiveType::Kind kind) const
@@ -39,6 +40,8 @@ bool TypeResolver::fits_in(int64_t val, PrimitiveType::Kind kind) const
         return val >= INT32_MIN && val <= INT32_MAX;
     case PrimitiveType::Kind::I64:
         return val >= INT64_MIN && val <= INT64_MAX;
+    case PrimitiveType::Kind::Boolean:
+        return val == 0 || val == 1;
     default:
         break;
     }

@@ -29,7 +29,8 @@
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(compiler.get_context()));                  \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
         if (!t.has_value())                                                                                     \
-            assert(false && "Binary arithmetic operation type mismatch");                                       \
+            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op, \
+                                                 lhs_ktype.to_string(), rhs_ktype.to_string()));                \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                     \
     }                                                                                                           \
     llvm::Type* name::get_type(llvm::LLVMContext& context) const                                                \
@@ -38,7 +39,8 @@
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(context));                                 \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
         if (!t.has_value())                                                                                     \
-            assert(false && "Binary arithmetic operation type mismatch");                                       \
+            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op, \
+                                                 lhs_ktype.to_string(), rhs_ktype.to_string()));                \
         auto ktype = new PrimitiveType(t.value());                                                              \
         auto res = ASTNode::get_llvm_type(ktype, context);                                                      \
         delete ktype;                                                                                           \
@@ -50,9 +52,7 @@
     llvm::Value* name::trivial_gen()                                           \
     {                                                                          \
         assert(is_trivially_evaluable());                                      \
-        auto* lhs_val = lhs->trivial_gen();                                    \
-        auto* rhs_val = rhs->trivial_gen();                                    \
-        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");    \
+        return gen();                                                          \
     }                                                                          \
     bool name::is_trivially_evaluable() const                                  \
     {                                                                          \
