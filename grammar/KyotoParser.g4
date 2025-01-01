@@ -58,9 +58,8 @@ assignment: IDENTIFIER EQUAL expression SEMICOLON;
 
 returnStatement: RETURN expression SEMICOLON;
 
-ifStatement: IF LPAREN expression RPAREN block_or_statement (ELSE block_or_statement)?;
-
-block_or_statement: block | statement;
+ifStatement: IF LPAREN expression RPAREN block (ELSE block)?
+			| IF LPAREN expression RPAREN statement (ELSE ifStatement)?;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;
