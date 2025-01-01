@@ -16,8 +16,6 @@ find_package(fmt CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${ANTLR4_INCLUDE_DIRS})
-include_directories(${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
-include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 
 set(SOURCES
     src/Visitor.cpp
@@ -31,8 +29,7 @@ set(SOURCES
     src/KType.cpp
     src/TypeResolver.cpp
     src/utils/File.cpp
-    ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
-    ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
+    ${ANTLR_SOURCES})
 
 add_executable(
     kyoto

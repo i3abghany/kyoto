@@ -18,3 +18,10 @@ antlr_target(
     DEPENDS_ANTLR KyotoGrammarLexer
     COMPILE_FLAGS -lib ${ANTLR_KyotoGrammarLexer_OUTPUT_DIR}
     VISITOR)
+
+include_directories(${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
+include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
+
+SET( ANTLR_SOURCES
+    ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
+    ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
