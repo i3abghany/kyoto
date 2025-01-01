@@ -1,6 +1,7 @@
 #include "kyoto/utils/File.h"
 
 #include <assert.h>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
@@ -64,13 +65,13 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
     size_t delim_pos = 0;
     while ((delim_pos = source.find(delim, start)) != std::string::npos) {
         std::string test_case = { data + start, delim_pos - start };
-        trim(test_case);
+        boost::trim(test_case);
         test_cases.emplace_back(parse_test_case(test_case));
         start = delim_pos + delim_len;
     }
 
     std::string test_case = { data + start, source.size() - start };
-    trim(test_case);
+    boost::trim(test_case);
     test_cases.emplace_back(parse_test_case(test_case));
     return test_cases;
 }
@@ -98,12 +99,6 @@ TestCase File::parse_test_case(const std::string& test_case)
 
     code = { std::istreambuf_iterator<char>(iss), {} };
     return TestCase(name, code, expected_return, error);
-}
-
-void File::trim(std::string& str)
-{
-    str.erase(str.find_last_not_of(" \t\n\r\f\v") + 1);
-    str.erase(0, str.find_first_not_of(" \t\n\r\f\v"));
 }
 
 }

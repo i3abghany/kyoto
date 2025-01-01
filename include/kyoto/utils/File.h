@@ -21,7 +21,6 @@ public:
 private:
     static std::vector<TestCase> split_test_cases(const std::string& source);
     static TestCase parse_test_case(const std::string& test_case);
-    static void trim(std::string& str);
 };
 
 }
