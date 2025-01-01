@@ -40,5 +40,8 @@ bool NumberNode::is_trivially_evaluable() const
 
 llvm::Value* NumberNode::trivial_gen()
 {
-    return gen();
+    auto primitive_type = dynamic_cast<PrimitiveType*>(type.get());
+    assert(primitive_type && "NumberNode type must be a primitive type");
+    // return the maximum-width integer constant
+    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(64, value, true));
 }

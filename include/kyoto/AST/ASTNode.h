@@ -33,6 +33,9 @@ public:
     [[nodiscard]] virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
+
+    static llvm::Value* handle_integer_conversion(ExpressionNode* expr, KType* target_type, ModuleCompiler& compiler,
+                                                  const std::string& what, const std::string& target_name = "");
 };
 
 class ProgramNode : public ASTNode {

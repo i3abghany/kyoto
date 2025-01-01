@@ -53,7 +53,9 @@
     llvm::Value* name::trivial_gen()                                           \
     {                                                                          \
         assert(is_trivially_evaluable());                                      \
-        return gen();                                                          \
+        auto* lhs_val = lhs->trivial_gen();                                    \
+        auto* rhs_val = rhs->trivial_gen();                                    \
+        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");    \
     }                                                                          \
     bool name::is_trivially_evaluable() const                                  \
     {                                                                          \

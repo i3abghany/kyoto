@@ -151,19 +151,21 @@ std::string FullDeclarationStatementNode::to_string() const
     return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
-llvm::Value* FullDeclarationStatementNode::gen()
+llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KType* target_ktype,
+                                                       ModuleCompiler& compiler, const std::string& what,
+                                                       const std::string& target_name)
 {
-    auto* ltype = get_llvm_type(type, compiler.get_context());
-    auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-    auto* expr_val = expr->gen();
+    PrimitiveType* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
+    auto* ltype = get_llvm_type(target_type, compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    auto* lhs_ktype = dynamic_cast<PrimitiveType*>(type);
-    bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), lhs_ktype->get_kind());
+    auto* expr_val = expr->gen();
+    bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), target_type->get_kind());
     bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
     if (!is_compatible && !is_trivially_evaluable) {
-        auto err = fmt::format("Cannot assign value of type `{}` to `{}` of type `{}`", expr_ktype.to_string(), name,
-                               lhs_ktype->to_string());
+        auto err
+            = fmt::format("Cannot {} value of type `{}`. Expected `{}`{}", what, expr_ktype.to_string(),
+                          target_type->to_string(), target_name.empty() ? "" : fmt::format(" for `{}`", target_name));
         throw std::runtime_error(err);
     }
 
@@ -171,21 +173,34 @@ llvm::Value* FullDeclarationStatementNode::gen()
         auto trivial_val = expr->trivial_gen();
         auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
         assert(constant_int && "Trivial value must be a constant int");
-        auto int_val = lhs_ktype->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
-                                                                          : constant_int->getSExtValue();
-        if (!compiler.get_type_resolver().fits_in(int_val, lhs_ktype->get_kind())) {
-            throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in variable `{}` of type `{}`",
-                                                 expr->to_string(), int_val, name, lhs_ktype->to_string()));
+        auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
+                                                                            : constant_int->getSExtValue();
+        if (!compiler.get_type_resolver().fits_in(int_val, target_type->get_kind())) {
+            throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}",
+                                                 expr->to_string(), int_val, target_type->to_string(),
+                                                 target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
         }
-        expr_val = llvm::ConstantInt::get(ltype, int_val, true);
+        return llvm::ConstantInt::get(ltype, int_val, true);
     } else {
-        if (expr_ktype.width() > lhs_ktype->width()) {
-            expr_val = compiler.get_builder().CreateTrunc(expr_val, ltype);
+        if (expr_ktype.width() > target_type->width()) {
+            return compiler.get_builder().CreateTrunc(expr_val, ltype);
+        } else if (expr_ktype.width() < target_type->width()) {
+            return compiler.get_builder().CreateSExt(expr_val, ltype);
         }
     }
 
+    return expr_val;
+}
+
+llvm::Value* FullDeclarationStatementNode::gen()
+{
+    auto* ltype = get_llvm_type(type, compiler.get_context());
+    auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
+
     compiler.get_builder().CreateStore(expr_val, alloca);
-    compiler.add_symbol(name, Symbol::primitive(alloca, lhs_ktype->get_kind()));
+    compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type)->get_kind()));
+
     return alloca;
 }
 
@@ -202,7 +217,8 @@ std::string ReturnStatementNode::to_string() const
 
 llvm::Value* ReturnStatementNode::gen()
 {
-    auto* expr_val = expr->gen();
+    auto* fn_ret_type = compiler.get_fn_return_type();
+    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return");
     return compiler.get_builder().CreateRet(expr_val);
 }
 

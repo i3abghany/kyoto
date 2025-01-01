@@ -37,18 +37,29 @@ public:
     void push_scope();
     void pop_scope();
 
+    void push_fn_return_type(KType* type);
+    void pop_fn_return_type();
+    KType* get_fn_return_type() const;
+
     size_t n_scopes() const;
 
 private:
-    bool verify_module() const;
+    bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
+
+private:
+    KType* curr_fn_ret_type = nullptr;
 
 private:
     std::string code;
     std::string name;
+
+private:
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
     std::unique_ptr<llvm::Module> module;
+
+private:
     SymbolTable symbol_table;
     TypeResolver type_resolver {};
 };
