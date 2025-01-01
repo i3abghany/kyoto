@@ -96,21 +96,14 @@ PrimitiveType::Kind PrimitiveType::get_kind() const
 
 PrimitiveType PrimitiveType::from_llvm_type(const llvm::Type* type)
 {
-    if (type->isIntegerTy(1))
-        return PrimitiveType(Kind::Boolean);
-    if (type->isIntegerTy(8))
-        return PrimitiveType(Kind::I8);
-    if (type->isIntegerTy(16))
-        return PrimitiveType(Kind::I16);
-    if (type->isIntegerTy(32))
-        return PrimitiveType(Kind::I32);
-    if (type->isIntegerTy(64))
-        return PrimitiveType(Kind::I64);
+    if (type->isIntegerTy(1)) return PrimitiveType(Kind::Boolean);
+    if (type->isIntegerTy(8)) return PrimitiveType(Kind::I8);
+    if (type->isIntegerTy(16)) return PrimitiveType(Kind::I16);
+    if (type->isIntegerTy(32)) return PrimitiveType(Kind::I32);
+    if (type->isIntegerTy(64)) return PrimitiveType(Kind::I64);
 
-    if (type->isFloatTy())
-        return PrimitiveType(Kind::F32);
-    if (type->isDoubleTy())
-        return PrimitiveType(Kind::F64);
+    if (type->isFloatTy()) return PrimitiveType(Kind::F32);
+    if (type->isDoubleTy()) return PrimitiveType(Kind::F64);
 
     return PrimitiveType(Kind::Unknown);
 }

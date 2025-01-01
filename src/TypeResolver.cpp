@@ -9,16 +9,14 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveT
 {
     // FIXME: figure out whether we want to do an elaborate promotion scheme
     // like the C standard mandates
-    if (lhs == rhs && lhs != PrimitiveType::Kind::Boolean)
-        return lhs;
+    if (lhs == rhs && lhs != PrimitiveType::Kind::Boolean) return lhs;
     return std::nullopt;
 }
 
 std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_cmp(PrimitiveType::Kind lhs,
                                                                     PrimitiveType::Kind rhs) const
 {
-    if (lhs == rhs)
-        return PrimitiveType::Kind::Boolean;
+    if (lhs == rhs) return PrimitiveType::Kind::Boolean;
     return std::nullopt;
 }
 

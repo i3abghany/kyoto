@@ -14,6 +14,7 @@ statement:
 	expressionStatement
 	| declaration
 	| fullDeclaration
+	| ifStatement
 	| returnStatement
 	| assignment;
 

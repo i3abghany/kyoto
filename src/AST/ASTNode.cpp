@@ -240,10 +240,8 @@ llvm::Value* UnaryNode::gen()
     auto expr_ltype = expr->get_type(compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
 
-    if (op == "-")
-        return compiler.get_builder().CreateNeg(expr_val, "negval");
-    else if (op == "+")
-        return expr_val;
+    if (op == "-") return compiler.get_builder().CreateNeg(expr_val, "negval");
+    else if (op == "+") return expr_val;
 
     return nullptr;
 }
@@ -272,8 +270,9 @@ llvm::Value* BlockNode::gen()
 {
     compiler.push_scope();
 
-    for (auto* node : nodes)
+    for (auto* node : nodes) {
         node->gen();
+    }
 
     compiler.pop_scope();
     return nullptr;

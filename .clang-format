@@ -8,3 +8,4 @@ AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
 AlignEscapedNewlines: Left
 AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse

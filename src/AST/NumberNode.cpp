@@ -25,7 +25,8 @@ llvm::Value* NumberNode::gen()
     auto primitive_type = dynamic_cast<PrimitiveType*>(type.get());
     assert(primitive_type && "NumberNode type must be a primitive type");
     size_t width = primitive_type->width();
-    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(width * 8, value, true));
+    auto b = primitive_type->is_boolean();
+    return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(b ? 1 : width * 8, value, b ? false : true));
 }
 
 llvm::Type* NumberNode::get_type(llvm::LLVMContext& context) const

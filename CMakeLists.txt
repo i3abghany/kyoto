@@ -22,6 +22,7 @@ include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 set(SOURCES
     src/Visitor.cpp
     src/AST/ASTNode.cpp
+    src/AST/ControlFlowNodes.cpp
     src/AST/ASTBinaryArithNode.cpp
     src/AST/ASTBinaryCmpNode.cpp
     src/AST/NumberNode.cpp

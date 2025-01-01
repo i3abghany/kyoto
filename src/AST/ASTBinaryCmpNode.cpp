@@ -30,8 +30,7 @@
         auto lhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(compiler.get_context()));                \
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(compiler.get_context()));                \
         auto t = compiler.get_type_resolver().resolve_binary_cmp(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
-        if (!t.has_value())                                                                                   \
-            assert(false && "Binary comparison operation type mismatch");                                     \
+        if (!t.has_value()) assert(false && "Binary comparison operation type mismatch");                     \
         auto* check = compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                           \
         return compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                                  \
     }                                                                                                         \

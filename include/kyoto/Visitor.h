@@ -39,6 +39,8 @@ public:
     std::any visitEqualsExpression(kyoto::KyotoParser::EqualsExpressionContext* ctx) override;
     std::any visitNotEqualsExpression(kyoto::KyotoParser::NotEqualsExpressionContext* ctx) override;
 
+    std::any visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx) override;
+
 private:
     PrimitiveType::Kind parse_primitive_type(const std::string& type) const;
     std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind) const;

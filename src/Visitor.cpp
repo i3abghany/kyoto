@@ -10,6 +10,7 @@
 #include "KyotoParser.h"
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ControlFlowNodes.h"
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
@@ -199,28 +200,26 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
     return visit(ctx->expression());
 }
 
+std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)
+{
+    auto* condition = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    auto* then_node = std::any_cast<ASTNode*>(visit(ctx->block(0)));
+    auto* else_node = ctx->block(1) ? std::any_cast<ASTNode*>(visit(ctx->block(1))) : nullptr;
+    return (ASTNode*)new IfStatementNode(condition, then_node, else_node, compiler);
+}
+
 PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type) const
 {
-    if (type == "bool")
-        return PrimitiveType::Kind::Boolean;
-    if (type == "char")
-        return PrimitiveType::Kind::Char;
-    if (type == "i8")
-        return PrimitiveType::Kind::I8;
-    if (type == "i16")
-        return PrimitiveType::Kind::I16;
-    if (type == "i32")
-        return PrimitiveType::Kind::I32;
-    if (type == "i64")
-        return PrimitiveType::Kind::I64;
-    if (type == "f32")
-        return PrimitiveType::Kind::F32;
-    if (type == "f64")
-        return PrimitiveType::Kind::F64;
-    if (type == "string")
-        return PrimitiveType::Kind::String;
-    if (type == "void")
-        return PrimitiveType::Kind::Void;
+    if (type == "bool") return PrimitiveType::Kind::Boolean;
+    if (type == "char") return PrimitiveType::Kind::Char;
+    if (type == "i8") return PrimitiveType::Kind::I8;
+    if (type == "i16") return PrimitiveType::Kind::I16;
+    if (type == "i32") return PrimitiveType::Kind::I32;
+    if (type == "i64") return PrimitiveType::Kind::I64;
+    if (type == "f32") return PrimitiveType::Kind::F32;
+    if (type == "f64") return PrimitiveType::Kind::F64;
+    if (type == "string") return PrimitiveType::Kind::String;
+    if (type == "void") return PrimitiveType::Kind::Void;
     return PrimitiveType::Kind::Unknown;
 }
 
@@ -234,15 +233,12 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
         case PrimitiveType::Kind::I32:
         case PrimitiveType::Kind::I64: {
             auto num = std::stoll(str);
-            if (compiler.get_type_resolver().fits_in(num, kind))
-                return num;
+            if (compiler.get_type_resolver().fits_in(num, kind)) return num;
             return std::nullopt;
         }
         case PrimitiveType::Kind::Boolean: {
-            if (str == "true")
-                return 1;
-            if (str == "false")
-                return 0;
+            if (str == "true") return 1;
+            if (str == "false") return 0;
             return std::nullopt;
         }
         default:
@@ -273,9 +269,7 @@ std::optional<float> ASTBuilderVisitor::parse_float(const std::string& str) cons
 
 std::optional<bool> ASTBuilderVisitor::parse_bool(const std::string& str) const
 {
-    if (str == "true")
-        return true;
-    if (str == "false")
-        return false;
+    if (str == "true") return true;
+    if (str == "false") return false;
     return std::nullopt;
 }
