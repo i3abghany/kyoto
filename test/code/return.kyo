@@ -1,0 +1,33 @@
+// NAME TestReturnSimple1
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    return 0;
+}
+// SEP
+
+// NAME TestReturnSimple2
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    return 1;
+}
+// SEP
+
+// NAME TestMissingReturn
+// ERR 1
+// RET 0
+
+fn main() i32 {
+}
+// SEP
+
+// NAME TestReturnNegative
+// ERR 0
+// RET -1
+
+fn main() i32 {
+    return -1;
+}

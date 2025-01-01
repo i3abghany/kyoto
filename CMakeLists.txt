@@ -29,7 +29,21 @@ set(SOURCES
     src/SymbolTable.cpp
     src/KType.cpp
     src/TypeResolver.cpp
+    src/utils/File.cpp
     ${ANTLR_KyotoGrammarLexer_CXX_OUTPUTS}
     ${ANTLR_KyotoGrammarParser_CXX_OUTPUTS})
 
-target_link_libraries(kyoto antlr4_static ${llvm_libs} fmt::fmt-header-only)
+add_executable(
+    kyoto
+    main.cpp
+    ${SOURCES})
+
+target_link_libraries(kyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
+
+add_executable(
+    ktest
+    ${SOURCES}
+    test/TestReturn.cpp
+)
+
+target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
