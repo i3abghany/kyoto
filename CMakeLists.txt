@@ -10,6 +10,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/SetupLLVM.cmake)
 include(cmake/SetupANTLR.cmake)
+include(cmake/SetupGTest.cmake)
+include(cmake/SetupBoost.cmake)
 find_package(fmt CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -17,9 +19,7 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 include_directories(${ANTLR_KyotoGrammarLexer_OUTPUT_DIR})
 include_directories(${ANTLR_KyotoGrammarParser_OUTPUT_DIR})
 
-add_executable(
-    kyoto
-    main.cpp
+set(SOURCES
     src/Visitor.cpp
     src/AST/ASTNode.cpp
     src/AST/ASTBinaryArithNode.cpp
