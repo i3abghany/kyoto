@@ -1,6 +1,7 @@
 #include "kyoto/ModuleCompiler.h"
 
 #include <any>
+#include <exception>
 #include <iostream>
 #include <utility>
 
@@ -12,6 +13,8 @@
 #include "kyoto/Visitor.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
+
+class KType;
 
 ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     : code(code)
@@ -40,15 +43,25 @@ ASTNode* ModuleCompiler::parse_program()
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
     auto program = parse_program();
-    program->gen();
-    if (verify_module()) {
-        std::string str;
-        llvm::raw_string_ostream os(str);
-        module->print(os, nullptr);
-        return os.str();
-    } else {
+    try {
+        program->gen();
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return std::nullopt;
     }
+    std::string llvm_err;
+    llvm::raw_string_ostream err(llvm_err);
+    if (!verify_module(err)) {
+        std::cerr << "Error: " << err.str() << std::endl;
+        return std::nullopt;
+    } else {
+        std::string llvm_ir;
+        llvm::raw_string_ostream os(llvm_ir);
+        module->print(os, nullptr);
+        return os.str();
+    }
+
+    return std::nullopt;
 }
 
 std::optional<Symbol> ModuleCompiler::get_symbol(const std::string& name)
@@ -71,18 +84,29 @@ void ModuleCompiler::pop_scope()
     symbol_table.pop_scope();
 }
 
+void ModuleCompiler::push_fn_return_type(KType* type)
+{
+    curr_fn_ret_type = type;
+}
+
+void ModuleCompiler::pop_fn_return_type()
+{
+    curr_fn_ret_type = nullptr;
+}
+
+KType* ModuleCompiler::get_fn_return_type() const
+{
+    return curr_fn_ret_type;
+}
+
 size_t ModuleCompiler::n_scopes() const
 {
     return symbol_table.n_scopes();
 }
 
-bool ModuleCompiler::verify_module() const
+bool ModuleCompiler::verify_module(llvm::raw_string_ostream& os) const
 {
-    auto err = llvm::verifyModule(*module, nullptr);
-    if (err) {
-        std::cerr << "Module verification failed" << std::endl;
-        llvm::errs() << "Error(s) in module " << module->getName() << ":\n";
-        llvm::verifyModule(*module, &llvm::errs());
-    }
+    auto err = llvm::verifyModule(*module, &os);
+    os.flush();
     return err == false;
 }

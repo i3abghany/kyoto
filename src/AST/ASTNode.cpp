@@ -26,6 +26,7 @@
 
 namespace llvm {
 class LLVMContext;
+class Value;
 }
 
 llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
@@ -236,12 +237,38 @@ llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
     return expr->get_type(context);
 }
 
-FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type,
-                           std::vector<ASTNode*> body, ModuleCompiler& compiler)
+BlockNode::BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
+    : nodes(std::move(nodes))
+    , compiler(compiler)
+{
+}
+
+std::string BlockNode::to_string() const
+{
+    std::string str;
+    for (const auto* node : nodes) {
+        str += node->to_string() + ", ";
+    }
+    return fmt::format("BlockNode([{}])", str);
+}
+
+llvm::Value* BlockNode::gen()
+{
+    compiler.push_scope();
+
+    for (auto* node : nodes)
+        node->gen();
+
+    compiler.pop_scope();
+    return nullptr;
+}
+
+FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, ASTNode* body,
+                           ModuleCompiler& compiler)
     : name(name)
     , args(std::move(args))
     , ret_type(ret_type)
-    , body(std::move(body))
+    , body(body)
     , compiler(compiler)
 {
 }
@@ -252,11 +279,7 @@ std::string FunctionNode::to_string() const
     for (const auto& arg : args) {
         args_str += arg.name + ": " + arg.type->to_string() + ", ";
     }
-    std::string body_str;
-    for (const auto* node : body) {
-        body_str += node->to_string() + ", ";
-    }
-    return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body_str);
+    return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body->to_string());
 }
 
 llvm::Value* FunctionNode::gen()
@@ -267,9 +290,9 @@ llvm::Value* FunctionNode::gen()
     auto* entry = llvm::BasicBlock::Create(compiler.get_context(), "func_entry", func);
     compiler.get_builder().SetInsertPoint(entry);
 
-    for (auto* node : body) {
-        node->gen();
-    }
+    compiler.push_fn_return_type(ret_type);
+    body->gen();
+    compiler.pop_fn_return_type();
 
     return func;
 }

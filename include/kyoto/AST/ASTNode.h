@@ -107,6 +107,18 @@ public:
     [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
+class BlockNode : public ASTNode {
+public:
+    BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
+
+    [[nodiscard]] std::string to_string() const override;
+    [[nodiscard]] llvm::Value* gen() override;
+
+private:
+    std::vector<ASTNode*> nodes;
+    ModuleCompiler& compiler;
+};
+
 class FunctionNode : public ASTNode {
 public:
     struct Parameter {
@@ -114,7 +126,7 @@ public:
         KType* type;
     };
 
-    FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, std::vector<ASTNode*> body,
+    FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, ASTNode* body,
                  ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
@@ -126,6 +138,6 @@ private:
     std::string name;
     std::vector<Parameter> args;
     KType* ret_type;
-    std::vector<ASTNode*> body;
+    ASTNode* body;
     ModuleCompiler& compiler;
 };

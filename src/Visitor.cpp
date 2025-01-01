@@ -46,13 +46,17 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
     std::string ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
     auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
-    std::vector<ASTNode*> body;
-    compiler.push_scope();
-    for (auto stmt : ctx->block()->statement()) {
-        body.push_back(std::any_cast<ASTNode*>(visit(stmt)));
-    }
-    compiler.pop_scope();
+    auto body = std::any_cast<ASTNode*>(visit(ctx->block()));
     return (ASTNode*)new FunctionNode(name, args, ret_type, body, compiler);
+}
+
+std::any ASTBuilderVisitor::visitBlock(kyoto::KyotoParser::BlockContext* ctx)
+{
+    std::vector<ASTNode*> nodes;
+    for (auto stmt : ctx->statement()) {
+        nodes.push_back(std::any_cast<ASTNode*>(visit(stmt)));
+    }
+    return (ASTNode*)new BlockNode(nodes, compiler);
 }
 
 std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx)
@@ -232,6 +236,13 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
             auto num = std::stoll(str);
             if (compiler.get_type_resolver().fits_in(num, kind))
                 return num;
+            return std::nullopt;
+        }
+        case PrimitiveType::Kind::Boolean: {
+            if (str == "true")
+                return 1;
+            if (str == "false")
+                return 0;
             return std::nullopt;
         }
         default:

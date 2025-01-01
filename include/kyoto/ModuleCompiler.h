@@ -12,6 +12,10 @@
 #include "llvm/IR/Module.h"
 
 class ASTNode;
+class KType;
+namespace llvm {
+class raw_string_ostream;
+}
 
 class ModuleCompiler {
 public:
