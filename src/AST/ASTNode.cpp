@@ -177,7 +177,7 @@ llvm::Value* FullDeclarationStatementNode::gen()
         }
         expr_val = llvm::ConstantInt::get(ltype, int_val, true);
     } else {
-        if (expr_ktype.get_kind() > lhs_ktype->get_kind()) {
+        if (expr_ktype.width() > lhs_ktype->width()) {
             expr_val = compiler.get_builder().CreateTrunc(expr_val, ltype);
         }
     }
