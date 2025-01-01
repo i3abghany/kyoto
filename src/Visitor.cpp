@@ -1,4 +1,5 @@
 #include <any>
+#include <array>
 #include <assert.h>
 #include <optional>
 #include <stdexcept>
@@ -12,6 +13,7 @@
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
+#include "kyoto/TypeResolver.h"
 #include "kyoto/Visitor.h"
 #include "tree/TerminalNode.h"
 
@@ -80,14 +82,18 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
 {
     auto txt = ctx->getText();
 
-    if (auto num = parse_signed_integer_into(txt, PrimitiveType::Kind::I32); num.has_value()) {
-        return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(PrimitiveType::Kind::I32), compiler);
-    } else if (auto b = parse_bool(txt); b.has_value()) {
-        return (ExpressionNode*)new NumberNode(b.value(), new PrimitiveType(PrimitiveType::Kind::Boolean), compiler);
-    } else {
-        assert(false && "Unknown Integer type");
+    // The resulting node will have the smallest possible integer type.
+    // Terminate if we can't parse the number.
+
+    using Kind = PrimitiveType::Kind;
+    std::array kinds = { Kind::I8, Kind::I16, Kind::I32, Kind::I64, Kind::Boolean };
+
+    for (auto kind : kinds) {
+        if (auto num = parse_signed_integer_into(txt, kind); num.has_value())
+            return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(kind), compiler);
     }
-    return {};
+
+    assert(false && "Unknown Integer type");
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
@@ -220,13 +226,14 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
     try {
         switch (kind) {
         case PrimitiveType::Kind::I8:
-            return std::stoi(str);
         case PrimitiveType::Kind::I16:
-            return std::stoi(str);
         case PrimitiveType::Kind::I32:
-            return std::stoi(str);
-        case PrimitiveType::Kind::I64:
-            return std::stoll(str);
+        case PrimitiveType::Kind::I64: {
+            auto num = std::stoll(str);
+            if (compiler.get_type_resolver().fits_in(num, kind))
+                return num;
+            return std::nullopt;
+        }
         default:
             return std::nullopt;
         }
