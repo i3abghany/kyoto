@@ -11,11 +11,13 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
+class ASTNode;
+
 class ModuleCompiler {
 public:
     explicit ModuleCompiler(const std::string& code, const std::string& name = "main");
 
-    void compile();
+    std::optional<std::string> gen_ir();
 
     llvm::LLVMContext& get_context() { return context; }
 
@@ -34,7 +36,8 @@ public:
     size_t n_scopes() const;
 
 private:
-    void verify_module() const;
+    bool verify_module() const;
+    ASTNode* parse_program();
 
 private:
     std::string code;

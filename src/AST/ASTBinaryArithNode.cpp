@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <fmt/core.h>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 #include "kyoto/AST/ASTBinaryNode.h"
