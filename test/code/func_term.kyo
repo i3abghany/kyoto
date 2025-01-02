@@ -1,0 +1,85 @@
+// NAME SimpleFunctionReturn
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    return 1;
+}
+// SEP
+
+// NAME NoReturn
+// ERR 1
+// RET 0
+
+fn main() i32 {
+}
+// SEP
+
+// NAME OneIf1j
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    if (true) {
+        return 1;
+    }
+}
+// SEP
+
+// NAME OneIf2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    if (false) {
+        return 1;
+    }
+}
+// SEP
+
+// NAME SimpleIfElse
+// ERR 0
+// RET 10
+
+fn main() i32 {
+    if (true) {
+        return 10;
+    } else {
+        return 20;
+    }
+}
+// SEP
+
+// NAME NestedIfNoTerm
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    if (true) {
+        if (true) {
+            return 1;
+        }
+    } else {
+        return 1;
+    }
+}
+// SEP
+
+// NAME NestedIfFullTerm
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    if (true) {
+        if (false) {
+            return 1;
+        }
+        return 2;
+    } else {
+        if (true) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+}
