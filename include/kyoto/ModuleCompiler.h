@@ -51,6 +51,8 @@ public:
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
+    void ensure_main_fn();
+    void llvm_pass();
 
 private:
     KType* curr_fn_ret_type = nullptr;

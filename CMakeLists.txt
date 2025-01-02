@@ -29,6 +29,7 @@ set(SOURCES
     src/KType.cpp
     src/TypeResolver.cpp
     src/utils/File.cpp
+    src/Analysis/FunctionTermination.cpp
     ${ANTLR_SOURCES})
 
 add_executable(

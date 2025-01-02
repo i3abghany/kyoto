@@ -11,8 +11,20 @@
 #include "KyotoLexer.h"
 #include "KyotoParser.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/Analysis/FunctionTermination.h"
 #include "kyoto/Visitor.h"
+#include "llvm/ADT/APInt.h"
+#include "llvm/Analysis/CGSCCPassManager.h"
+#include "llvm/Analysis/LoopAnalysisManager.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/PassManager.h"
+#include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/raw_ostream.h"
 
 class KType;
@@ -41,6 +53,52 @@ ASTNode* ModuleCompiler::parse_program()
     return std::any_cast<ASTNode*>(visitor.visit(tree));
 }
 
+void ModuleCompiler::llvm_pass()
+{
+    // We are only using the FunctionAnalysisManager but apparently we need to
+    // register all of those managers.
+    llvm::LoopAnalysisManager LAM;
+    llvm::FunctionAnalysisManager FAM;
+    llvm::CGSCCAnalysisManager CGAM;
+    llvm::ModuleAnalysisManager MAM;
+    llvm::PassBuilder PB;
+
+    PB.registerModuleAnalyses(MAM);
+    PB.registerCGSCCAnalyses(CGAM);
+    PB.registerFunctionAnalyses(FAM);
+    PB.registerLoopAnalyses(LAM);
+    PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+
+    llvm::FunctionPassManager FPM;
+    FPM.addPass(FunctionTerminationPass(*this));
+
+    llvm::ModulePassManager MPM;
+    MPM.addPass(llvm::createModuleToFunctionPassAdaptor(std::move(FPM)));
+
+    MPM.run(*module, MAM);
+}
+
+void ModuleCompiler::ensure_main_fn()
+{
+    auto* main_fn = module->getFunction("main");
+    if (!main_fn) {
+        std::cerr << "Couldn't find main function\n";
+        std::exit(1);
+    }
+
+    if (!main_fn->getReturnType()->isIntegerTy(32)) {
+        main_fn->getReturnType()->dump();
+        std::cerr << "Error: main function must return an i32\n";
+        std::exit(1);
+    }
+
+    auto* last_bb = &main_fn->back();
+    auto* term = last_bb->getTerminator();
+    if (!term) {
+        builder.SetInsertPoint(last_bb);
+        builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(32, 0)));
+    }
+}
 
 void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
 {
@@ -71,6 +129,13 @@ std::optional<std::string> ModuleCompiler::gen_ir()
         std::cerr << "Error: " << e.what() << std::endl;
         return std::nullopt;
     }
+
+    llvm_pass();
+
+    if (!fn_termination_error) {
+        ensure_main_fn();
+    }
+
     std::string llvm_err;
     llvm::raw_string_ostream err(llvm_err);
     if (!verify_module(err)) {
