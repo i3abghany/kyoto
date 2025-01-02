@@ -151,11 +151,33 @@ std::string FullDeclarationStatementNode::to_string() const
     return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
+llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler, KType* target_ktype,
+                                                    const std::string& target_name)
+{
+    if (!expr->is_trivially_evaluable()) return nullptr;
+
+    auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
+    auto* ltype = get_llvm_type(target_type, compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+
+    auto trivial_val = expr->trivial_gen();
+    auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
+    assert(constant_int && "Trivial value must be a constant int");
+    auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
+                                                                        : constant_int->getSExtValue();
+    if (!compiler.get_type_resolver().fits_in(int_val, target_type->get_kind())) {
+        throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr->to_string(),
+                                             int_val, target_type->to_string(),
+                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+    }
+    return llvm::ConstantInt::get(ltype, int_val, true);
+}
+
 llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KType* target_ktype,
                                                        ModuleCompiler& compiler, const std::string& what,
                                                        const std::string& target_name)
 {
-    PrimitiveType* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
+    auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
     auto* ltype = get_llvm_type(target_type, compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
     auto* expr_val = expr->gen();
@@ -163,24 +185,13 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
     bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
     if (!is_compatible && !is_trivially_evaluable) {
-        auto err
-            = fmt::format("Cannot {} value of type `{}`. Expected `{}`{}", what, expr_ktype.to_string(),
-                          target_type->to_string(), target_name.empty() ? "" : fmt::format(" for `{}`", target_name));
-        throw std::runtime_error(err);
+        throw std::runtime_error(fmt::format("Cannot {} value of type `{}`. Expected `{}`{}", what,
+                                             expr_ktype.to_string(), target_type->to_string(),
+                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
     }
 
-    if (is_trivially_evaluable) {
-        auto trivial_val = expr->trivial_gen();
-        auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
-        assert(constant_int && "Trivial value must be a constant int");
-        auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
-                                                                            : constant_int->getSExtValue();
-        if (!compiler.get_type_resolver().fits_in(int_val, target_type->get_kind())) {
-            throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}",
-                                                 expr->to_string(), int_val, target_type->to_string(),
-                                                 target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
-        }
-        return llvm::ConstantInt::get(ltype, int_val, true);
+    if (auto* trivial = ExpressionNode::promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {
+        return trivial;
     } else {
         if (expr_ktype.width() > target_type->width()) {
             return compiler.get_builder().CreateTrunc(expr_val, ltype);
