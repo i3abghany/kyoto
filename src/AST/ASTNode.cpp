@@ -160,16 +160,26 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
     auto* ltype = get_llvm_type(target_type, compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
 
+    auto is_bool_promotion = !target_type->is_boolean() && expr_ktype.is_boolean();
+
+    if (is_bool_promotion) {
+        throw std::runtime_error(fmt::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype.to_string(),
+                                             target_type->to_string(),
+                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+    }
+
     auto trivial_val = expr->trivial_gen();
     auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
     assert(constant_int && "Trivial value must be a constant int");
     auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
                                                                         : constant_int->getSExtValue();
+
     if (!compiler.get_type_resolver().fits_in(int_val, target_type->get_kind())) {
         throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr->to_string(),
                                              int_val, target_type->to_string(),
                                              target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
     }
+
     return llvm::ConstantInt::get(ltype, int_val, true);
 }
 
@@ -178,7 +188,6 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
                                                        const std::string& target_name)
 {
     auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
-    auto* ltype = get_llvm_type(target_type, compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
     auto* expr_val = expr->gen();
     bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), target_type->get_kind());
@@ -193,6 +202,7 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
     if (auto* trivial = ExpressionNode::promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {
         return trivial;
     } else {
+        auto* ltype = get_llvm_type(target_type, compiler.get_context());
         if (expr_ktype.width() > target_type->width()) {
             return compiler.get_builder().CreateTrunc(expr_val, ltype);
         } else if (expr_ktype.width() < target_type->width()) {
