@@ -1,21 +1,21 @@
 #pragma once
 
-#include <memory>
 #include <stdint.h>
 #include <string>
 
 #include "kyoto/AST/ASTNode.h"
-#include "kyoto/KType.h"
 
 class ModuleCompiler;
+class KType;
 
 class NumberNode : public ExpressionNode {
     int64_t value;
-    std::unique_ptr<KType> type;
+    KType* type;
     ModuleCompiler& compiler;
 
 public:
     NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler);
+    ~NumberNode();
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;

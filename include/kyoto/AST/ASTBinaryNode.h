@@ -17,6 +17,7 @@ class Value;
                                                                                   \
     public:                                                                       \
         name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler); \
+        ~name();                                                                  \
         std::string to_string() const override;                                   \
         llvm::Value* gen() override;                                              \
         llvm::Type* get_type(llvm::LLVMContext& context) const override;          \

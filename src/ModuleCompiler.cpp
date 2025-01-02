@@ -122,7 +122,7 @@ void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
 
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
-    auto program = parse_program();
+    auto program = std::unique_ptr<ASTNode>(parse_program());
     try {
         program->gen();
     } catch (const std::exception& e) {

@@ -19,6 +19,11 @@
         , compiler(compiler)                                                                                  \
     {                                                                                                         \
     }                                                                                                         \
+    name::~name()                                                                                             \
+    {                                                                                                         \
+        delete lhs;                                                                                           \
+        delete rhs;                                                                                           \
+    }                                                                                                         \
     std::string name::to_string() const                                                                       \
     {                                                                                                         \
         return fmt::format("{}({}, {})", #name, lhs->to_string(), rhs->to_string());                          \

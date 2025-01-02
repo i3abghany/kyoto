@@ -66,6 +66,13 @@ ProgramNode::ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
 {
 }
 
+ProgramNode::~ProgramNode()
+{
+    for (auto* node : nodes) {
+        delete node;
+    }
+}
+
 std::string ProgramNode::to_string() const
 {
     std::string str;
@@ -125,6 +132,11 @@ DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktyp
 {
 }
 
+DeclarationStatementNode::~DeclarationStatementNode()
+{
+    delete type;
+}
+
 std::string DeclarationStatementNode::to_string() const
 {
     return fmt::format("DeclarationNode({}, {})", name, type->to_string());
@@ -145,6 +157,12 @@ FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KTy
     , expr(expr)
     , compiler(compiler)
 {
+}
+
+FullDeclarationStatementNode::~FullDeclarationStatementNode()
+{
+    delete type;
+    delete expr;
 }
 
 std::string FullDeclarationStatementNode::to_string() const
@@ -244,6 +262,11 @@ ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& c
 {
 }
 
+ReturnStatementNode::~ReturnStatementNode()
+{
+    delete expr;
+}
+
 std::string ReturnStatementNode::to_string() const
 {
     return fmt::format("ReturnNode({})", expr->to_string());
@@ -261,6 +284,11 @@ UnaryNode::UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compi
     , op(op)
     , compiler(compiler)
 {
+}
+
+UnaryNode::~UnaryNode()
+{
+    delete expr;
 }
 
 std::string UnaryNode::to_string() const
@@ -289,6 +317,13 @@ BlockNode::BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
     : nodes(std::move(nodes))
     , compiler(compiler)
 {
+}
+
+BlockNode::~BlockNode()
+{
+    for (auto* node : nodes) {
+        delete node;
+    }
 }
 
 std::string BlockNode::to_string() const
@@ -320,6 +355,15 @@ FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args,
     , body(body)
     , compiler(compiler)
 {
+}
+
+FunctionNode::~FunctionNode()
+{
+    delete ret_type;
+    delete body;
+    for (auto& arg : args) {
+        delete arg.type;
+    }
 }
 
 std::string FunctionNode::to_string() const

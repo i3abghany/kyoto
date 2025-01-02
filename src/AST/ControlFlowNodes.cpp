@@ -19,6 +19,13 @@ IfStatementNode::IfStatementNode(ExpressionNode* condition, ASTNode* then_node, 
 {
 }
 
+IfStatementNode::~IfStatementNode()
+{
+    delete condition;
+    delete then;
+    if (els) delete els;
+}
+
 std::string IfStatementNode::to_string() const
 {
     return fmt::format("IfStatement({}, {}, {})", condition->to_string(), then->to_string(), els->to_string());

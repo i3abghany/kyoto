@@ -7,12 +7,18 @@
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/IR/Constants.h"
+#include "kyoto/KType.h"
 
 NumberNode::NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler)
     : value(value)
     , type(ktype)
     , compiler(compiler)
 {
+}
+
+NumberNode::~NumberNode()
+{
+    delete type;
 }
 
 std::string NumberNode::to_string() const
@@ -22,7 +28,7 @@ std::string NumberNode::to_string() const
 
 llvm::Value* NumberNode::gen()
 {
-    auto primitive_type = dynamic_cast<PrimitiveType*>(type.get());
+    auto primitive_type = dynamic_cast<PrimitiveType*>(type);
     assert(primitive_type && "NumberNode type must be a primitive type");
     size_t width = primitive_type->width();
     auto b = primitive_type->is_boolean();
@@ -31,7 +37,7 @@ llvm::Value* NumberNode::gen()
 
 llvm::Type* NumberNode::get_type(llvm::LLVMContext& context) const
 {
-    return ASTNode::get_llvm_type(type.get(), context);
+    return ASTNode::get_llvm_type(type, context);
 }
 
 bool NumberNode::is_trivially_evaluable() const
@@ -41,7 +47,7 @@ bool NumberNode::is_trivially_evaluable() const
 
 llvm::Value* NumberNode::trivial_gen()
 {
-    auto primitive_type = dynamic_cast<PrimitiveType*>(type.get());
+    auto primitive_type = dynamic_cast<PrimitiveType*>(type);
     assert(primitive_type && "NumberNode type must be a primitive type");
     // return the maximum-width integer constant
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(64, value, true));

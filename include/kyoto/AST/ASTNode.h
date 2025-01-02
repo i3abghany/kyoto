@@ -50,6 +50,7 @@ class ProgramNode : public ASTNode {
 
 public:
     ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
+    ~ProgramNode();
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -61,6 +62,7 @@ class IdentifierExpressionNode : public ExpressionNode {
 
 public:
     IdentifierExpressionNode(std::string name, ModuleCompiler& compiler);
+    ~IdentifierExpressionNode() = default;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -74,6 +76,7 @@ class DeclarationStatementNode : public ASTNode {
 
 public:
     DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler);
+    ~DeclarationStatementNode();
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -87,6 +90,7 @@ class FullDeclarationStatementNode : public ASTNode {
 
 public:
     FullDeclarationStatementNode(std::string name, KType* type, ExpressionNode* expr, ModuleCompiler& compiler);
+    ~FullDeclarationStatementNode();
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -98,6 +102,7 @@ class ReturnStatementNode : public ASTNode {
 
 public:
     ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler);
+    ~ReturnStatementNode();
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -110,6 +115,7 @@ class UnaryNode : public ExpressionNode {
 
 public:
     UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compiler);
+    ~UnaryNode();
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -119,6 +125,7 @@ public:
 class BlockNode : public ASTNode {
 public:
     BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
+    ~BlockNode();
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -137,6 +144,7 @@ public:
 
     FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, ASTNode* body,
                  ModuleCompiler& compiler);
+    ~FunctionNode();
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
