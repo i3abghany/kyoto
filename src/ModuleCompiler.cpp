@@ -1,6 +1,7 @@
 #include "kyoto/ModuleCompiler.h"
 
 #include <any>
+#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <utility>
@@ -38,6 +39,27 @@ ASTNode* ModuleCompiler::parse_program()
 
     ASTBuilderVisitor visitor(*this);
     return std::any_cast<ASTNode*>(visitor.visit(tree));
+}
+
+
+void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
+{
+    auto* llvm_type = bb.getParent()->getReturnType();
+
+    if (!llvm_type) {
+        return;
+    }
+
+    builder.SetInsertPoint(&bb);
+
+    if (llvm_type->isVoidTy()) {
+        builder.CreateRetVoid();
+    } else if (llvm_type->isIntegerTy()) {
+        builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(llvm_type->getIntegerBitWidth(), 0)));
+    } else {
+        std::cerr << "Error: unsupported return type\n";
+        std::exit(1);
+    }
 }
 
 std::optional<std::string> ModuleCompiler::gen_ir()
@@ -97,6 +119,11 @@ void ModuleCompiler::pop_fn_return_type()
 KType* ModuleCompiler::get_fn_return_type() const
 {
     return curr_fn_ret_type;
+}
+
+void ModuleCompiler::set_fn_termination_error()
+{
+    fn_termination_error = true;
 }
 
 size_t ModuleCompiler::n_scopes() const

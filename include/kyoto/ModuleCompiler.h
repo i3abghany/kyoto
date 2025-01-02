@@ -13,8 +13,10 @@
 
 class ASTNode;
 class KType;
+
 namespace llvm {
 class raw_string_ostream;
+class BasicBlock;
 }
 
 class ModuleCompiler {
@@ -41,6 +43,9 @@ public:
     void pop_fn_return_type();
     KType* get_fn_return_type() const;
 
+    void set_fn_termination_error();
+    void insert_dummy_return(llvm::BasicBlock& bb);
+
     size_t n_scopes() const;
 
 private:
@@ -49,17 +54,15 @@ private:
 
 private:
     KType* curr_fn_ret_type = nullptr;
+    bool fn_termination_error = false;
 
-private:
     std::string code;
     std::string name;
 
-private:
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
     std::unique_ptr<llvm::Module> module;
 
-private:
     SymbolTable symbol_table;
     TypeResolver type_resolver {};
 };
