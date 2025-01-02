@@ -2,6 +2,7 @@
 #include <fmt/core.h>
 #include <optional>
 #include <stdexcept>
+#include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -151,36 +152,42 @@ std::string FullDeclarationStatementNode::to_string() const
     return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
+static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
+                                    const std::string& target_name)
+{
+    if (expr_ktype->is_boolean() && !target_type->is_boolean()) {
+        throw std::runtime_error(fmt::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype->to_string(),
+                                             target_type->to_string(),
+                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+    }
+}
+
+static void check_int_range_fit(int64_t val, PrimitiveType* target_type, ModuleCompiler& compiler,
+                                const std::string& expr, const std::string& target_name)
+{
+    if (!compiler.get_type_resolver().fits_in(val, target_type->get_kind())) {
+        throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr, val,
+                                             target_type->to_string(),
+                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+    }
+}
+
 llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler, KType* target_ktype,
                                                     const std::string& target_name)
 {
     if (!expr->is_trivially_evaluable()) return nullptr;
 
     auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
-    auto* ltype = get_llvm_type(target_type, compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+    check_boolean_promotion(&expr_ktype, target_type, target_name);
 
-    auto is_bool_promotion = !target_type->is_boolean() && expr_ktype.is_boolean();
-
-    if (is_bool_promotion) {
-        throw std::runtime_error(fmt::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype.to_string(),
-                                             target_type->to_string(),
-                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
-    }
-
-    auto trivial_val = expr->trivial_gen();
-    auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(trivial_val);
+    auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr->trivial_gen());
     assert(constant_int && "Trivial value must be a constant int");
     auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
                                                                         : constant_int->getSExtValue();
 
-    if (!compiler.get_type_resolver().fits_in(int_val, target_type->get_kind())) {
-        throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr->to_string(),
-                                             int_val, target_type->to_string(),
-                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
-    }
-
-    return llvm::ConstantInt::get(ltype, int_val, true);
+    check_int_range_fit(int_val, target_type, compiler, expr->to_string(), target_name);
+    return llvm::ConstantInt::get(get_llvm_type(target_type, compiler.get_context()), int_val, true);
 }
 
 llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
