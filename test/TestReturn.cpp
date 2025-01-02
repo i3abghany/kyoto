@@ -1,6 +1,7 @@
 #include <gtest/gtest-message.h>
 #include <gtest/gtest-param-test.h>
 #include <gtest/gtest-test-part.h>
+#include <gtest/gtest_pred_impl.h>
 #include <optional>
 #include <stdint.h>
 #include <string>
@@ -9,7 +10,6 @@
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/utils/File.h"
 #include "kyoto/utils/Test.h"
-#include "gtest/gtest_pred_impl.h"
 
 class TestReturn : public ::testing::TestWithParam<utils::TestCase> {
 protected:
@@ -32,7 +32,7 @@ TEST_P(TestReturn, TestReturn)
     }
 }
 
-auto generate_test_cases()
+static auto generate_test_cases()
 {
     const auto test_cases = utils::File::get_test_cases("../test/code/return.kyo");
     return test_cases;
