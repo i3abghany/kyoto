@@ -1,7 +1,6 @@
 #include "kyoto/Analysis/FunctionTermination.h"
 
 #include "kyoto/ModuleCompiler.h"
-#include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/ilist_iterator.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/CFG.h"
