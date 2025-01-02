@@ -183,13 +183,26 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
     return llvm::ConstantInt::get(ltype, int_val, true);
 }
 
+llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
+                                                        PrimitiveType* target_type, ModuleCompiler& compiler)
+{
+    auto* ltype = get_llvm_type(target_type, compiler.get_context());
+
+    if (expr_ktype->width() > target_type->width()) {
+        return compiler.get_builder().CreateTrunc(expr_val, ltype);
+    } else if (expr_ktype->width() < target_type->width()) {
+        return compiler.get_builder().CreateSExt(expr_val, ltype);
+    }
+
+    return expr_val;
+}
+
 llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KType* target_ktype,
                                                        ModuleCompiler& compiler, const std::string& what,
                                                        const std::string& target_name)
 {
     auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
     auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    auto* expr_val = expr->gen();
     bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), target_type->get_kind());
     bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
@@ -201,16 +214,9 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
 
     if (auto* trivial = ExpressionNode::promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {
         return trivial;
-    } else {
-        auto* ltype = get_llvm_type(target_type, compiler.get_context());
-        if (expr_ktype.width() > target_type->width()) {
-            return compiler.get_builder().CreateTrunc(expr_val, ltype);
-        } else if (expr_ktype.width() < target_type->width()) {
-            return compiler.get_builder().CreateSExt(expr_val, ltype);
-        }
     }
 
-    return expr_val;
+    return dynamic_integer_conversion(expr->gen(), &expr_ktype, target_type, compiler);
 }
 
 llvm::Value* FullDeclarationStatementNode::gen()

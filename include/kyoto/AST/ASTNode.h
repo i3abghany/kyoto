@@ -34,6 +34,9 @@ public:
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
 
+    static llvm::Value* dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
+                                                   PrimitiveType* target_type, ModuleCompiler& compiler);
+
     static llvm::Value* promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler, KType* target_ktype,
                                                const std::string& target_name);
 
