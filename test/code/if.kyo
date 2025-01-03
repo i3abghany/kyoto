@@ -1,0 +1,103 @@
+// NAME SimpleIf
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    if (true) {
+        return 1;
+    }
+    return 0;
+}
+// SEP
+
+// NAME SimpleIfElse
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    if (false) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
+// SEP
+
+// NAME NestedIf
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    if (true) {
+        if (false) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
+    return 0;
+}
+// SEP
+
+// NAME NestedIfElse
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    if (false) {
+        if (false) {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else {
+        if (true) {
+            return 3;
+        } else {
+            return 4;
+        }
+    }
+
+    return 0;
+}
+// SEP
+
+// NAME NestedIfElseIf
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    if (false) {
+        if (false) {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if (true) {
+        return 3;
+    } else {
+        return 4;
+    }
+
+    return 0;
+}
+// SEP
+
+// NAME NestedIfElseIfElse
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    if (false) {
+        if (false) {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if (false) {
+        return 3;
+    } else {
+        return 4;
+    }
+    return 0;
+}
