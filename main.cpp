@@ -30,7 +30,7 @@ int run(int argc, const char* argv[])
 {
     po::options_description desc("The Kyoto Programming Language Compiler");
     desc.add_options()("help,h", "Print this help message")(
-        "output,o", po::value<std::string>()->default_value("out.ll"), "Output file");
+        "output,o", po::value<std::string>()->default_value("out.ll"), "Output file for the LLVM IR");
 
     po::positional_options_description pos;
     pos.add("files", -1);
