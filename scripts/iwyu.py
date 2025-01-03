@@ -37,7 +37,10 @@ def filter_compile_commands():
     with open('compile_commands.json', 'r') as f:
         compile_commands = json.load(f)
 
-    compile_commands = [cc for cc in compile_commands if 'generated' not in cc['file']]
+    # Remove generated files and main.cpp from compile_commands.json
+    # We don't want to run on antlr-generated files. Also, main.cpp uses boost
+    # program_options, which iwyu seems to have trouble with
+    compile_commands = [cc for cc in compile_commands if 'generated' not in cc['file'] and 'main.cpp' not in cc['file']]
     with open('compile_commands.json', 'w') as f:
         json.dump(compile_commands, f, indent=2)
 
