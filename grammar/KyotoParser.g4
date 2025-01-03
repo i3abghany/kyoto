@@ -16,7 +16,7 @@ statement:
 	| fullDeclaration
 	| ifStatement
 	| returnStatement
-	| assignment;
+	;
 
 expressionStatement: expression SEMICOLON;
 
@@ -40,6 +40,7 @@ expression:
 	| expression EQUALS expression #equalsExpression
 	| expression NOT_EQUALS expression #notEqualsExpression
 	| expression comparisonOp expression #comparisonExpression
+	| <assoc=right> expression EQUAL expression #assignmentExpression
 	;
 
 comparisonOp:
@@ -54,8 +55,6 @@ number: INTEGER | FLOAT | TRUE | FALSE;
 fullDeclaration: VAR IDENTIFIER COLON type EQUAL expression SEMICOLON;
 
 declaration: VAR IDENTIFIER COLON type SEMICOLON;
-
-assignment: IDENTIFIER EQUAL expression SEMICOLON;
 
 returnStatement: RETURN expression SEMICOLON;
 

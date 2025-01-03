@@ -4,10 +4,10 @@
 #include <fmt/core.h>
 #include <stddef.h>
 
+#include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/IR/Constants.h"
-#include "kyoto/KType.h"
 
 NumberNode::NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler)
     : value(value)

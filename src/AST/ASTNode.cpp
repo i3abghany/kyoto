@@ -1,5 +1,6 @@
 #include <cassert>
 #include <fmt/core.h>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <stdint.h>
@@ -68,9 +69,8 @@ ProgramNode::ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
 
 ProgramNode::~ProgramNode()
 {
-    for (auto* node : nodes) {
+    for (auto* node : nodes)
         delete node;
-    }
 }
 
 std::string ProgramNode::to_string() const
@@ -91,6 +91,28 @@ llvm::Value* ProgramNode::gen()
 
     assert(compiler.n_scopes() == 1 && "Unbalanced scopes");
     compiler.pop_scope();
+    return nullptr;
+}
+
+ExpressionStatementNode::ExpressionStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
+    : expr(expr)
+    , compiler(compiler)
+{
+}
+
+ExpressionStatementNode::~ExpressionStatementNode()
+{
+    delete expr;
+}
+
+std::string ExpressionStatementNode::to_string() const
+{
+    return fmt::format("ExpressionStatementNode({})", expr->to_string());
+}
+
+llvm::Value* ExpressionStatementNode::gen()
+{
+    expr->gen();
     return nullptr;
 }
 
@@ -170,8 +192,8 @@ std::string FullDeclarationStatementNode::to_string() const
     return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
-static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
-                                    const std::string& target_name)
+void ExpressionNode::check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
+                                             const std::string& target_name)
 {
     if (expr_ktype->is_boolean() && !target_type->is_boolean()) {
         throw std::runtime_error(fmt::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype->to_string(),
@@ -180,8 +202,8 @@ static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* ta
     }
 }
 
-static void check_int_range_fit(int64_t val, PrimitiveType* target_type, ModuleCompiler& compiler,
-                                const std::string& expr, const std::string& target_name)
+void ExpressionNode::check_int_range_fit(int64_t val, PrimitiveType* target_type, ModuleCompiler& compiler,
+                                         const std::string& expr, const std::string& target_name)
 {
     if (!compiler.get_type_resolver().fits_in(val, target_type->get_kind())) {
         throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr, val,
@@ -256,6 +278,58 @@ llvm::Value* FullDeclarationStatementNode::gen()
     return alloca;
 }
 
+AssignmentNode::AssignmentNode(std::string name, ExpressionNode* expr, ModuleCompiler& compiler)
+    : name(name)
+    , expr(expr)
+    , compiler(compiler)
+{
+}
+
+AssignmentNode::~AssignmentNode()
+{
+    delete expr;
+}
+
+std::string AssignmentNode::to_string() const
+{
+    return fmt::format("AssignmentNode({}, {})", name, expr->to_string());
+}
+
+llvm::Value* AssignmentNode::gen()
+{
+    auto symbol_opt = compiler.get_symbol(name);
+    if (!symbol_opt.has_value()) {
+        assert(false && "Unknown symbol");
+    }
+
+    auto symbol = symbol_opt.value();
+    auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
+    auto* ltype = get_llvm_type(type.get(), compiler.get_context());
+    // auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
+    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
+
+    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
+    // compiler.get_builder().CreateStore(expr_val, alloca);
+    // compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type.get())->get_kind()));
+
+    return expr_val;
+}
+
+llvm::Type* AssignmentNode::get_type(llvm::LLVMContext& context) const
+{
+    return expr->get_type(context);
+}
+
+llvm::Value* AssignmentNode::trivial_gen()
+{
+    return nullptr;
+}
+
+bool AssignmentNode::is_trivially_evaluable() const
+{
+    return false;
+}
+
 ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)
     , compiler(compiler)
@@ -321,9 +395,8 @@ BlockNode::BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
 
 BlockNode::~BlockNode()
 {
-    for (auto* node : nodes) {
+    for (auto* node : nodes)
         delete node;
-    }
 }
 
 std::string BlockNode::to_string() const
@@ -339,9 +412,8 @@ llvm::Value* BlockNode::gen()
 {
     compiler.push_scope();
 
-    for (auto* node : nodes) {
+    for (auto* node : nodes)
         node->gen();
-    }
 
     compiler.pop_scope();
     return nullptr;
@@ -361,9 +433,8 @@ FunctionNode::~FunctionNode()
 {
     delete ret_type;
     delete body;
-    for (auto& arg : args) {
+    for (auto& arg : args)
         delete arg.type;
-    }
 }
 
 std::string FunctionNode::to_string() const

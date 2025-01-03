@@ -1,6 +1,7 @@
 #include <any>
 #include <array>
 #include <assert.h>
+#include <fmt/core.h>
 #include <optional>
 #include <stdexcept>
 #include <stdint.h>
@@ -60,6 +61,12 @@ std::any ASTBuilderVisitor::visitBlock(kyoto::KyotoParser::BlockContext* ctx)
     return (ASTNode*)new BlockNode(nodes, compiler);
 }
 
+std::any ASTBuilderVisitor::visitExpressionStatement(kyoto::KyotoParser::ExpressionStatementContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ASTNode*)new ExpressionStatementNode(expr, compiler);
+}
+
 std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx)
 {
     std::string type_str = ctx->type()->getText();
@@ -75,6 +82,19 @@ std::any ASTBuilderVisitor::visitFullDeclaration(kyoto::KyotoParser::FullDeclara
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
+}
+
+std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx)
+{
+    auto* lhs_expr = dynamic_cast<kyoto::KyotoParser::IdentifierExpressionContext*>(ctx->expression(0));
+    if (!lhs_expr) {
+        throw std::runtime_error(fmt::format("Expected an identifier on the left-hand side of the assignment. Got `{}`",
+                                             ctx->expression(0)->getText()));
+    }
+
+    auto name = lhs_expr->IDENTIFIER()->getText();
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
+    return (ExpressionNode*)new AssignmentNode(name, expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx)

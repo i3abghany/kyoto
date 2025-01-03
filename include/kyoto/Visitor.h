@@ -14,8 +14,10 @@ public:
     std::any visitProgram(kyoto::KyotoParser::ProgramContext* ctx) override;
     std::any visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx) override;
     std::any visitBlock(kyoto::KyotoParser::BlockContext* ctx) override;
+    std::any visitExpressionStatement(kyoto::KyotoParser::ExpressionStatementContext* ctx) override;
     std::any visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx) override;
     std::any visitFullDeclaration(kyoto::KyotoParser::FullDeclarationContext* ctx) override;
+    std::any visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
 
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;

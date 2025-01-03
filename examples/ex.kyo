@@ -1,14 +1,6 @@
 fn main() i32 {
-    if (true) {
-        if (false) {
-            return 1;
-        }
-        return 2;
-    } else {
-        if (true) {
-            return 2;
-        } else {
-            return 3;
-        }
-    }
+    var x: i32;
+    var y: i32;
+    x = y = 5;
+    return x + y;
 }
