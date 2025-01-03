@@ -1,12 +1,4 @@
-#include <boost/any.hpp>
-#include <boost/program_options/detail/parsers.hpp>
-#include <boost/program_options/detail/value_semantic.hpp>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/positional_options.hpp>
-#include <boost/program_options/value_semantic.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/type_index/type_index_facade.hpp>
+#include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
 #include <optional>
