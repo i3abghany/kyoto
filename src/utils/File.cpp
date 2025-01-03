@@ -47,8 +47,7 @@ int32_t File::execute_ir(const std::string& ir)
     ofs.close();
 
     boost::process::ipstream error_stream;
-    // FIXME: this assumes the lli-20 binary is in the PATH
-    boost::process::child proc { "lli-20 " + temp_file.string(), boost::process::std_err > error_stream };
+    boost::process::child proc { "lli " + temp_file.string(), boost::process::std_err > error_stream };
     proc.wait();
     int exit_code = proc.exit_code();
     boost::filesystem::remove(temp_file);
