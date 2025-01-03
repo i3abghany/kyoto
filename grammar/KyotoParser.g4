@@ -59,7 +59,7 @@ declaration: VAR IDENTIFIER COLON type SEMICOLON;
 returnStatement: RETURN expression SEMICOLON;
 
 ifStatement: IF LPAREN expression RPAREN block (ELSE block)?
-			| IF LPAREN expression RPAREN statement (ELSE ifStatement)?;
+			| IF LPAREN expression RPAREN block (ELSE ifStatement)?;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

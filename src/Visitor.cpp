@@ -224,7 +224,13 @@ std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementCont
 {
     auto* condition = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     auto* then_node = std::any_cast<ASTNode*>(visit(ctx->block(0)));
-    auto* else_node = ctx->block(1) ? std::any_cast<ASTNode*>(visit(ctx->block(1))) : nullptr;
+    ASTNode* else_node = nullptr;
+
+    if (ctx->ELSE()) {
+        else_node = ctx->ifStatement() ? std::any_cast<ASTNode*>(visit(ctx->ifStatement()))
+                                       : std::any_cast<ASTNode*>(visit(ctx->block(1)));
+    }
+
     return (ASTNode*)new IfStatementNode(condition, then_node, else_node, compiler);
 }
 
