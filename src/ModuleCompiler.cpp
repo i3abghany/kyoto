@@ -126,7 +126,9 @@ std::optional<std::string> ModuleCompiler::gen_ir()
     try {
         program->gen();
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        constexpr const char* RED = "\033[0;31m";
+        constexpr const char* NC = "\033[0m";
+        std::cerr << RED << "Error: " << NC << e.what() << std::endl;
         return std::nullopt;
     }
 
