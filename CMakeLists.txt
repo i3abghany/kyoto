@@ -44,6 +44,7 @@ add_executable(
     ${SOURCES}
     test/TestReturn.cpp
     test/TestFunctionTermination.cpp
+    test/TestAssignment.cpp
 )
 
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)

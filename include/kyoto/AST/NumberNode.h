@@ -4,9 +4,9 @@
 #include <string>
 
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/KType.h"
 
 class ModuleCompiler;
-class KType;
 
 class NumberNode : public ExpressionNode {
     int64_t value;
@@ -22,4 +22,6 @@ public:
     [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
     [[nodiscard]] llvm::Value* trivial_gen();
     [[nodiscard]] bool is_trivially_evaluable() const;
+
+    void cast_to(PrimitiveType::Kind target_type);
 };

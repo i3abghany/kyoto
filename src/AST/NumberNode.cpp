@@ -52,3 +52,10 @@ llvm::Value* NumberNode::trivial_gen()
     // return the maximum-width integer constant
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(64, value, true));
 }
+
+void NumberNode::cast_to(PrimitiveType::Kind target_kind)
+{
+    auto target_type = new PrimitiveType(target_kind);
+    delete type;
+    type = target_type;
+}

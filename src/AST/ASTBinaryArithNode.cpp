@@ -6,10 +6,12 @@
 
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/NumberNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Value.h"
 
 #define ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                                                          \
     name::name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)                              \
@@ -33,6 +35,13 @@
         auto* rhs_val = rhs->gen();                                                                             \
         auto lhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(compiler.get_context()));                  \
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(compiler.get_context()));                  \
+        if (lhs_ktype.width() > rhs_ktype.width()) {                                                            \
+            rhs_val = compiler.get_builder().CreateSExt(rhs_val, lhs_val->getType(), "sext");                   \
+            rhs_ktype = PrimitiveType::from_llvm_type(lhs_val->getType());                                      \
+        } else if (lhs_ktype.width() < rhs_ktype.width()) {                                                     \
+            lhs_val = compiler.get_builder().CreateSExt(lhs_val, rhs_val->getType(), "sext");                   \
+            lhs_ktype = PrimitiveType::from_llvm_type(rhs_val->getType());                                      \
+        }                                                                                                       \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
         if (!t.has_value())                                                                                     \
             throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op, \
@@ -43,10 +52,18 @@
     {                                                                                                           \
         auto lhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(context));                                 \
         auto rhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(context));                                 \
+        if (auto* num = dynamic_cast<NumberNode*>(lhs); num) {                                                  \
+            num->cast_to(rhs_ktype.get_kind());                                                                 \
+            lhs_ktype = PrimitiveType::from_llvm_type(rhs->get_type(context));                                  \
+        } else if (auto* num = dynamic_cast<NumberNode*>(rhs); num) {                                           \
+            num->cast_to(lhs_ktype.get_kind());                                                                 \
+            rhs_ktype = PrimitiveType::from_llvm_type(lhs->get_type(context));                                  \
+        }                                                                                                       \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype.get_kind(), rhs_ktype.get_kind()); \
-        if (!t.has_value())                                                                                     \
+        if (!t.has_value()) {                                                                                   \
             throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op, \
                                                  lhs_ktype.to_string(), rhs_ktype.to_string()));                \
+        }                                                                                                       \
         auto ktype = new PrimitiveType(t.value());                                                              \
         auto res = ASTNode::get_llvm_type(ktype, context);                                                      \
         delete ktype;                                                                                           \

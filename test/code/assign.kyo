@@ -1,0 +1,152 @@
+// NAME TestSimpleAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: i32;
+    x = 5;
+    return x;
+}
+// SEP
+
+// NAME TestReAssignment
+// ERR 0
+// RET 12
+
+fn main() i32 {
+    var x: i32 = 5;
+    x = 12;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentAdd
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var x: i32;
+    x = 5 + 3;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentValueOutsideRange
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = 128;
+    return 0;
+}
+// SEP
+
+// NAME TestAssignmentAddOverflow
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = 100 + 100;
+    return 0;
+}
+// SEP
+
+// NAME TestAssignmentAddOverflow2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = 100 + 50 + 50;
+    return 0;
+}
+// SEP
+
+// NAME TestSimpleChainedAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 5;
+    return x;
+}
+// SEP
+
+// NAME TestChainedReAssignment
+// ERR 0
+// RET 24
+
+fn main() i32 {
+    var x: i32 = 5;
+    var y: i32 = 7;
+    x = y = 12;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentAdd
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 5 + 3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentVariable
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 5;
+    x = y = x + 3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentVariable
+// ERR 0
+// RET 6
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = 3;
+    x = y = z;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentVariable2
+// ERR 0
+// RET 6
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = 3;
+    x = y = z;
+    x = y = x + 3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentTrivialConversion
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = 5;
+    return y;
+}
