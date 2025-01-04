@@ -21,7 +21,7 @@ void print_usage(const std::string& prog, const po::options_description& desc)
 int run(int argc, const char* argv[])
 {
     po::options_description desc("The Kyoto Programming Language Compiler");
-    desc.add_options()("help,h", "Print this help message")(
+    desc.add_options()("help,h", "Print this help message")("run,r", "Run the program in `lli` after compilation")(
         "output,o", po::value<std::string>()->default_value("out.ll"), "Output file for the LLVM IR");
 
     po::positional_options_description pos;
@@ -61,13 +61,19 @@ int run(int argc, const char* argv[])
 
     auto output = vm["output"].as<std::string>();
     auto ir = compiler.gen_ir();
-    if (ir) {
-        std::ofstream ofs(output);
-        ofs << *ir;
-        return 0;
+
+    if (!ir) {
+        return 1;
     }
 
-    return 1;
+    std::ofstream ofs(output);
+    ofs << *ir;
+
+    if (vm.count("run")) {
+        return utils::File::execute_ir(*ir);
+    }
+
+    return 0;
 }
 
 int main(int argc, const char* argv[])
