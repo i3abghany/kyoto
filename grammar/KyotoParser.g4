@@ -11,7 +11,8 @@ topLevel: functionDefinition | fullDeclaration | cdecl;
 block: OPEN_BRACE statement* CLOSE_BRACE;
 
 statement:
-	expressionStatement
+	block
+	| expressionStatement
 	| declaration
 	| fullDeclaration
 	| ifStatement

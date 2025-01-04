@@ -47,25 +47,23 @@ llvm::Value* IfStatementNode::gen()
     auto* else_bb = llvm::BasicBlock::Create(compiler.get_context(), "else");
     auto* merge_bb = llvm::BasicBlock::Create(compiler.get_context(), "ifcont");
 
-    compiler.get_builder().CreateCondBr(cond_val, then_bb, else_bb);
+    compiler.get_builder().CreateCondBr(cond_val, then_bb, els ? else_bb : merge_bb);
 
     compiler.get_builder().SetInsertPoint(then_bb);
     then->gen();
 
-    if (!then_bb->getTerminator()) compiler.get_builder().CreateBr(merge_bb);
+    if (!then_bb->getTerminator()) {
+        compiler.get_builder().CreateBr(merge_bb);
+    }
 
-    then_bb = compiler.get_builder().GetInsertBlock();
-
-    fn->insert(fn->end(), else_bb);
-    compiler.get_builder().SetInsertPoint(else_bb);
-
-    if (els) els->gen();
+    if (els) {
+        fn->insert(fn->end(), else_bb);
+        compiler.get_builder().SetInsertPoint(else_bb);
+        els->gen();
+        if (!else_bb->getTerminator()) compiler.get_builder().CreateBr(merge_bb);
+    }
 
     if (auto* second_if = dynamic_cast<IfStatementNode*>(els); second_if) return nullptr;
-
-    if (!else_bb->getTerminator()) compiler.get_builder().CreateBr(merge_bb);
-
-    else_bb = compiler.get_builder().GetInsertBlock();
 
     fn->insert(fn->end(), merge_bb);
     compiler.get_builder().SetInsertPoint(merge_bb);

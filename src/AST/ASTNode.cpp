@@ -444,10 +444,19 @@ std::string BlockNode::to_string() const
 
 llvm::Value* BlockNode::gen()
 {
+    if (nodes.empty()) return nullptr;
+
+    auto* fn = compiler.get_builder().GetInsertBlock()->getParent();
+    auto* new_bb = llvm::BasicBlock::Create(compiler.get_context(), "block", fn);
+
+    compiler.get_builder().CreateBr(new_bb);
+    compiler.get_builder().SetInsertPoint(new_bb);
+
     compiler.push_scope();
 
-    for (auto* node : nodes)
+    for (auto* node : nodes) {
         node->gen();
+    }
 
     compiler.pop_scope();
     return nullptr;

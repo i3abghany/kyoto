@@ -1,13 +1,13 @@
 #include <gtest/gtest-message.h>
 #include <gtest/gtest-test-part.h>
 #include <gtest/gtest_pred_impl.h>
-#include <stdint.h>
 #include <optional>
+#include <stdint.h>
 #include <string>
 
-#include "kyoto/utils/Test.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/utils/File.h"
+#include "kyoto/utils/Test.h"
 
 namespace utils {
 
