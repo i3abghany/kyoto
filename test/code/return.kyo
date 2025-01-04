@@ -33,9 +33,9 @@ fn main() i32 {
 }
 // SEP
 
-// NAME ValidReturn
-// ERR 0
-// RET 42
+// NAME InvalidReturnType
+// ERR 1
+// RET 0
 
 fn main() i32 {
     var x: i8 = 41;
@@ -45,9 +45,9 @@ fn main() i32 {
 }
 // SEP
 
-// NAME ValidReturnAdd
-// ERR 0
-// RET 5
+// NAME InvalidReturnAdd
+// ERR 1
+// RET 0
 
 fn main() i32 {
     var x: i8 = 2;
@@ -57,9 +57,9 @@ fn main() i32 {
 }
 // SEP
 
-// NAME TrivialValidExtension
-// ERR 0
-// RET 42
+// NAME NontrivialExtension
+// ERR 1
+// RET 0
 
 fn main() i32 {
     var x: i8 = 41;
@@ -68,9 +68,9 @@ fn main() i32 {
 }
 // SEP
 
-// NAME TrivialValidTruncation
-// ERR 0
-// RET 10
+// NAME NontrivialTruncation
+// ERR 1
+// RET 0
 
 fn main() i32 {
     var x: i32 = 10;

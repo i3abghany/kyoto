@@ -140,13 +140,362 @@ fn main() i32 {
 }
 // SEP
 
-// NAME TestChainedAssignmentTrivialConversion
-// ERR 0
-// RET 5
+// NAME TestChainedAssignmentNontrivialConversion
+// ERR 1
+// RET 0
 
 fn main() i32 {
     var x: i32;
     var y: i8;
     x = y = 5;
+    return y;
+}
+// SEP
+
+// NAME TestChainedAssignmentNontrivialConversion2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = 5;
+    x = y = x + 3;
+    return y;
+}
+// SEP
+
+// NAME TestNegativeAssignment
+// ERR 0
+// RET -5
+
+fn main() i32 {
+    var x: i32;
+    x = -5;
+    return x;
+}
+// SEP
+
+// NAME TestNegativeReAssignment
+// ERR 0
+// RET -12
+
+fn main() i32 {
+    var x: i32 = -5;
+    x = -12;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentSubtraction
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32;
+    x = 5 - 3;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentMultiplication
+// ERR 0
+// RET 15
+
+fn main() i32 {
+    var x: i32;
+    x = 5 * 3;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentDivision
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32;
+    x = 6 / 3;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentModulo
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: i32;
+    x = 7 % 3;
+    return x;
+}
+// SEP
+
+// NAME TestAssignmentNegativeOverflow
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = -129;
+    return 0;
+}
+// SEP
+
+// NAME TestAssignmentNegativeOverflow2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = -128 - 1;
+    return 0;
+}
+// SEP
+
+// NAME TestAssignmentPositiveOverflow
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = 127 + 1;
+    return 0;
+}
+// SEP
+
+// NAME TestAssignmentPositiveOverflow2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8;
+    x = 128;
+    return 0;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegative
+// ERR 0
+// RET -5
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = -5;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegativeReAssignment
+// ERR 0
+// RET -24
+
+fn main() i32 {
+    var x: i32 = -5;
+    var y: i32 = -7;
+    x = y = -12;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegativeAdd
+// ERR 0
+// RET -8
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = -5 + -3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegativeVariable
+// ERR 0
+// RET -8
+// SKIP
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = -5;
+    x = y = x + -3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegativeVariable2
+// ERR 0
+// RET -6
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = -3;
+    x = y = z;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentNegativeVariable3
+// ERR 0
+// RET -6
+// SKIP
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = -3;
+    x = y = z;
+    x = y = x + -3;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentNontrivialConversionNegative
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = -5;
+    return y;
+}
+// SEP
+
+// NAME TestChainedAssignmentNontrivialConversionNegative2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = -5;
+    x = y = x + -3;
+    return y;
+}
+// SEP
+
+// NAME TestAssignmentZero
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    x = 0;
+    return x;
+}
+// SEP
+
+// NAME TestReAssignmentZero
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 5;
+    x = 0;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentZero
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 0;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentZeroReAssignment
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 5;
+    var y: i32 = 7;
+    x = y = 0;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentZeroAdd
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 0 + 0;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentZeroVariable
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    x = y = 0;
+    x = y = x + 0;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentZeroVariable2
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = 0;
+    x = y = z;
+    return x + y;
+}
+// SEP
+
+// NAME TestChainedAssignmentZeroVariable3
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i32;
+    var z: i32 = 0;
+    x = y = z;
+    x = y = x + 0;
+    return x;
+}
+// SEP
+
+// NAME TestChainedAssignmentNontrivialConversionZero
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = 0;
+    return y;
+}
+// SEP
+
+// NAME TestChainedAssignmentNontrivialConversionZero2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32;
+    var y: i8;
+    x = y = 0;
+    x = y = x + 0;
     return y;
 }
