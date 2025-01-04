@@ -33,10 +33,6 @@ expression:
 	| expression PERCENT expression #modulusExpression
 	| expression PLUS expression #additionExpression
 	| expression MINUS expression #subtractionExpression
-	| expression LESS_THAN expression #lessThanExpression
-	| expression LESS_THAN_OR_EQUAL expression #lessThanOrEqualExpression
-	| expression GREATER_THAN expression #greaterThanExpression
-	| expression GREATER_THAN_OR_EQUAL expression #greaterThanOrEqualExpression
 
 	| expression EQUALS expression #equalsExpression
 	| expression NOT_EQUALS expression #notEqualsExpression
