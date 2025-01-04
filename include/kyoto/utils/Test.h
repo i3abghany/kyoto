@@ -7,11 +7,12 @@ namespace utils {
 class TestCase {
 public:
     TestCase() = default;
-    TestCase(std::string name, std::string code, int32_t expected_return, bool error = false)
+    TestCase(std::string name, std::string code, int32_t expected_return, bool error = false, bool skip = false)
         : test_name(std::move(name))
         , kyoto_code(std::move(code))
         , expected_return(std::move(expected_return))
         , error(error)
+        , should_skip(skip)
     {
     }
 
@@ -19,6 +20,7 @@ public:
     std::string code() const { return kyoto_code; }
     int32_t ret() const { return expected_return; }
     bool err() const { return error; }
+    bool skip() const { return should_skip; }
 
     friend std::ostream& operator<<(std::ostream& os, const TestCase& test_case)
     {
@@ -34,6 +36,7 @@ private:
     std::string kyoto_code {};
     int32_t expected_return {};
     bool error {};
+    bool should_skip {};
 };
 
 }

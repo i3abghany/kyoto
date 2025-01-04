@@ -81,6 +81,7 @@ TestCase File::parse_test_case(const std::string& test_case)
     std::string code;
     int32_t expected_return = 0;
     bool error = false;
+    bool skip = false;
     std::string line;
     std::istringstream iss(test_case);
 
@@ -96,8 +97,12 @@ TestCase File::parse_test_case(const std::string& test_case)
     assert(line.starts_with("// RET "));
     expected_return = std::stoi(line.substr(6));
 
-    code = { std::istreambuf_iterator<char>(iss), {} };
-    return TestCase(name, code, expected_return, error);
+    std::getline(iss, line);
+    if (line.starts_with("// SKIP")) skip = true;
+    else code = line;
+
+    code += std::string { std::istreambuf_iterator<char>(iss), {} };
+    return TestCase(name, code, expected_return, error, skip);
 }
 
 }

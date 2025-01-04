@@ -20,6 +20,10 @@ protected:
 
 TEST_P(TestFunctionTermination, TestFunctionTermination)
 {
+    if (test_case.skip()) {
+        GTEST_SKIP();
+    }
+
     ModuleCompiler compiler(test_case.code());
     auto ir = compiler.gen_ir();
 
