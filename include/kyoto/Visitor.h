@@ -41,6 +41,9 @@ public:
     std::any visitEqualsExpression(kyoto::KyotoParser::EqualsExpressionContext* ctx) override;
     std::any visitNotEqualsExpression(kyoto::KyotoParser::NotEqualsExpressionContext* ctx) override;
 
+    std::any visitLogicalAndExpression(kyoto::KyotoParser::LogicalAndExpressionContext* ctx) override;
+    std::any visitLogicalOrExpression(kyoto::KyotoParser::LogicalOrExpressionContext* ctx) override;
+
     std::any visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx) override;
 
 private:

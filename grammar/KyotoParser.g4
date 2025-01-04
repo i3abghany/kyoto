@@ -37,18 +37,24 @@ expression:
 	| expression LESS_THAN_OR_EQUAL expression #lessThanOrEqualExpression
 	| expression GREATER_THAN expression #greaterThanExpression
 	| expression GREATER_THAN_OR_EQUAL expression #greaterThanOrEqualExpression
+
 	| expression EQUALS expression #equalsExpression
 	| expression NOT_EQUALS expression #notEqualsExpression
-	| expression comparisonOp expression #comparisonExpression
+	| expression LESS_THAN expression #lessThanExpression
+	| expression LESS_THAN_OR_EQUAL expression #lessThanOrEqualExpression
+	| expression GREATER_THAN expression #greaterThanExpression
+	| expression GREATER_THAN_OR_EQUAL expression #greaterThanOrEqualExpression
+
+	| expression LOGICAL_AND expression #logicalAndExpression
+	| expression LOGICAL_OR expression #logicalOrExpression
+
+	| expression logicalOp expression #logicalExpression
 	| <assoc=right> expression EQUAL expression #assignmentExpression
 	;
 
-comparisonOp:
-	LESS_THAN
-	| LESS_THAN_OR_EQUAL
-	| GREATER_THAN
-	| GREATER_THAN_OR_EQUAL
-	| EQUALS;
+logicalOp:
+	LOGICAL_AND
+	| LOGICAL_OR;
 
 number: INTEGER | FLOAT | TRUE | FALSE;
 

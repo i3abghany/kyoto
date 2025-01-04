@@ -20,6 +20,15 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_cmp(PrimitiveTyp
     return std::nullopt;
 }
 
+std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_logical(PrimitiveType::Kind lhs,
+                                                                        PrimitiveType::Kind rhs) const
+{
+    if (lhs == PrimitiveType::Kind::Boolean && rhs == PrimitiveType::Kind::Boolean) {
+        return PrimitiveType::Kind::Boolean;
+    }
+    return std::nullopt;
+}
+
 bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind to) const
 {
     auto pfrom = PrimitiveType(from);

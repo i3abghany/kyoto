@@ -23,6 +23,7 @@ set(SOURCES
     src/AST/ControlFlowNodes.cpp
     src/AST/ASTBinaryArithNode.cpp
     src/AST/ASTBinaryCmpNode.cpp
+    src/AST/ASTBinaryLogicalNode.cpp
     src/AST/NumberNode.cpp
     src/ModuleCompiler.cpp
     src/SymbolTable.cpp

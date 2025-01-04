@@ -215,6 +215,20 @@ std::any ASTBuilderVisitor::visitNotEqualsExpression(kyoto::KyotoParser::NotEqua
     return (ExpressionNode*)new NotEqNode(lhs, rhs, compiler);
 }
 
+std::any ASTBuilderVisitor::visitLogicalAndExpression(kyoto::KyotoParser::LogicalAndExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new LogicalAndNode(lhs, rhs, compiler);
+}
+
+std::any ASTBuilderVisitor::visitLogicalOrExpression(kyoto::KyotoParser::LogicalOrExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));
+    auto* rhs = std::any_cast<ExpressionNode*>(visit(ctx->children[2]));
+    return (ExpressionNode*)new LogicalOrNode(lhs, rhs, compiler);
+}
+
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)
 {
     return visit(ctx->expression());

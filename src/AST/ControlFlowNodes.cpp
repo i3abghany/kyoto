@@ -61,6 +61,8 @@ llvm::Value* IfStatementNode::gen()
 
     if (els) els->gen();
 
+    if (auto* second_if = dynamic_cast<IfStatementNode*>(els); second_if) return nullptr;
+
     if (!else_bb->getTerminator()) compiler.get_builder().CreateBr(merge_bb);
 
     else_bb = compiler.get_builder().GetInsertBlock();

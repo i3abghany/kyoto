@@ -15,6 +15,9 @@ GREATER_THAN_OR_EQUAL: '>=';
 EQUALS: '==';
 NOT_EQUALS: '!=';
 
+LOGICAL_AND: '&&';
+LOGICAL_OR: '||';
+
 PLUS: '+';
 MINUS: '-';
 ASTERISK: '*';
