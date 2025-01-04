@@ -84,15 +84,18 @@
         return lhs->is_trivially_evaluable() && rhs->is_trivially_evaluable(); \
     }
 
-#define ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL(name, op, llvm_op) \
-    ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                \
-    llvm::Value* name::trivial_gen()                              \
-    {                                                             \
-        return nullptr;                                           \
-    }                                                             \
-    bool name::is_trivially_evaluable() const                     \
-    {                                                             \
-        return false;                                             \
+#define ARITH_BINARY_NODE_IMPL_NO_TRIVIAL_EVAL(name, op, llvm_op)              \
+    ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                             \
+    llvm::Value* name::trivial_gen()                                           \
+    {                                                                          \
+        assert(is_trivially_evaluable());                                      \
+        auto* lhs_val = lhs->trivial_gen();                                    \
+        auto* rhs_val = rhs->trivial_gen();                                    \
+        return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");    \
+    }                                                                          \
+    bool name::is_trivially_evaluable() const                                  \
+    {                                                                          \
+        return lhs->is_trivially_evaluable() && rhs->is_trivially_evaluable(); \
     }
 
 ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(MulNode, *, CreateMul);

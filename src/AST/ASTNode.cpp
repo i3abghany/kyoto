@@ -263,7 +263,11 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
         return trivial;
     }
 
-    return dynamic_integer_conversion(expr->gen(), &expr_ktype, target_type, compiler);
+    if (is_compatible) {
+        return dynamic_integer_conversion(expr->gen(), &expr_ktype, target_type, compiler);
+    }
+
+    assert(false && "Unreachable");
 }
 
 llvm::Value* FullDeclarationStatementNode::gen()
@@ -305,12 +309,8 @@ llvm::Value* AssignmentNode::gen()
     auto symbol = symbol_opt.value();
     auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
     auto* ltype = get_llvm_type(type.get(), compiler.get_context());
-    // auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
-
     compiler.get_builder().CreateStore(expr_val, symbol.alloc);
-    // compiler.get_builder().CreateStore(expr_val, alloca);
-    // compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type.get())->get_kind()));
 
     return expr_val;
 }
@@ -322,12 +322,23 @@ llvm::Type* AssignmentNode::get_type(llvm::LLVMContext& context) const
 
 llvm::Value* AssignmentNode::trivial_gen()
 {
-    return nullptr;
+    auto symbol_opt = compiler.get_symbol(name);
+    if (!symbol_opt.has_value()) {
+        assert(false && "Unknown symbol");
+    }
+
+    auto symbol = symbol_opt.value();
+    auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
+    auto* ltype = get_llvm_type(type.get(), compiler.get_context());
+    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
+    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
+
+    return expr_val;
 }
 
 bool AssignmentNode::is_trivially_evaluable() const
 {
-    return false;
+    return expr->is_trivially_evaluable();
 }
 
 ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
@@ -380,6 +391,29 @@ llvm::Value* UnaryNode::gen()
     else if (op == "+") return expr_val;
 
     return nullptr;
+}
+
+llvm::Value* UnaryNode::trivial_gen()
+{
+    assert(is_trivially_evaluable() && "Expression is not trivially evaluable");
+    auto* expr_val = expr->trivial_gen();
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (op == "-") {
+        auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
+        assert(constant_int && "Trivial value must be a constant int");
+        return llvm::ConstantInt::get(expr_ltype, -constant_int->getSExtValue(), true);
+    } else if (op == "+") {
+        return expr_val;
+    } else {
+        assert(false && "Unknown unary operator");
+    }
+}
+
+bool UnaryNode::is_trivially_evaluable() const
+{
+    return expr->is_trivially_evaluable();
 }
 
 llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
