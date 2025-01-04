@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 
 namespace utils {
@@ -38,5 +39,7 @@ private:
     bool error {};
     bool should_skip {};
 };
+
+void test_driver(const TestCase& test_case);
 
 }

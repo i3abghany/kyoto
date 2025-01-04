@@ -43,6 +43,7 @@ target_link_libraries(kyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::f
 add_executable(
     ktest
     ${SOURCES}
+    test/TestDriver.cpp
     test/TestReturn.cpp
     test/TestFunctionTermination.cpp
     test/TestAssignment.cpp

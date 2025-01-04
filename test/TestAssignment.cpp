@@ -1,13 +1,8 @@
-#include <gtest/gtest-message.h>
 #include <gtest/gtest-param-test.h>
-#include <gtest/gtest-test-part.h>
-#include <gtest/gtest_pred_impl.h>
-#include <optional>
-#include <stdint.h>
+#include <gtest/gtest.h>
 #include <string>
 #include <vector>
 
-#include "kyoto/ModuleCompiler.h"
 #include "kyoto/utils/File.h"
 #include "kyoto/utils/Test.h"
 
@@ -20,20 +15,7 @@ protected:
 
 TEST_P(TestAssignment, TestAssignment)
 {
-    if (test_case.skip()) {
-        GTEST_SKIP();
-    }
-
-    ModuleCompiler compiler(test_case.code());
-    auto ir = compiler.gen_ir();
-
-    if (test_case.err()) {
-        EXPECT_FALSE(ir.has_value());
-    } else {
-        EXPECT_TRUE(ir.has_value());
-        int32_t ret = utils::File::execute_ir(ir.value());
-        EXPECT_EQ(ret, test_case.ret());
-    }
+    utils::test_driver(test_case);
 }
 
 static auto generate_test_cases()
