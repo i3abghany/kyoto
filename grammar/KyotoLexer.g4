@@ -66,6 +66,8 @@ VAR: 'var';
 IF: 'if';
 ELSE: 'else';
 
+FOR: 'for';
+
 // This has to be defined after all the keywords because it will match all of
 // them if defined first.
 IDENTIFIER: LETTER (LETTER | [0-9])*;

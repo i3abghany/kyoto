@@ -248,6 +248,33 @@ std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementCont
     return (ASTNode*)new IfStatementNode(condition, then_node, else_node, compiler);
 }
 
+std::any ASTBuilderVisitor::visitForInit(kyoto::KyotoParser::ForInitContext* ctx)
+{
+    if (ctx->fullDeclaration()) return visit(ctx->fullDeclaration());
+    if (ctx->expressionStatement()) return visit(ctx->expressionStatement());
+    return nullptr;
+}
+
+std::any ASTBuilderVisitor::visitForCondition(kyoto::KyotoParser::ForConditionContext* ctx)
+{
+    return (ExpressionStatementNode*)std::any_cast<ASTNode*>(visit(ctx->expressionStatement()));
+}
+
+std::any ASTBuilderVisitor::visitForUpdate(kyoto::KyotoParser::ForUpdateContext* ctx)
+{
+    return visit(ctx->expression());
+}
+
+std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementContext* ctx)
+{
+
+    auto* init = std::any_cast<ASTNode*>(visit(ctx->forInit()));
+    auto* condition = std::any_cast<ExpressionStatementNode*>(visit(ctx->forCondition()));
+    auto* update = std::any_cast<ExpressionNode*>(visit(ctx->forUpdate()));
+    auto* body = std::any_cast<ASTNode*>(visit(ctx->block()));
+    return (ASTNode*)new ForStatementNode(init, condition, update, body, compiler);
+}
+
 PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type) const
 {
     if (type == "bool") return PrimitiveType::Kind::Boolean;

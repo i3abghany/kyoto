@@ -70,3 +70,32 @@ llvm::Value* IfStatementNode::gen()
 
     return nullptr;
 }
+
+ForStatementNode::ForStatementNode(ASTNode* init, ExpressionStatementNode* condition, ExpressionNode* update,
+                                   ASTNode* body, ModuleCompiler& compiler)
+    : init(init)
+    , condition(condition)
+    , update(update)
+    , body(body)
+    , compiler(compiler)
+{
+}
+
+ForStatementNode::~ForStatementNode()
+{
+    delete init;
+    delete condition;
+    delete update;
+    delete body;
+}
+
+std::string ForStatementNode::to_string() const
+{
+    return fmt::format("ForStatement({}, {}, {}, {})", init->to_string(), condition->to_string(), update->to_string(),
+                       body->to_string());
+}
+
+llvm::Value* ForStatementNode::gen()
+{
+    return nullptr;
+}

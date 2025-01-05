@@ -20,3 +20,20 @@ private:
     ASTNode* els;
     ModuleCompiler& compiler;
 };
+
+class ForStatementNode : public ASTNode {
+public:
+    ForStatementNode(ASTNode* init, ExpressionStatementNode* condition, ExpressionNode* update, ASTNode* body,
+                     ModuleCompiler& compiler);
+    ~ForStatementNode();
+
+    [[nodiscard]] std::string to_string() const override;
+    [[nodiscard]] llvm::Value* gen() override;
+
+private:
+    ASTNode* init;
+    ExpressionStatementNode* condition;
+    ExpressionNode* update;
+    ASTNode* body;
+    ModuleCompiler& compiler;
+};

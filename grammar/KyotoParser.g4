@@ -16,6 +16,7 @@ statement:
 	| declaration
 	| fullDeclaration
 	| ifStatement
+	| forStatement
 	| returnStatement
 	;
 
@@ -63,6 +64,25 @@ returnStatement: RETURN expression SEMICOLON;
 
 ifStatement: IF LPAREN expression RPAREN block (ELSE block)?
 			| IF LPAREN expression RPAREN block (ELSE ifStatement)?;
+
+forStatement: FOR LPAREN forInit forCondition forUpdate RPAREN block;
+
+forInit:
+	fullDeclaration
+	| expressionStatement
+	| SEMICOLON
+	;
+
+forCondition:
+	expressionStatement
+	| SEMICOLON
+	;
+
+forUpdate:
+	expression
+	|
+	;
+
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

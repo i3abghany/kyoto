@@ -70,6 +70,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    [[nodiscard]] ExpressionNode* get_expr() const { return expr; }
+
 private:
     ExpressionNode* expr;
     ModuleCompiler& compiler;
@@ -167,6 +169,8 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+
+    [[nodiscard]] const std::vector<ASTNode*>& get_nodes() const { return nodes; }
 
 private:
     std::vector<ASTNode*> nodes;
