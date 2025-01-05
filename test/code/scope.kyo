@@ -1,0 +1,143 @@
+// NAME TestSimpleNoScopes
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: i32 = 1;
+    return x;
+}
+// SEP
+
+// NAME TestSimpleOneScope
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 2;
+        return x;
+    }
+    return x;
+}
+// SEP
+
+// NAME TestSimpleTwoScopes
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 2;
+        {
+            var x: i32 = 3;
+            return x;
+        }
+    }
+}
+// SEP
+
+// NAME TestReturnInNestedScope
+// ERR 0
+// RET 6
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 2;
+        {
+            var x: i32 = 3;
+            {
+                var x: i32 = 4;
+                {
+                    var x: i32 = 6;
+                    return x;
+                }
+            }
+        }
+    }
+    return x;
+}
+// SEP
+
+// NAME TestReturnIntermediateScope
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 2;
+        {
+            var x: i32 = 3;
+            {
+                var x: i32 = 4;
+                {
+                    var x: i32 = 6;
+                }
+                return x;
+            }
+        }
+    }
+    return x;
+}
+// SEP
+
+// NAME TestMultipleReturnsWithIf
+// ERR 0
+// RET 7
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 2;
+        if (x == 2) {
+            return 7;
+        }
+        return x;
+    }
+    return x;
+}
+// SEP
+
+// NAME TestEarlyReturn
+// ERR 0
+// RET 50
+
+fn main() i32 {
+    var x: i32 = 1;
+    {
+        var x: i32 = 50;
+        return x;
+        var y: i32 = 100;
+    }
+    return x;
+}
+// SEP
+
+// NAME TestVariableReuse
+// ERR 0
+// RET 30
+
+fn main() i32 {
+    {
+        var x: i32 = 20;
+    }
+    var x: i32 = 30;
+    return x;
+}
+// SEP
+
+// NAME TestScopeWithCondition
+// ERR 0
+// RET 25
+
+fn main() i32 {
+    var x: i32 = 10;
+    if (x > 5) {
+        var x: i32 = 25;
+        return x;
+    }
+    return x;
+}

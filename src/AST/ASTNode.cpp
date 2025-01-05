@@ -456,6 +456,8 @@ llvm::Value* BlockNode::gen()
 
     for (auto* node : nodes) {
         node->gen();
+        auto* last_bb = compiler.get_builder().GetInsertBlock();
+        if (last_bb->getTerminator()) break;
     }
 
     compiler.pop_scope();

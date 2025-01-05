@@ -49,6 +49,7 @@ add_executable(
     test/TestAssignment.cpp
     test/TestIfStatement.cpp
     test/TestLogical.cpp
+    test/TestScope.cpp
 )
 
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
