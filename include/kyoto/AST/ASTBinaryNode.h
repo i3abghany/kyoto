@@ -22,7 +22,7 @@ class Value;
         llvm::Value* gen() override;                                              \
         llvm::Type* get_type(llvm::LLVMContext& context) const override;          \
         llvm::Value* trivial_gen() override;                                      \
-        bool is_trivially_evaluable() const;                                      \
+        bool is_trivially_evaluable() const override;                             \
     }
 
 BINARY_NODE_INTERFACE(AddNode);
