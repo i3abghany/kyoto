@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 
@@ -8,16 +9,17 @@ class ModuleCompiler;
 
 class IfStatementNode : public ASTNode {
 public:
-    IfStatementNode(ExpressionNode* condition, ASTNode* then_node, ASTNode* else_node, ModuleCompiler& compiler);
+    IfStatementNode(std::vector<ExpressionNode*> conditions, std::vector<ASTNode*> bodies, ModuleCompiler& compiler);
     ~IfStatementNode();
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    bool has_else() const { return conditions.size() != bodies.size(); }
+
 private:
-    ExpressionNode* condition;
-    ASTNode* then;
-    ASTNode* els;
+    std::vector<ExpressionNode*> conditions;
+    std::vector<ASTNode*> bodies;
     ModuleCompiler& compiler;
 };
 

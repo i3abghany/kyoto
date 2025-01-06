@@ -1,13 +1,12 @@
 #include "kyoto/Analysis/FunctionTermination.h"
 
-#include "kyoto/ModuleCompiler.h"
+#include <vector>
+
 #include "llvm/ADT/ilist_iterator.h"
+#include "llvm/Analysis/CFG.h"
 #include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/CFG.h"
 #include "llvm/IR/Function.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/Instruction.h"
 
 FunctionTerminationPass::FunctionTerminationPass(ModuleCompiler& compiler)
     : compiler(compiler)
@@ -20,39 +19,63 @@ llvm::PreservedAnalyses FunctionTerminationPass::run(llvm::Function& func, llvm:
     return llvm::PreservedAnalyses::all();
 }
 
-bool FunctionTerminationPass::is_basic_block_unreachable(llvm::BasicBlock& bb)
+void remove_unreachable_blocks(llvm::Function& func)
 {
-    if (&bb == &bb.getParent()->getEntryBlock()) {
-        return false;
+    std::vector<llvm::BasicBlock*> unreachable_bbs;
+    for (auto& bb : func) {
+        if (&bb == &func.getEntryBlock()) continue;
+        if (llvm::isPotentiallyReachable(&func.getEntryBlock(), &bb)) continue;
+
+        unreachable_bbs.push_back(&bb);
     }
 
-    for (auto* pred : llvm::predecessors(&bb)) {
-        if (auto* term = pred->getTerminator(); !llvm::isa<llvm::ReturnInst>(term)) {
-            return false;
+    for (auto* bb : unreachable_bbs) {
+        while (!bb->empty()) {
+            auto& i = bb->back();
+            i.eraseFromParent();
+        }
+        bb->eraseFromParent();
+    }
+}
+
+bool has_multiple_terminators(llvm::BasicBlock& bb)
+{
+    int count = 0;
+    for (auto& i : bb) {
+        if (i.isTerminator()) {
+            count++;
+            if (count > 1) return true;
         }
     }
+    return false;
+}
 
-    return true;
+void ensure_single_terminator(llvm::BasicBlock& bb)
+{
+    if (!has_multiple_terminators(bb)) return;
+
+    llvm::Instruction* first_terminator = nullptr;
+    std::vector<llvm::Instruction*> to_remove;
+
+    for (auto& i : bb) {
+        if (first_terminator) {
+            to_remove.push_back(&i);
+            continue;
+        }
+
+        if (i.isTerminator()) first_terminator = &i;
+    }
+
+    for (auto& i : to_remove) {
+        i->eraseFromParent();
+    }
 }
 
 void FunctionTerminationPass::verify_function_termination(llvm::Function& func)
 {
-    bool has_error = false;
+    remove_unreachable_blocks(func);
+
     for (auto& bb : func) {
-        auto* term = bb.getTerminator();
-        if (term && (llvm::isa<llvm::BranchInst>(term) || llvm::isa<llvm::ReturnInst>(term))) {
-            continue;
-        }
-
-        if (is_basic_block_unreachable(bb)) {
-            compiler.insert_dummy_return(bb);
-            continue;
-        }
-        llvm::errs() << "Function " << func.getName() << " does not terminate properly\n";
-        has_error = true;
-    }
-
-    if (has_error) {
-        compiler.set_fn_termination_error();
+        ensure_single_terminator(bb);
     }
 }

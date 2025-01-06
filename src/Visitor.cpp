@@ -236,16 +236,33 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
 
 std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)
 {
-    auto* condition = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
-    auto* then_node = std::any_cast<ASTNode*>(visit(ctx->block(0)));
-    ASTNode* else_node = nullptr;
+    std::vector<ExpressionNode*> conditions;
+    std::vector<ASTNode*> bodies;
 
-    if (ctx->ELSE()) {
-        else_node = ctx->ifStatement() ? std::any_cast<ASTNode*>(visit(ctx->ifStatement()))
-                                       : std::any_cast<ASTNode*>(visit(ctx->block(1)));
+    conditions.push_back(std::any_cast<ExpressionNode*>(visit(ctx->expression())));
+    bodies.push_back(std::any_cast<ASTNode*>(visit(ctx->block())));
+
+    kyoto::KyotoParser::ElseIfElseStatementContext* else_if_else = ctx->elseIfElseStatement();
+
+    while (true) {
+        auto* else_if = dynamic_cast<kyoto::KyotoParser::ElseIfStatementContext*>(else_if_else);
+        if (else_if) {
+            conditions.push_back(std::any_cast<ExpressionNode*>(visit(else_if->expression())));
+            bodies.push_back(std::any_cast<ASTNode*>(visit(else_if->block())));
+            else_if_else = else_if->elseIfElseStatement();
+            continue;
+        }
+
+        auto* else_stmt = dynamic_cast<kyoto::KyotoParser::ElseStatementContext*>(else_if_else);
+
+        if (else_stmt) {
+            if (auto* block = else_stmt->optionalElseStatement()->block(); block)
+                bodies.push_back(std::any_cast<ASTNode*>(visit(block)));
+            break;
+        }
     }
 
-    return (ASTNode*)new IfStatementNode(condition, then_node, else_node, compiler);
+    return (ASTNode*)new IfStatementNode(conditions, bodies, compiler);
 }
 
 std::any ASTBuilderVisitor::visitForInit(kyoto::KyotoParser::ForInitContext* ctx)

@@ -5,6 +5,7 @@
 #include <exception>
 #include <iostream>
 #include <utility>
+#include <stdexcept>
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
@@ -82,21 +83,12 @@ void ModuleCompiler::ensure_main_fn()
 {
     auto* main_fn = module->getFunction("main");
     if (!main_fn) {
-        std::cerr << "Couldn't find main function\n";
-        std::exit(1);
+        throw std::runtime_error("Main function not found");
     }
 
     if (!main_fn->getReturnType()->isIntegerTy(32)) {
         main_fn->getReturnType()->dump();
-        std::cerr << "Error: main function must return an i32\n";
-        std::exit(1);
-    }
-
-    auto* last_bb = &main_fn->back();
-    auto* term = last_bb->getTerminator();
-    if (!term) {
-        builder.SetInsertPoint(last_bb);
-        builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(32, 0)));
+        throw std::runtime_error("Main function must return an `i32`");
     }
 }
 
@@ -120,6 +112,11 @@ void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
     }
 }
 
+llvm::BasicBlock* ModuleCompiler::create_basic_block(const std::string& name)
+{
+    return llvm::BasicBlock::Create(context, name, builder.GetInsertBlock()->getParent());
+}
+
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
     auto program = std::unique_ptr<ASTNode>(parse_program());
@@ -134,8 +131,11 @@ std::optional<std::string> ModuleCompiler::gen_ir()
 
     llvm_pass();
 
-    if (!fn_termination_error) {
+    try {
         ensure_main_fn();
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return std::nullopt;
     }
 
     std::string llvm_err;
@@ -186,11 +186,6 @@ void ModuleCompiler::pop_fn_return_type()
 KType* ModuleCompiler::get_fn_return_type() const
 {
     return curr_fn_ret_type;
-}
-
-void ModuleCompiler::set_fn_termination_error()
-{
-    fn_termination_error = true;
 }
 
 size_t ModuleCompiler::n_scopes() const

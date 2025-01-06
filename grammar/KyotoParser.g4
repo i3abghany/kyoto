@@ -62,8 +62,17 @@ declaration: VAR IDENTIFIER COLON type SEMICOLON;
 
 returnStatement: RETURN expression SEMICOLON;
 
-ifStatement: IF LPAREN expression RPAREN block (ELSE block)?
-			| IF LPAREN expression RPAREN block (ELSE ifStatement)?;
+ifStatement: IF LPAREN expression RPAREN block elseIfElseStatement;
+
+elseIfElseStatement:
+	ELSE IF LPAREN expression RPAREN block elseIfElseStatement #elseIfStatement
+	| optionalElseStatement #elseStatement
+	;
+
+optionalElseStatement:
+	ELSE block
+	| /* empty */
+	;
 
 forStatement: FOR LPAREN forInit forCondition forUpdate RPAREN block;
 

@@ -43,8 +43,8 @@ public:
     void pop_fn_return_type();
     KType* get_fn_return_type() const;
 
-    void set_fn_termination_error();
     void insert_dummy_return(llvm::BasicBlock& bb);
+    llvm::BasicBlock* create_basic_block(const std::string& name);
 
     size_t n_scopes() const;
 
