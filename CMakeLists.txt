@@ -12,7 +12,13 @@ include(cmake/SetupLLVM.cmake)
 include(cmake/SetupANTLR.cmake)
 include(cmake/SetupGTest.cmake)
 include(cmake/SetupBoost.cmake)
-find_package(fmt CONFIG REQUIRED)
+
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
+# find_package(fmt CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${ANTLR4_INCLUDE_DIRS})
