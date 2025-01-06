@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 

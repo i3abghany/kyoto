@@ -1,7 +1,6 @@
 #include "kyoto/AST/ControlFlowNodes.h"
 
 #include <fmt/core.h>
-#include <iostream>
 #include <stddef.h>
 #include <stdexcept>
 #include <utility>
@@ -11,6 +10,8 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/Support/Casting.h"
 
 IfStatementNode::IfStatementNode(std::vector<ExpressionNode*> conditions, std::vector<ASTNode*> bodies,
                                  ModuleCompiler& compiler)

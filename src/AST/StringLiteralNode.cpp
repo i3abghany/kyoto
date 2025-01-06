@@ -1,8 +1,12 @@
 #include "kyoto/AST/StringLiteralNode.h"
 
 #include <fmt/core.h>
+#include <utility>
 
 #include "kyoto/ModuleCompiler.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/IRBuilder.h"
 
 StringLiteralNode::StringLiteralNode(std::string value, ModuleCompiler& compiler)
     : value(std::move(value))

@@ -1,6 +1,5 @@
 #pragma once
 
-// #include "llvm/IR/Analysis.h"
 #include "llvm/IR/PassManager.h"
 
 class ModuleCompiler;
