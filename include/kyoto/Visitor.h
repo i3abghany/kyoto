@@ -21,6 +21,7 @@ public:
     std::any visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
 
+    std::any visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx) override;
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;

@@ -26,6 +26,7 @@ public:
     bool is_boolean() const;
     bool is_numeric() const;
     bool is_char() const;
+    bool is_string() const;
 
     size_t width() const;
 

@@ -20,6 +20,7 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 set(SOURCES
     src/Visitor.cpp
     src/AST/ASTNode.cpp
+    src/AST/StringLiteralNode.cpp
     src/AST/ControlFlowNodes.cpp
     src/AST/ASTBinaryArithNode.cpp
     src/AST/ASTBinaryCmpNode.cpp

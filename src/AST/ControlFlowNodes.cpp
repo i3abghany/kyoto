@@ -166,7 +166,6 @@ llvm::Value* ForStatementNode::gen()
 
     if (condition) {
         compiler.get_builder().SetInsertPoint(cond_bb);
-        std::cout << "Condition: " << condition->to_string() << std::endl;
         auto* cond_val = condition->gen();
         compiler.get_builder().CreateCondBr(cond_val, body_bb, out_bb);
     }

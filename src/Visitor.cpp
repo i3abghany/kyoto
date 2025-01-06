@@ -13,6 +13,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ControlFlowNodes.h"
 #include "kyoto/AST/NumberNode.h"
+#include "kyoto/AST/StringLiteralNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"
@@ -114,6 +115,12 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
 {
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new ReturnStatementNode(expr, compiler);
+}
+
+std::any ASTBuilderVisitor::visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx)
+{
+    auto txt = ctx->getText();
+    return (ExpressionNode*)new StringLiteralNode(txt.substr(1, txt.size() - 2), compiler);
 }
 
 std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx)

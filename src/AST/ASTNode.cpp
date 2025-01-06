@@ -56,6 +56,7 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context
     case PrimitiveType::Kind::Void:
         return llvm::Type::getVoidTy(context);
     case PrimitiveType::Kind::String:
+        return llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
     case PrimitiveType::Kind::Unknown:
         assert(false && "Unsupported type");
     }
@@ -279,7 +280,19 @@ llvm::Value* FullDeclarationStatementNode::gen()
 
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
+
+    auto* ktype = dynamic_cast<PrimitiveType*>(type);
+    llvm::Value* expr_val = nullptr;
+    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+    if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
+        expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
+    } else if (ktype->is_string() && pt.is_string()) {
+        expr_val = expr->gen();
+    } else {
+        throw std::runtime_error(
+            fmt::format("Type of expression `{}` does not match the type of the variable `{}` of type `{}`",
+                        expr->to_string(), name, type->to_string()));
+    }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type)->get_kind()));
@@ -313,8 +326,20 @@ llvm::Value* AssignmentNode::gen()
 
     auto symbol = symbol_opt.value();
     auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
-    auto* ltype = get_llvm_type(type.get(), compiler.get_context());
-    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
+
+    auto* ktype = dynamic_cast<PrimitiveType*>(type.get());
+    llvm::Value* expr_val = nullptr;
+    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+    if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
+        expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
+    } else if (ktype->is_string() && pt.is_string()) {
+        expr_val = expr->gen();
+    } else {
+        throw std::runtime_error(
+            fmt::format("Type of expression `{}` does not match the type of the variable `{}` of type `{}`",
+                        expr->to_string(), name, type->to_string()));
+    }
+
     compiler.get_builder().CreateStore(expr_val, symbol.alloc);
 
     return expr_val;
