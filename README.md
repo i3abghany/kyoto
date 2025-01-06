@@ -15,7 +15,7 @@ The Kyoto Compiler requires the following dependencies:
 To install the dependencies on Ubuntu, run the following commands:
 
 ```bash
-$ sudo apt-get install llvm-20-dev cmake antlr4 libboost-all-dev gcc-11 g++-11
+$ sudo apt-get install llvm-19-dev cmake antlr4 libboost1.74-all-dev gcc-11 g++-11 libfmt-dev
 ```
 
 To build the compiler, run the following commands:
