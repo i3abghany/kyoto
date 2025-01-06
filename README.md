@@ -37,5 +37,6 @@ $ ./kyoto --help
 Usage: ./kyoto [OPTIONS] INPUT_FILE
 The Kyoto Programming Language Compiler:
   -h [ --help ]                 Print this help message
+  -r [ --run ]                  Run the program in `lli` after compilation
   -o [ --output ] arg (=out.ll) Output file for the LLVM IR
 ```
