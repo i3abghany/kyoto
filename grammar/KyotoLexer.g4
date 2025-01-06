@@ -52,7 +52,7 @@ I32: 'i32';
 I64: 'i64';
 F32: 'f32';
 F64: 'f64';
-STRING: 'string';
+STRING: 'str';
 VOID: 'void';
 
 FN: 'fn';

@@ -582,7 +582,7 @@ fn main() i32 {
 // RET 5
 
 fn main() i32 {
-    var x: string = "hello";
+    var x: str = "hello";
     return 5;
 }
 // SEP
@@ -602,7 +602,7 @@ fn main() i32 {
 // RET 5
 
 fn main() i32 {
-    var x: string;
+    var x: str;
     x = "hello";
     return 5;
 }
@@ -613,7 +613,7 @@ fn main() i32 {
 // RET 5
 
 fn main() i32 {
-    var x: string = "hello";
+    var x: str = "hello";
     var y = x = "world";
     return 5;
 }
@@ -644,7 +644,7 @@ fn main() i32 {
 // RET 0
 
 fn main() i32 {
-    var x: string = 5;
+    var x: str = 5;
     return 5;
 }
 // SEP
@@ -654,7 +654,7 @@ fn main() i32 {
 // RET 0
 
 fn main() i32 {
-    var x: string = true;
+    var x: str = true;
     return 5;
 }
 // SEP
@@ -664,7 +664,7 @@ fn main() i32 {
 // RET 0
 
 fn main() i32 {
-    var x: string = "hello";
+    var x: str = "hello";
     x = 5;
     return 5;
 }
@@ -674,7 +674,7 @@ fn main() i32 {
 // RET 0
 
 fn main() i32 {
-    var x: string = "hello";
+    var x: str = "hello";
     x = true;
     return 5;
 }

@@ -331,7 +331,7 @@ PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& t
     if (type == "i64") return PrimitiveType::Kind::I64;
     if (type == "f32") return PrimitiveType::Kind::F32;
     if (type == "f64") return PrimitiveType::Kind::F64;
-    if (type == "string") return PrimitiveType::Kind::String;
+    if (type == "str") return PrimitiveType::Kind::String;
     if (type == "void") return PrimitiveType::Kind::Void;
     return PrimitiveType::Kind::Unknown;
 }
