@@ -6,7 +6,7 @@ This is the repository for the Kyoto Compiler for the Kyoto Programming Language
 
 The Kyoto Compiler requires the following dependencies:
 
-- LLVM >= 19
+- LLVM >= 20
 - CMake >= 3.20
 - Java >= 8
 - antlr == 4.13.2
@@ -16,7 +16,7 @@ The Kyoto Compiler requires the following dependencies:
 To install the dependencies on Ubuntu, run the following commands:
 
 ```bash
-$ sudo apt-get install llvm-19-dev cmake default-jre libboost1.74-all-dev gcc-11 g++-11 libfmt-dev
+$ sudo apt-get install llvm-20-dev cmake default-jre libboost1.74-all-dev gcc-11 g++-11 libfmt-dev
 ```
 
 Antlr 4.13.2 can be installed from the official website's mirror as follows:

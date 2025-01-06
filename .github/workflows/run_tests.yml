@@ -20,6 +20,8 @@ jobs:
     - name: Install LLVM
       run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20 all
 
+    # This may be a little excessive but works for the purposes of CI. This
+    # helps Boost pick the correct header files as libstdc++ and libc++ conflict.
     - name: Remove libc++
       run: sudo apt purge libc++*
 
