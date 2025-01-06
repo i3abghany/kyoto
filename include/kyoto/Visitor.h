@@ -12,6 +12,7 @@ class ASTBuilderVisitor : public kyoto::KyotoParserBaseVisitor {
 public:
     ASTBuilderVisitor(ModuleCompiler& compiler);
     std::any visitProgram(kyoto::KyotoParser::ProgramContext* ctx) override;
+    std::any visitCdecl(kyoto::KyotoParser::CdeclContext* ctx) override;
     std::any visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx) override;
     std::any visitBlock(kyoto::KyotoParser::BlockContext* ctx) override;
     std::any visitExpressionStatement(kyoto::KyotoParser::ExpressionStatementContext* ctx) override;
@@ -21,6 +22,7 @@ public:
     std::any visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
 
+    std::any visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx) override;
     std::any visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx) override;
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;

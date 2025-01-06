@@ -132,7 +132,7 @@ llvm::Value* IdentifierExpressionNode::gen()
 {
     auto symbol_opt = compiler.get_symbol(name);
     if (!symbol_opt.has_value()) {
-        assert(false && "Unknown symbol");
+        throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
     }
     auto symbol = symbol_opt.value();
     return compiler.get_builder().CreateLoad(symbol.alloc->getAllocatedType(), symbol.alloc, name);
@@ -142,7 +142,7 @@ llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
 {
     auto symbol = compiler.get_symbol(name);
     if (!symbol.has_value()) {
-        assert(false && "Unknown symbol");
+        throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
     }
     auto stored_type = symbol.value().kind;
     return symbol.value().alloc->getAllocatedType();
@@ -290,8 +290,8 @@ llvm::Value* FullDeclarationStatementNode::gen()
         expr_val = expr->gen();
     } else {
         throw std::runtime_error(
-            fmt::format("Type of expression `{}` does not match the type of the variable `{}` of type `{}`",
-                        expr->to_string(), name, type->to_string()));
+            fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                        expr->to_string(), pt.to_string(), name, type->to_string()));
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
@@ -321,7 +321,7 @@ llvm::Value* AssignmentNode::gen()
 {
     auto symbol_opt = compiler.get_symbol(name);
     if (!symbol_opt.has_value()) {
-        assert(false && "Unknown symbol");
+        throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
     }
 
     auto symbol = symbol_opt.value();
@@ -336,8 +336,8 @@ llvm::Value* AssignmentNode::gen()
         expr_val = expr->gen();
     } else {
         throw std::runtime_error(
-            fmt::format("Type of expression `{}` does not match the type of the variable `{}` of type `{}`",
-                        expr->to_string(), name, type->to_string()));
+            fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                        expr->to_string(), pt.to_string(), name, type->to_string()));
     }
 
     compiler.get_builder().CreateStore(expr_val, symbol.alloc);
@@ -486,10 +486,11 @@ llvm::Value* BlockNode::gen()
     return nullptr;
 }
 
-FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, ASTNode* body,
-                           ModuleCompiler& compiler)
+FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, bool varargs, KType* ret_type,
+                           ASTNode* body, ModuleCompiler& compiler)
     : name(name)
     , args(std::move(args))
+    , varargs(varargs)
     , ret_type(ret_type)
     , body(body)
     , compiler(compiler)
@@ -516,12 +517,16 @@ std::string FunctionNode::to_string() const
 llvm::Value* FunctionNode::gen()
 {
     auto* return_ltype = get_llvm_type(ret_type, compiler.get_context());
-    auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), false);
+    auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
     auto* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
+
+    if (body == nullptr) return func;
+
     auto* entry = llvm::BasicBlock::Create(compiler.get_context(), "func_entry", func);
     compiler.get_builder().SetInsertPoint(entry);
 
     compiler.push_fn_return_type(ret_type);
+    compiler.set_current_function(this, func);
     body->gen();
     compiler.pop_fn_return_type();
 

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <fmt/core.h>
 #include <optional>
+#include <regex>
 #include <stdexcept>
 #include <stdint.h>
 #include <string>
@@ -12,6 +13,7 @@
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ControlFlowNodes.h"
+#include "kyoto/AST/FunctionCall.h"
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/AST/StringLiteralNode.h"
 #include "kyoto/KType.h"
@@ -35,9 +37,26 @@ std::any ASTBuilderVisitor::visitProgram(kyoto::KyotoParser::ProgramContext* ctx
     return (ASTNode*)new ProgramNode(nodes, compiler);
 }
 
+std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
+{
+    auto name = ctx->IDENTIFIER()->getText();
+    std::vector<FunctionNode::Parameter> args;
+    for (auto& paramCtx : ctx->parameterList()->parameter()) {
+        auto type_str = paramCtx->type()->getText();
+        // FIXME: only accounts for primitive types
+        auto type = parse_primitive_type(type_str);
+        args.push_back({ paramCtx->IDENTIFIER()->getText(), new PrimitiveType(type) });
+    }
+
+    auto ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
+    auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
+    auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
+    return (ASTNode*)new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+}
+
 std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx)
 {
-    std::string name = ctx->IDENTIFIER()->getText();
+    auto name = ctx->IDENTIFIER()->getText();
     std::vector<FunctionNode::Parameter> args;
 
     for (auto paramCtx : ctx->parameterList()->parameter()) {
@@ -47,7 +66,7 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
         args.push_back({ paramCtx->IDENTIFIER()->getText(), new PrimitiveType(type) });
     }
 
-    std::string ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
+    auto ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
     auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
     ASTNode* body = nullptr;
     try {
@@ -56,7 +75,8 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
         delete ret_type;
         throw e;
     }
-    return (ASTNode*)new FunctionNode(name, args, ret_type, body, compiler);
+    auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
+    return (ASTNode*)new FunctionNode(name, args, varargs, ret_type, body, compiler);
 }
 
 std::any ASTBuilderVisitor::visitBlock(kyoto::KyotoParser::BlockContext* ctx)
@@ -117,9 +137,19 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
     return (ASTNode*)new ReturnStatementNode(expr, compiler);
 }
 
+std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx)
+{
+    std::string name = ctx->IDENTIFIER()->getText();
+    std::vector<ExpressionNode*> args;
+    for (auto arg : ctx->argumentList()->expression()) {
+        args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+    }
+    return (ExpressionNode*)new FunctionCall(name, args, compiler);
+}
+
 std::any ASTBuilderVisitor::visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx)
 {
-    auto txt = ctx->getText();
+    auto txt = std::regex_replace(ctx->getText(), std::regex(R"(\\n)"), "\n");
     return (ExpressionNode*)new StringLiteralNode(txt.substr(1, txt.size() - 2), compiler);
 }
 

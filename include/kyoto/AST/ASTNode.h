@@ -184,18 +184,20 @@ public:
         KType* type;
     };
 
-    FunctionNode(const std::string& name, std::vector<Parameter> args, KType* ret_type, ASTNode* body,
+    FunctionNode(const std::string& name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
                  ModuleCompiler& compiler);
     ~FunctionNode();
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
+    [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
 
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;
 
     std::string name;
     std::vector<Parameter> args;
+    bool varargs;
     KType* ret_type;
     ASTNode* body;
     ModuleCompiler& compiler;

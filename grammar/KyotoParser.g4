@@ -30,6 +30,7 @@ expression:
 	| LPAREN expression RPAREN #parenthesizedExpression
 	| MINUS expression #negationExpression
 	| PLUS expression #positiveExpression
+	| IDENTIFIER LPAREN argumentList RPAREN #functionCallExpression
 	| expression ASTERISK expression #multiplicationExpression
 	| expression SLASH expression #divisionExpression
 	| expression PERCENT expression #modulusExpression
@@ -48,6 +49,11 @@ expression:
 
 	| expression logicalOp expression #logicalExpression
 	| <assoc=right> expression EQUAL expression #assignmentExpression
+	;
+
+argumentList:
+	expression (COMMA expression)*
+	| /* empty */
 	;
 
 logicalOp:
@@ -94,7 +100,6 @@ forUpdate:
 	expression
 	|
 	;
-
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

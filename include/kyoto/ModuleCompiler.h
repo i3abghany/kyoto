@@ -12,6 +12,7 @@
 #include "llvm/IR/Module.h"
 
 class ASTNode;
+class FunctionNode;
 class KType;
 
 namespace llvm {
@@ -39,6 +40,8 @@ public:
     void push_scope();
     void pop_scope();
 
+    void set_current_function(FunctionNode* node, llvm::Function* func);
+
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();
     KType* get_fn_return_type() const;
@@ -55,6 +58,8 @@ private:
     void llvm_pass();
 
 private:
+    FunctionNode* current_fn_node = nullptr;
+    llvm::Function* current_fn = nullptr;
     KType* curr_fn_ret_type = nullptr;
     bool fn_termination_error = false;
 

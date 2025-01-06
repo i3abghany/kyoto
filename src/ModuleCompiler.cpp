@@ -163,11 +163,31 @@ void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 void ModuleCompiler::push_scope()
 {
     symbol_table.push_scope();
+
+    // global scope + outer-most function scope
+    if (symbol_table.n_scopes() == 2) {
+        int i = 0;
+        for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
+            llvm::Value* arg = &*iter;
+            auto* arg_type = arg->getType();
+            auto arg_name = current_fn_node->get_params()[i++].name;
+            auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
+            builder.CreateStore(arg, arg_alloc);
+            symbol_table.add_symbol(arg_name,
+                                    Symbol::primitive(arg_alloc, PrimitiveType::from_llvm_type(arg_type).get_kind()));
+        }
+    }
 }
 
 void ModuleCompiler::pop_scope()
 {
     symbol_table.pop_scope();
+}
+
+void ModuleCompiler::set_current_function(FunctionNode* node, llvm::Function* func)
+{
+    current_fn_node = node;
+    current_fn = func;
 }
 
 void ModuleCompiler::push_fn_return_type(KType* type)
