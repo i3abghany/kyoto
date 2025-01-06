@@ -23,10 +23,6 @@ FetchContent_MakeAvailable(fmt)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${ANTLR4_INCLUDE_DIRS})
 
-set(CMAKE_CXX_COMPILER "clang++-20")
-add_compile_options(-fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer)
-add_link_options(-fsanitize=address -fsanitize=undefined)
-
 set(SOURCES
     src/Visitor.cpp
     src/AST/ASTNode.cpp
