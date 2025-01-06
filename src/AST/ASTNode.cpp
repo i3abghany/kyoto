@@ -113,8 +113,7 @@ std::string ExpressionStatementNode::to_string() const
 
 llvm::Value* ExpressionStatementNode::gen()
 {
-    expr->gen();
-    return nullptr;
+    return expr->gen();
 }
 
 IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompiler& compiler)
