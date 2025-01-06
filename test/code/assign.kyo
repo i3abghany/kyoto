@@ -499,3 +499,35 @@ fn main() i32 {
     x = y = x + 0;
     return y;
 }
+// SEP
+
+// NAME TypelessIntegerAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x = 5;
+    return x;
+}
+// SEP
+
+// NAME TypelessIntegerDeclarationWithoutInitialization
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x;
+    x = 5;
+    return x;
+}
+// SEP
+
+// NAME TypelessIntegerInitializationWithAssignment
+// ERR 0
+// RET -1
+
+fn main() i32 {
+    var x: i32 = 5;
+    var y = x = -1
+    return x;
+}

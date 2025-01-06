@@ -273,6 +273,11 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
 
 llvm::Value* FullDeclarationStatementNode::gen()
 {
+    if (!type) {
+        auto* expr_type = expr->get_type(compiler.get_context());
+        type = new PrimitiveType(PrimitiveType::from_llvm_type(expr_type).get_kind());
+    }
+
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
     auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);

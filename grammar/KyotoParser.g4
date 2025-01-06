@@ -56,7 +56,10 @@ logicalOp:
 
 number: INTEGER | FLOAT | TRUE | FALSE;
 
-fullDeclaration: VAR IDENTIFIER COLON type EQUAL expression SEMICOLON;
+fullDeclaration:
+	VAR IDENTIFIER COLON type EQUAL expression SEMICOLON #regularDeclaration
+	| VAR IDENTIFIER EQUAL expression SEMICOLON #typelessDeclaration
+	;
 
 declaration: VAR IDENTIFIER COLON type SEMICOLON;
 

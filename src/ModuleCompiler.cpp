@@ -119,17 +119,14 @@ llvm::BasicBlock* ModuleCompiler::create_basic_block(const std::string& name)
 
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
-    auto report_error =
-        [](const std::string& msg) {
-            constexpr const char* RED = "\033[0;31m";
-            constexpr const char* NC = "\033[0m";
-            std::cerr << RED << "Error: " << NC << msg << std::endl;
-        }
-
-    auto program
-        = std::unique_ptr<ASTNode>(parse_program());
+    auto report_error = [](const std::string& msg) {
+        constexpr const char* RED = "\033[0;31m";
+        constexpr const char* NC = "\033[0m";
+        std::cerr << RED << "Error: " << NC << msg << std::endl;
+    };
 
     try {
+        auto program = std::unique_ptr<ASTNode>(parse_program());
         program->gen();
         llvm_pass();
         ensure_main_fn();

@@ -48,7 +48,13 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
     std::string ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
     auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
-    auto body = std::any_cast<ASTNode*>(visit(ctx->block()));
+    ASTNode* body = nullptr;
+    try {
+        body = std::any_cast<ASTNode*>(visit(ctx->block()));
+    } catch (const std::bad_any_cast& e) {
+        delete ret_type;
+        throw e;
+    }
     return (ASTNode*)new FunctionNode(name, args, ret_type, body, compiler);
 }
 
@@ -75,13 +81,20 @@ std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationCont
     return (ASTNode*)new DeclarationStatementNode(name, type, compiler);
 }
 
-std::any ASTBuilderVisitor::visitFullDeclaration(kyoto::KyotoParser::FullDeclarationContext* ctx)
+std::any ASTBuilderVisitor::visitRegularDeclaration(kyoto::KyotoParser::RegularDeclarationContext* ctx)
 {
     std::string type_str = ctx->type()->getText();
     auto type = new PrimitiveType(parse_primitive_type(type_str));
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
+}
+
+std::any ASTBuilderVisitor::visitTypelessDeclaration(kyoto::KyotoParser::TypelessDeclarationContext* ctx)
+{
+    std::string name = ctx->IDENTIFIER()->getText();
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ASTNode*)new FullDeclarationStatementNode(name, nullptr, expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx)
@@ -111,7 +124,7 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
     // Terminate if we can't parse the number.
 
     using Kind = PrimitiveType::Kind;
-    std::array kinds = { Kind::I8, Kind::I16, Kind::I32, Kind::I64, Kind::Boolean };
+    std::array kinds = { Kind::I32, Kind::I64, Kind::Boolean };
 
     for (auto kind : kinds) {
         if (auto num = parse_signed_integer_into(txt, kind); num.has_value())
