@@ -33,7 +33,7 @@ jobs:
       run: export PATH="${{github.workspace}}:$PATH" && echo $PATH && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -- -j4
 
     - name: Test
       working-directory: ${{github.workspace}}/build
