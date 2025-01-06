@@ -26,6 +26,14 @@ $ wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O /path/to/inst
 $ export PATH="/path/to/install:$PATH"
 ```
 
+If llvm-20 is not available in the package manager, it can be installed using the script provided on the official website as follows:
+
+```bash
+$ wget https://apt.llvm.org/llvm.sh
+$ chmod +x llvm.sh
+$ sudo ./llvm.sh 20 all
+```
+
 To build the compiler, run the following commands:
 
 ```bash
