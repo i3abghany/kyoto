@@ -531,3 +531,150 @@ fn main() i32 {
     var y = x = -1
     return x;
 }
+// SEP
+
+// NAME TypelessBooleanAssignment
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x = true;
+    if (x) {
+        return 1;
+    }
+    
+    return 0;
+}
+// SEP
+
+// NAME TypelessBooleanDeclarationWithoutInitialization
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: bool;
+    x = true;
+    if (x) {
+        return 1;
+    }
+
+    return 0;
+}
+// SEP
+
+// NAME TypelessBooleanInitializationWithAssignment
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: bool = true;
+    var y = x = false;
+    if (x) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+// SEP
+
+// NAME BasicStringAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: string = "hello";
+    return 5;
+}
+// SEP
+
+// NAME TypelessStringAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x = "hello";
+    return 5;
+}
+// SEP
+
+// NAME TypelessStringDeclarationWithoutInitialization
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: string;
+    x = "hello";
+    return 5;
+}
+// SEP
+
+// NAME TypelessStringInitializationWithAssignment
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var x: string = "hello";
+    var y = x = "world";
+    return 5;
+}
+// SEP
+
+// NAME StringAssignmentToInteger
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = "hello";
+    return 5;
+}
+// SEP
+
+// NAME StringAssignmentToBoolean
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: bool = "hello";
+    return 5;
+}
+// SEP
+
+// NAME IntegerAssignmentToString
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: string = 5;
+    return 5;
+}
+// SEP
+
+// NAME BooleanAssignmentToString
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: string = true;
+    return 5;
+}
+// SEP
+
+// NAME StringReassignmentToInteger
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: string = "hello";
+    x = 5;
+    return 5;
+}
+
+// NAME StringReassignmentToBoolean
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: string = "hello";
+    x = true;
+    return 5;
+}
