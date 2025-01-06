@@ -55,3 +55,6 @@ add_executable(
 )
 
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
+
+include(GoogleTest)
+gtest_discover_tests(ktest)
