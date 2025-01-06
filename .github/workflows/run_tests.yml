@@ -26,10 +26,10 @@ jobs:
       run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20 all
 
     - name: Install Prerequisites
-      run: sudo apt install libboost1.74-all-dev openjdk-21-jre -y
+      run: sudo apt update && sudo apt install libboost1.74-all-dev default-jre -y
 
     - name: Download ANTLR4.13.2
-      run: wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ${{github.workspace}}/antlr-4.13.2-complete.jar
+      run: wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O ${{github.workspace}}/antlr-4.13.2-complete.jar && chmod +x ${{github.workspace}}/antlr-4.13.2-complete.jar
 
     - name: print java version
       run: java --version
