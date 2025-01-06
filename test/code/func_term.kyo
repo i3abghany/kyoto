@@ -125,3 +125,64 @@ fn main() i32 {
 fn notmain() i32 {
     return 1;
 }
+
+// NAME NoMain2
+// ERR 1
+// RET 0
+
+fn main2() i32 {
+    return 1;
+}
+
+// NAME WithForLoop
+// ERR 0
+// RET 10
+
+fn main() i32 {
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i == 5) {
+            return 10;
+        }
+    }
+    return 20;
+}
+
+// NAME WithForLoopError
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i == 5) {
+            return 10;
+        }
+    }
+}
+
+// NAME WithForLoopAllTerminated
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i == 5) {
+            return 10;
+        } else {
+            return 20;
+        }
+    }
+}
+
+// NAME NoRunForLoop
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    for (var i = 0; false; i = i + 1) {
+        if (i == 5) {
+            return 10;
+        } else {
+            return 20;
+        }
+    }
+}
