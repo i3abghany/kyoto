@@ -282,25 +282,34 @@ std::any ASTBuilderVisitor::visitForInit(kyoto::KyotoParser::ForInitContext* ctx
 {
     if (ctx->fullDeclaration()) return visit(ctx->fullDeclaration());
     if (ctx->expressionStatement()) return visit(ctx->expressionStatement());
-    return nullptr;
+    return std::any();
 }
 
 std::any ASTBuilderVisitor::visitForCondition(kyoto::KyotoParser::ForConditionContext* ctx)
 {
-    return (ExpressionStatementNode*)std::any_cast<ASTNode*>(visit(ctx->expressionStatement()));
+    if (ctx->expressionStatement())
+        return (ExpressionStatementNode*)std::any_cast<ASTNode*>(visit(ctx->expressionStatement()));
+    else return std::any();
 }
 
 std::any ASTBuilderVisitor::visitForUpdate(kyoto::KyotoParser::ForUpdateContext* ctx)
 {
-    return visit(ctx->expression());
+    if (ctx->expression()) return std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    else return std::any();
 }
 
 std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementContext* ctx)
 {
 
-    auto* init = std::any_cast<ASTNode*>(visit(ctx->forInit()));
-    auto* condition = std::any_cast<ExpressionStatementNode*>(visit(ctx->forCondition()));
-    auto* update = std::any_cast<ExpressionNode*>(visit(ctx->forUpdate()));
+    auto init_any = visit(ctx->forInit());
+    auto* init = init_any.has_value() ? std::any_cast<ASTNode*>(init_any) : nullptr;
+
+    auto condition_any = visit(ctx->forCondition());
+    auto* condition = condition_any.has_value() ? std::any_cast<ExpressionStatementNode*>(condition_any) : nullptr;
+
+    auto update_any = visit(ctx->forUpdate());
+    auto* update = update_any.has_value() ? std::any_cast<ExpressionNode*>(update_any) : nullptr;
+
     auto* body = std::any_cast<ASTNode*>(visit(ctx->block()));
     return (ASTNode*)new ForStatementNode(init, condition, update, body, compiler);
 }
