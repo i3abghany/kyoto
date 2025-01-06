@@ -12,7 +12,7 @@ namespace utils {
 void test_driver(const utils::TestCase& test_case)
 {
     if (test_case.skip()) {
-        return;
+        GTEST_SKIP();
     }
 
     ModuleCompiler compiler(test_case.code());
