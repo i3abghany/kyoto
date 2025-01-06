@@ -25,6 +25,9 @@ jobs:
     - name: Install LLVM
       run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 19 all
 
+    - name: Make a symbolic link to lli-19
+      run: sudo ln -s /usr/bin/lli-19 /usr/bin/lli
+
     - name: Install Prerequisites
       run: sudo apt update && sudo apt install libboost1.74-all-dev default-jre libfmt-dev -y
 
