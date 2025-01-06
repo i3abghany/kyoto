@@ -6,7 +6,7 @@ This is the repository for the Kyoto Compiler for the Kyoto Programming Language
 
 The Kyoto Compiler requires the following dependencies:
 
-- LLVM >= 20
+- LLVM >= 19
 - CMake >= 3.20
 - antlr >= 4.13.2
 - Boost >= 1.74.0
