@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
-#include <utility>
 #include <stdexcept>
+#include <utility>
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
