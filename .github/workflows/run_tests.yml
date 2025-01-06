@@ -29,7 +29,10 @@ jobs:
       run: sudo apt install libboost1.74-all-dev openjdk-21-jre -y
 
     - name: Download ANTLR4.13.2
-      run: wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ${{github.workspace}}/antlr-4.13.2-complete.jar && chmod +x ${{github.workspace}}/antlr-4.13.2-complete.jar
+      run: wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ${{github.workspace}}/antlr-4.13.2-complete.jar
+
+    - name: print java version
+      run: java --version
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
