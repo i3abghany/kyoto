@@ -1,6 +1,4 @@
-#include <gtest/gtest-message.h>
-#include <gtest/gtest-test-part.h>
-#include <gtest/gtest_pred_impl.h>
+#include <gtest/gtest.h>
 #include <optional>
 #include <stdint.h>
 #include <string>
@@ -14,7 +12,7 @@ namespace utils {
 void test_driver(const utils::TestCase& test_case)
 {
     if (test_case.skip()) {
-        GTEST_SKIP();
+        return;
     }
 
     ModuleCompiler compiler(test_case.code());
