@@ -6,6 +6,7 @@
 
 class ModuleCompiler;
 class KType;
+class ExpressionNode;
 
 class DeclarationStatementNode : public ASTNode {
     std::string name;

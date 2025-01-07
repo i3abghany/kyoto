@@ -6,6 +6,7 @@
 #include "kyoto/AST/ASTNode.h"
 
 class ModuleCompiler;
+class ExpressionNode;
 
 class IfStatementNode : public ASTNode {
 public:

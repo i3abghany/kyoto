@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string>
 
-#include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/KType.h"
 
 class ModuleCompiler;

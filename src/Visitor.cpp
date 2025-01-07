@@ -14,6 +14,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ControlFlowNodes.h"
 #include "kyoto/AST/DeclarationNodes.h"
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/AST/FunctionCall.h"
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/AST/StringLiteralNode.h"

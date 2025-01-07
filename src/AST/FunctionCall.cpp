@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/Function.h"

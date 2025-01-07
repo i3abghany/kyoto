@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ExpressionNode.h"
 
 class ModuleCompiler;
 

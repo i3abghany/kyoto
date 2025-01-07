@@ -5,7 +5,7 @@
 #include <string>
 
 #include "kyoto/AST/ASTBinaryNode.h"
-#include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"

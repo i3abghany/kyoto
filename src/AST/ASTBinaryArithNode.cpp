@@ -6,6 +6,7 @@
 
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/AST/NumberNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

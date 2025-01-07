@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/IR/BasicBlock.h"

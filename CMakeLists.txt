@@ -22,6 +22,7 @@ set(SOURCES
     src/AST/ASTNode.cpp
     src/AST/StringLiteralNode.cpp
     src/AST/DeclarationNodes.cpp
+    src/AST/ExpressionNode.cpp
     src/AST/FunctionCall.cpp
     src/AST/ControlFlowNodes.cpp
     src/AST/ASTBinaryArithNode.cpp

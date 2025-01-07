@@ -2,13 +2,13 @@
 
 #include <vector>
 
+#include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ilist_iterator.h"
 #include "llvm/Analysis/CFG.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Function.h"
-#include "llvm/IR/Instruction.h"
-#include "kyoto/ModuleCompiler.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Instruction.h"
 #include "llvm/IR/Type.h"
 
 FunctionTerminationPass::FunctionTerminationPass(ModuleCompiler& compiler)
