@@ -11,14 +11,11 @@
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constant.h"
-#include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Type.h"
-#include "llvm/Support/Casting.h"
 
 namespace llvm {
 class LLVMContext;

@@ -18,6 +18,9 @@ NOT_EQUALS: '!=';
 LOGICAL_AND: '&&';
 LOGICAL_OR: '||';
 
+PLUS_PLUS: '++';
+MINUS_MINUS: '--';
+
 PLUS: '+';
 MINUS: '-';
 ASTERISK: '*';

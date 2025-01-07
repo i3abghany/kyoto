@@ -22,6 +22,7 @@ public:
     [[nodiscard]] virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
+    [[nodiscard]] virtual llvm::Value* gen_ptr() const { return nullptr; }
 
     static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
                                         const std::string& target_name);
@@ -49,6 +50,7 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen_ptr() const override;
     [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
@@ -101,6 +103,10 @@ public:
 
 private:
     std::string op_to_string() const;
+    bool simple_op() const;
+
+    llvm::Value* gen_prefix_increment();
+    llvm::Value* gen_prefix_decrement();
 
 private:
     ExpressionNode* expr;

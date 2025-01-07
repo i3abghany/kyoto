@@ -28,6 +28,8 @@ expression:
 	| STRING_LITERAL #stringExpression
 	| IDENTIFIER #identifierExpression
 	| LPAREN expression RPAREN #parenthesizedExpression
+	| PLUS_PLUS expression #prefixIncrementExpression
+	| MINUS_MINUS expression #prefixDecrementExpression
 	| MINUS expression #negationExpression
 	| PLUS expression #positiveExpression
 	| IDENTIFIER LPAREN argumentList RPAREN #functionCallExpression

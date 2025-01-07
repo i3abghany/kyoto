@@ -28,6 +28,9 @@ public:
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
 
+    std::any visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx) override;
+    std::any visitPrefixDecrementExpression(kyoto::KyotoParser::PrefixDecrementExpressionContext* ctx) override;
+
     std::any visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx) override;
     std::any visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx) override;
 

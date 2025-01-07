@@ -119,6 +119,16 @@ llvm::Value* IdentifierExpressionNode::gen()
     return compiler.get_builder().CreateLoad(symbol.alloc->getAllocatedType(), symbol.alloc, name);
 }
 
+llvm::Value* IdentifierExpressionNode::gen_ptr() const
+{
+    auto symbol_opt = compiler.get_symbol(name);
+    if (!symbol_opt.has_value()) {
+        throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
+    }
+    auto symbol = symbol_opt.value();
+    return symbol.alloc;
+}
+
 llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
 {
     auto symbol = compiler.get_symbol(name);
@@ -225,8 +235,52 @@ llvm::Value* UnaryNode::gen()
 
     if (op == UnaryOp::Negate) return compiler.get_builder().CreateNeg(expr_val, "negval");
     else if (op == UnaryOp::Positive) return expr_val;
+    else if (op == UnaryOp::PrefixDecrement) return gen_prefix_decrement();
+    else if (op == UnaryOp::PrefixIncrement) return gen_prefix_increment();
+    else {
+        assert(false && "Unknown unary operator");
+    }
 
     return nullptr;
+}
+
+llvm::Value* UnaryNode::gen_prefix_increment()
+{
+    assert(op == UnaryOp::PrefixIncrement && "Expected prefix increment unary");
+
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (expr->is_trivially_evaluable() || !expr_ktype.is_integer()) {
+        throw std::runtime_error(fmt::format("Cannot apply op `++` to expression `{}`", expr->to_string()));
+    }
+
+    auto* expr_ptr = expr->gen_ptr();
+    auto* expr_val = compiler.get_builder().CreateLoad(expr_ltype, expr_ptr, "incptr");
+    assert(expr_val && "Expression value must not be null");
+    auto* one = llvm::ConstantInt::get(expr_ltype, 1, true);
+    auto* new_val = compiler.get_builder().CreateAdd(expr_val, one, "incval");
+    compiler.get_builder().CreateStore(new_val, expr_ptr);
+    return new_val;
+}
+
+llvm::Value* UnaryNode::gen_prefix_decrement()
+{
+    assert(op == UnaryOp::PrefixDecrement && "Expected prefix decrement unary");
+
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (expr->is_trivially_evaluable() || !expr_ktype.is_integer()) {
+        throw std::runtime_error(fmt::format("Cannot apply op `++` to expression `{}`", expr->to_string()));
+    }
+
+    auto* expr_ptr = expr->gen_ptr();
+    auto* expr_val = expr->gen();
+    auto* one = llvm::ConstantInt::get(expr_ltype, 1, true);
+    auto* new_val = compiler.get_builder().CreateSub(expr_val, one, "decval");
+    compiler.get_builder().CreateStore(new_val, expr_ptr);
+    return new_val;
 }
 
 llvm::Value* UnaryNode::trivial_gen()
@@ -249,7 +303,7 @@ llvm::Value* UnaryNode::trivial_gen()
 
 bool UnaryNode::is_trivially_evaluable() const
 {
-    return expr->is_trivially_evaluable();
+    return simple_op() && expr->is_trivially_evaluable();
 }
 
 llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
@@ -271,4 +325,9 @@ std::string UnaryNode::op_to_string() const
     default:
         return "";
     }
+}
+
+bool UnaryNode::simple_op() const
+{
+    return op == UnaryOp::Negate || op == UnaryOp::Positive;
 }

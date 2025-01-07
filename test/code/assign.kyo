@@ -701,3 +701,23 @@ fn main() i32 {
     var x: void = f();
     return 5;
 }
+
+// NAME AssignIncrementedVal
+// ERR 0
+// RET 10
+
+fn main() i32 {
+    var x = 9;
+    var y = ++x;
+    return y;
+}
+
+// NAME AssignNegativeIncrementedVal
+// ERR 0
+// RET -10
+
+fn main() i32 {
+    var x = 9;
+    var y = -++x;
+    return y;
+}
