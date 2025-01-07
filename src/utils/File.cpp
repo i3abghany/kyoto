@@ -1,6 +1,5 @@
 #include "kyoto/utils/File.h"
 
-#include <algorithm>
 #include <assert.h>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -15,7 +14,6 @@
 #include <fstream>
 #include <iterator>
 #include <memory>
-#include <random>
 #include <sstream>
 #include <stddef.h>
 #include <stdexcept>
@@ -74,8 +72,6 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
     std::string test_case = { data + start, source.size() - start };
     boost::trim(test_case);
     test_cases.emplace_back(parse_test_case(test_case));
-    auto rng = std::default_random_engine {};
-    std::ranges::shuffle(test_cases, rng);
     return test_cases;
 }
 

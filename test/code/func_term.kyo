@@ -125,6 +125,7 @@ fn main() i32 {
 fn notmain() i32 {
     return 1;
 }
+// SEP
 
 // NAME NoMain2
 // ERR 1
@@ -133,6 +134,7 @@ fn notmain() i32 {
 fn main2() i32 {
     return 1;
 }
+// SEP
 
 // NAME WithForLoop
 // ERR 0
@@ -146,6 +148,7 @@ fn main() i32 {
     }
     return 20;
 }
+// SEP
 
 // NAME WithForLoopError
 // ERR 1
@@ -158,6 +161,7 @@ fn main() i32 {
         }
     }
 }
+// SEP
 
 // NAME WithForLoopAllTerminated
 // ERR 1
@@ -172,6 +176,7 @@ fn main() i32 {
         }
     }
 }
+// SEP
 
 // NAME NoRunForLoop
 // ERR 1

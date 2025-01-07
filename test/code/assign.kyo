@@ -668,6 +668,7 @@ fn main() i32 {
     x = 5;
     return 5;
 }
+// SEP
 
 // NAME StringReassignmentToBoolean
 // ERR 1

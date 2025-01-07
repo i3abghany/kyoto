@@ -174,7 +174,7 @@ fn f() i32 {
         for (var i = 0; i < 5; i = i + 1) {
             sum = sum + i;
         }
-    } else? {
+    } else {
         sum = sum - 1;
     }
     return sum;
