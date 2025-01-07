@@ -40,12 +40,11 @@ fn main() i32 {
 fn main() i32 {
     var x: i8 = 41;
     var y: i8 = x + 1;
-    var z: i32 = y;
-    return z;
+    return y;
 }
 // SEP
 
-// NAME InvalidReturnAdd
+// NAME InvalidReturnTypeAdd
 // ERR 1
 // RET 0
 
@@ -79,19 +78,36 @@ fn main() i32 {
 }
 // SEP
 
-// NAME NoVariables
-// ERR 0
-// RET 7
-
-fn main() i32 {
-    return 7;
-}
-// SEP
-
 // NAME NoReturn
 // ERR 1
 // RET 0
 
 fn main() i32 {
     var x: i8 = 10;
+}
+// SEP
+
+// NAME VoidNoReturn
+// ERR 0
+// RET 5
+
+fn func() void { }
+
+fn main() i32 {
+    func();
+    return 5;
+}
+// SEP
+
+// NAME VoidNotReturnMultiplePaths
+// ERR 0
+// RET 5
+
+fn func() void {
+    if (true) { }
+}
+
+fn main() i32 {
+    func();
+    return 5;
 }

@@ -7,7 +7,6 @@
 #include "llvm/Analysis/CFG.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Type.h"
 
@@ -79,8 +78,7 @@ void FunctionTerminationPass::ensure_void_return(llvm::Function& func)
     for (auto& bb : func) {
         if (bb.getTerminator()) continue;
         if (bb.getParent()->getReturnType()->isVoidTy()) {
-            compiler.get_builder().SetInsertPoint(&bb);
-            compiler.get_builder().CreateRetVoid();
+            compiler.insert_dummy_return(bb);
         }
     }
 }
