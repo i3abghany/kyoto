@@ -199,3 +199,76 @@ bool AssignmentNode::is_trivially_evaluable() const
 {
     return expr->is_trivially_evaluable();
 }
+
+UnaryNode::UnaryNode(ExpressionNode* expr, UnaryNode::UnaryOp op, ModuleCompiler& compiler)
+    : expr(expr)
+    , op(op)
+    , compiler(compiler)
+{
+}
+
+UnaryNode::~UnaryNode()
+{
+    delete expr;
+}
+
+std::string UnaryNode::to_string() const
+{
+    return fmt::format("UnaryNode({}, {})", op_to_string(), expr->to_string());
+}
+
+llvm::Value* UnaryNode::gen()
+{
+    auto* expr_val = expr->gen();
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (op == UnaryOp::Negate) return compiler.get_builder().CreateNeg(expr_val, "negval");
+    else if (op == UnaryOp::Positive) return expr_val;
+
+    return nullptr;
+}
+
+llvm::Value* UnaryNode::trivial_gen()
+{
+    assert(is_trivially_evaluable() && "Expression is not trivially evaluable");
+    auto* expr_val = expr->trivial_gen();
+    auto expr_ltype = expr->get_type(compiler.get_context());
+    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+
+    if (op == UnaryOp::Negate) {
+        auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
+        assert(constant_int && "Trivial value must be a constant int");
+        return llvm::ConstantInt::get(expr_ltype, -constant_int->getSExtValue(), true);
+    } else if (op == UnaryOp::Positive) {
+        return expr_val;
+    } else {
+        assert(false && "Unknown unary operator");
+    }
+}
+
+bool UnaryNode::is_trivially_evaluable() const
+{
+    return expr->is_trivially_evaluable();
+}
+
+llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
+{
+    return expr->get_type(context);
+}
+
+std::string UnaryNode::op_to_string() const
+{
+    switch (op) {
+    case UnaryOp::Negate:
+        return "-";
+    case UnaryOp::Positive:
+        return "+";
+    case UnaryOp::PrefixIncrement:
+        return "++";
+    case UnaryOp::PrefixDecrement:
+        return "--";
+    default:
+        return "";
+    }
+}

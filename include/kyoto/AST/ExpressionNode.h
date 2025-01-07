@@ -82,12 +82,15 @@ public:
 };
 
 class UnaryNode : public ExpressionNode {
-    ExpressionNode* expr;
-    std::string op;
-    ModuleCompiler& compiler;
-
 public:
-    UnaryNode(ExpressionNode* expr, std::string op, ModuleCompiler& compiler);
+    enum class UnaryOp {
+        Negate,
+        Positive,
+        PrefixIncrement,
+        PrefixDecrement,
+    };
+
+    UnaryNode(ExpressionNode* expr, UnaryOp op, ModuleCompiler& compiler);
     ~UnaryNode();
 
     [[nodiscard]] std::string to_string() const override;
@@ -95,4 +98,12 @@ public:
     [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
+
+private:
+    std::string op_to_string() const;
+
+private:
+    ExpressionNode* expr;
+    UnaryOp op;
+    ModuleCompiler& compiler;
 };
