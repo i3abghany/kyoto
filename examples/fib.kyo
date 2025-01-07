@@ -1,11 +1,18 @@
-fn main() i32 {
+cdecl fn printf(fmt: str, ...) i32;
+
+fn fib(n: i32) i32 {
     var a = 0;
     var b = 1;
     var c = 0;
-    for (var i = 0; i < 6; i = i + 1) {
+    for (var i = 1; i < n; i = i + 1) {
         c = a + b;
         a = b;
         b = c;
     }
     return c;
+}
+
+fn main() i32 {
+    var n = 6;
+    return printf("fib(%d) = %d\n", n, fib(n));
 }
