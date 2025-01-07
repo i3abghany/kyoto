@@ -1,0 +1,185 @@
+// NAME EmptyVoidFunction
+// ERR 0
+// RET 1
+
+fn f() void { }
+
+fn main() i32 {
+    return 1;
+}
+// SEP
+
+// NAME EmptyVoidFunctionImplicitRet
+// ERR 0
+// RET 1
+
+fn f() {  }
+
+fn main() i32 {
+    return 1;
+}
+// SEP
+
+// NAME FunctionScopeIndependence
+// ERR 1
+// RET 0
+
+fn f() void {
+    x = x + 1;
+}
+
+fn main() i32 {
+    var x = 1;
+}
+// SEP
+
+// NAME ReturnIntNoConversionFunction
+// ERR 0
+// RET 5
+
+fn f() i32 {
+    var x: i32 = 5;
+    return x;
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+// NAME ReturnIntWithConversionError
+// ERR 1
+// RET 0
+
+fn f() i16 {
+    var x: i32 = 5;
+    return x;
+}
+
+fn main() i32 {
+    var x: i16 = f();
+    return 1;
+}
+// SEP
+
+// NAME ReturnIntWithConversionFunctionReturn
+// ERR 1
+// RET 0
+
+fn f() i16 {
+    var x: i32 = 5;
+    return x;
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+// NAME ReturnIntWithArithmetic
+// ERR 0
+// RET 15
+
+fn f() i32 {
+    var x: i32 = 5;
+    var y: i32 = 10;
+    return x + y;
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+// NAME ReturnIntWithArithmeticConversionError
+// ERR 1
+// RET 0
+
+fn f() i16 {
+    var x: i32 = 5;
+    var y: i32 = 10;
+    return x + y;
+}
+
+fn main() i32 {
+    var x: i16 = f();
+    return 1;
+}
+
+// SEP
+
+// NAME FunctionWithIfStatement
+// ERR 0
+// RET 10
+
+fn f() i32 {
+    var x: i32 = 5;
+    if (x > 3) {
+        return 10;
+    } else {
+        return 0;
+    }
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+// NAME ForLoopSimple
+// ERR 0
+// RET 45
+
+fn f() i32 {
+    var sum: i32 = 0;
+    for (var i = 0; i < 10; i = i + 1) {
+        sum = sum + i;
+    }
+    return sum;
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+
+// NAME ForLoopWithConditionInside
+// ERR 0
+// RET 20
+
+fn f() i32 {
+    var sum: i32 = 0;
+    for (var i = 0; i < 10; i = i + 1) {
+        if (i % 2 == 0) {
+            sum = sum + i;
+        }
+    }
+    return sum;
+}
+
+fn main() i32 {
+    return f();
+}
+// SEP
+
+// NAME IfElseWithLoop
+// ERR 0
+// RET 10
+
+fn f() i32 {
+    var sum: i32 = 0;
+    var x: i32 = 3;
+    if (x > 2) {
+        for (var i = 0; i < 5; i = i + 1) {
+            sum = sum + i;
+        }
+    } else? {
+        sum = sum - 1;
+    }
+    return sum;
+}
+
+fn main() i32 {
+    return f();
+}

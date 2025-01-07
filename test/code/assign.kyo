@@ -678,3 +678,25 @@ fn main() i32 {
     x = true;
     return 5;
 }
+// SEP
+
+// NAME AssignVoid
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: void = 5;
+    return 5;
+}
+// SEP
+
+// NAME AssignVoidFromFunction
+// ERR 1
+// RET 0
+
+fn f() void { }
+
+fn main() i32 {
+    var x: void = f();
+    return 5;
+}
