@@ -17,6 +17,7 @@ struct FunctionTerminationPass : public llvm::PassInfoMixin<FunctionTerminationP
 
     bool is_basic_block_unreachable(llvm::BasicBlock& bb);
     void verify_function_termination(llvm::Function& func);
+    void ensure_void_return(llvm::Function& func);
 
 private:
     ModuleCompiler& compiler;

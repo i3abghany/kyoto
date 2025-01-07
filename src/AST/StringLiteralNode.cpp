@@ -1,6 +1,7 @@
 #include "kyoto/AST/StringLiteralNode.h"
 
 #include <fmt/core.h>
+#include <regex>
 #include <utility>
 
 #include "kyoto/ModuleCompiler.h"
@@ -18,7 +19,8 @@ StringLiteralNode::~StringLiteralNode() { }
 
 std::string StringLiteralNode::to_string() const
 {
-    return fmt::format("StringLiteralNode(\"{}\")", value);
+    auto escaped_value = std::regex_replace(value, std::regex("\n"), "\\n");
+    return fmt::format("StringLiteralNode(\"{}\")", escaped_value);
 }
 
 llvm::Value* StringLiteralNode::gen()

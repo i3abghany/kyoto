@@ -27,6 +27,7 @@ public:
     bool is_numeric() const;
     bool is_char() const;
     bool is_string() const;
+    bool is_void() const;
 
     size_t width() const;
 

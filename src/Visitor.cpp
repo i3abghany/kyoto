@@ -133,7 +133,7 @@ std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::Assign
 
 std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx)
 {
-    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    auto* expr = ctx->expression() ? std::any_cast<ExpressionNode*>(visit(ctx->expression())) : nullptr;
     return (ASTNode*)new ReturnStatementNode(expr, compiler);
 }
 

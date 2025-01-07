@@ -189,8 +189,10 @@ public:
     ~FunctionNode();
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen() override;
+
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
+    [[nodiscard]] std::string get_name() const { return name; }
 
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;

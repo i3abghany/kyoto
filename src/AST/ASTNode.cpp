@@ -278,12 +278,19 @@ llvm::Value* FullDeclarationStatementNode::gen()
         type = new PrimitiveType(PrimitiveType::from_llvm_type(expr_type).get_kind());
     }
 
+    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
+    auto* ktype = dynamic_cast<PrimitiveType*>(type);
+
+    if (ktype->is_void()) {
+        throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
+    } else if (pt.is_void()) {
+        throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
+    }
+
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
-    auto* ktype = dynamic_cast<PrimitiveType*>(type);
     llvm::Value* expr_val = nullptr;
-    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
     if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
     } else if (ktype->is_string() && pt.is_string()) {
@@ -390,7 +397,26 @@ std::string ReturnStatementNode::to_string() const
 llvm::Value* ReturnStatementNode::gen()
 {
     auto* fn_ret_type = compiler.get_fn_return_type();
-    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return");
+
+    auto* ret_ktype = dynamic_cast<PrimitiveType*>(fn_ret_type);
+    auto expr_ktype = expr ? PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()))
+                           : PrimitiveType(PrimitiveType::Kind::Void);
+    auto fn_name = compiler.get_current_function_node()->get_name();
+
+    llvm::Value* expr_val = nullptr;
+    if (ret_ktype->is_void() && !expr) {
+        return compiler.get_builder().CreateRetVoid();
+    } else if (ret_ktype->is_integer() && expr_ktype.is_integer()
+               || ret_ktype->is_boolean() && expr_ktype.is_boolean()) {
+        expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return", fn_name);
+    } else if (ret_ktype->is_string() && expr_ktype.is_string()) {
+        expr_val = expr->gen();
+    } else {
+        throw std::runtime_error(fmt::format(
+            "Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
+            expr->to_string(), expr_ktype.to_string(), fn_name, fn_ret_type->to_string()));
+    }
+
     return compiler.get_builder().CreateRet(expr_val);
 }
 

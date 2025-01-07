@@ -184,6 +184,11 @@ void ModuleCompiler::pop_scope()
     symbol_table.pop_scope();
 }
 
+FunctionNode* ModuleCompiler::get_current_function_node() const
+{
+    return current_fn_node;
+}
+
 void ModuleCompiler::set_current_function(FunctionNode* node, llvm::Function* func)
 {
     current_fn_node = node;

@@ -68,6 +68,11 @@ bool PrimitiveType::is_string() const
     return kind == Kind::String;
 }
 
+bool PrimitiveType::is_void() const
+{
+    return kind == Kind::Void;
+}
+
 size_t PrimitiveType::width() const
 {
     switch (kind) {
@@ -113,6 +118,8 @@ PrimitiveType PrimitiveType::from_llvm_type(const llvm::Type* type)
     // The only "pointer" type we support for now is string, so we can safely
     // return it here.
     if (type->isPointerTy()) return PrimitiveType(Kind::String);
+
+    if (type->isVoidTy()) return PrimitiveType(Kind::Void);
 
     return PrimitiveType(Kind::Unknown);
 }

@@ -41,6 +41,7 @@ public:
     void pop_scope();
 
     void set_current_function(FunctionNode* node, llvm::Function* func);
+    FunctionNode* get_current_function_node() const;
 
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();

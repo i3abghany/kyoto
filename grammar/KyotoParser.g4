@@ -69,7 +69,7 @@ fullDeclaration:
 
 declaration: VAR IDENTIFIER COLON type SEMICOLON;
 
-returnStatement: RETURN expression SEMICOLON;
+returnStatement: RETURN expression? SEMICOLON;
 
 ifStatement: IF LPAREN expression RPAREN block elseIfElseStatement;
 
