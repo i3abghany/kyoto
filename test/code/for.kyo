@@ -6,7 +6,7 @@ fn main() i32 {
     for (;false;) { }
     return 1;
 }
-// SEP
+
 
 // NAME Fibonacci
 // ERR 0
@@ -23,7 +23,7 @@ fn main() i32 {
     }
     return c;
 }
-// SEP
+
 
 // NAME Factorial
 // ERR 0
@@ -36,7 +36,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME ForLoopWithIf
 // ERR 0
@@ -50,7 +50,7 @@ fn main() i32 {
     }
     return -1;
 }
-// SEP
+
 
 // NAME ForLoopWithIfElse
 // ERR 0
@@ -66,7 +66,7 @@ fn main() i32 {
     }
     return -1;
 }
-// SEP
+
 
 // NAME ForLoopWithEmptyIfElseIf
 // ERR 0
@@ -83,7 +83,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME ForLoopWithNoBody
 // ERR 0
@@ -93,7 +93,7 @@ fn main() i32 {
     for (var i = 0; i < 10; i = i + 1) { }
     return 0;
 }
-// SEP
+
 
 // NAME ForLoopWithNestedLoop
 // ERR 0
@@ -108,7 +108,7 @@ fn main() i32 {
     }
     return sum;
 }
-// SEP
+
 
 
 // NAME ForLoopWithLargeIteration

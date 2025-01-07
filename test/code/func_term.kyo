@@ -5,7 +5,7 @@
 fn main() i32 {
     return 1;
 }
-// SEP
+
 
 // NAME NoReturn
 // ERR 1
@@ -13,7 +13,7 @@ fn main() i32 {
 
 fn main() i32 {
 }
-// SEP
+
 
 // NAME OneIf1
 // ERR 1
@@ -24,7 +24,7 @@ fn main() i32 {
         return 1;
     }
 }
-// SEP
+
 
 // NAME OneIf2
 // ERR 1
@@ -35,7 +35,7 @@ fn main() i32 {
         return 1;
     }
 }
-// SEP
+
 
 // NAME SimpleIfElse
 // ERR 0
@@ -48,7 +48,7 @@ fn main() i32 {
         return 20;
     }
 }
-// SEP
+
 
 // NAME NestedIfNoTerm
 // ERR 1
@@ -63,7 +63,7 @@ fn main() i32 {
         return 1;
     }
 }
-// SEP
+
 
 // NAME NestedIfFullTerm
 // ERR 0
@@ -83,7 +83,7 @@ fn main() i32 {
         }
     }
 }
-// SEP
+
 
 // NAME EmptyFunction
 // ERR 1
@@ -91,7 +91,7 @@ fn main() i32 {
 
 fn main() i32 {
 }
-// SEP
+
 
 // NAME IfWithoutReturn
 // ERR 1
@@ -101,7 +101,7 @@ fn main() i32 {
     if (true) {
     }
 }
-// SEP
+
 
 // NAME MultipleReturns
 // ERR 0
@@ -116,7 +116,7 @@ fn main() i32 {
         return 3;
     }
 }
-// SEP
+
 
 // NAME NoMain
 // ERR 1
@@ -125,7 +125,7 @@ fn main() i32 {
 fn notmain() i32 {
     return 1;
 }
-// SEP
+
 
 // NAME NoMain2
 // ERR 1
@@ -134,7 +134,7 @@ fn notmain() i32 {
 fn main2() i32 {
     return 1;
 }
-// SEP
+
 
 // NAME WithForLoop
 // ERR 0
@@ -148,7 +148,7 @@ fn main() i32 {
     }
     return 20;
 }
-// SEP
+
 
 // NAME WithForLoopError
 // ERR 1
@@ -161,7 +161,7 @@ fn main() i32 {
         }
     }
 }
-// SEP
+
 
 // NAME WithForLoopAllTerminated
 // ERR 1
@@ -176,7 +176,7 @@ fn main() i32 {
         }
     }
 }
-// SEP
+
 
 // NAME NoRunForLoop
 // ERR 1

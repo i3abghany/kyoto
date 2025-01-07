@@ -59,14 +59,14 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
     std::vector<TestCase> test_cases;
     size_t start = 0;
     const char* data = source.data();
-    constexpr const char* delim = "// SEP";
-    constexpr size_t delim_len = 6;
+    constexpr const char* delim = "// NAME";
+    constexpr size_t delim_len = 7;
     size_t delim_pos = 0;
-    while ((delim_pos = source.find(delim, start)) != std::string::npos) {
+    while ((delim_pos = source.find(delim, start + 1)) != std::string::npos) {
         std::string test_case = { data + start, delim_pos - start };
         boost::trim(test_case);
         test_cases.emplace_back(parse_test_case(test_case));
-        start = delim_pos + delim_len;
+        start = delim_pos;
     }
 
     std::string test_case = { data + start, source.size() - start };

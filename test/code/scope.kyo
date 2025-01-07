@@ -6,7 +6,7 @@ fn main() i32 {
     var x: i32 = 1;
     return x;
 }
-// SEP
+
 
 // NAME TestSimpleOneScope
 // ERR 0
@@ -20,7 +20,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME TestSimpleTwoScopes
 // ERR 0
@@ -36,7 +36,7 @@ fn main() i32 {
         }
     }
 }
-// SEP
+
 
 // NAME TestReturnInNestedScope
 // ERR 0
@@ -59,7 +59,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME TestReturnIntermediateScope
 // ERR 0
@@ -82,7 +82,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME TestMultipleReturnsWithIf
 // ERR 0
@@ -99,7 +99,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME TestEarlyReturn
 // ERR 0
@@ -114,7 +114,7 @@ fn main() i32 {
     }
     return x;
 }
-// SEP
+
 
 // NAME TestVariableReuse
 // ERR 0
@@ -127,7 +127,7 @@ fn main() i32 {
     var x: i32 = 30;
     return x;
 }
-// SEP
+
 
 // NAME TestScopeWithCondition
 // ERR 0

@@ -8,7 +8,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfLessThan
 // ERR 0
@@ -20,7 +20,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfEquals
 // ERR 0
@@ -32,7 +32,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfNotEquals
 // ERR 0
@@ -44,7 +44,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfGreaterOrEquals
 // ERR 0
@@ -56,7 +56,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfLessOrEquals
 // ERR 0
@@ -68,7 +68,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfAnd1
 // ERR 0
@@ -80,7 +80,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfAnd2
 // ERR 0
@@ -92,7 +92,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfOr1
 // ERR 0
@@ -104,7 +104,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfOr2
 // ERR 0
@@ -116,7 +116,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfOr3
 // ERR 0
@@ -128,7 +128,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfOr4
 // ERR 0
@@ -140,7 +140,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfSimpleVariable
 // ERR 0
@@ -153,7 +153,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfSimpleVariable2
 // ERR 0
@@ -166,7 +166,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfSimpleVariable3
 // ERR 0
@@ -179,7 +179,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfSimpleVariable4
 // ERR 0
@@ -192,7 +192,7 @@ fn main() i32 {
     }
     return 1;
 }
-// SEP
+
 
 // NAME IfComparison
 // ERR 0
@@ -208,7 +208,7 @@ fn main() i32 {
     }
     return 0;
 }
-// SEP
+
 
 // NAME IfComparison2
 // ERR 0

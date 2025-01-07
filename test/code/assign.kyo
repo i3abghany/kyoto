@@ -7,7 +7,7 @@ fn main() i32 {
     x = 5;
     return x;
 }
-// SEP
+
 
 // NAME TestReAssignment
 // ERR 0
@@ -18,7 +18,7 @@ fn main() i32 {
     x = 12;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentAdd
 // ERR 0
@@ -29,7 +29,7 @@ fn main() i32 {
     x = 5 + 3;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentValueOutsideRange
 // ERR 1
@@ -40,7 +40,7 @@ fn main() i32 {
     x = 128;
     return 0;
 }
-// SEP
+
 
 // NAME TestAssignmentAddOverflow
 // ERR 1
@@ -51,7 +51,7 @@ fn main() i32 {
     x = 100 + 100;
     return 0;
 }
-// SEP
+
 
 // NAME TestAssignmentAddOverflow2
 // ERR 1
@@ -62,7 +62,7 @@ fn main() i32 {
     x = 100 + 50 + 50;
     return 0;
 }
-// SEP
+
 
 // NAME TestSimpleChainedAssignment
 // ERR 0
@@ -74,7 +74,7 @@ fn main() i32 {
     x = y = 5;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedReAssignment
 // ERR 0
@@ -86,7 +86,7 @@ fn main() i32 {
     x = y = 12;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentAdd
 // ERR 0
@@ -98,7 +98,7 @@ fn main() i32 {
     x = y = 5 + 3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentVariable
 // ERR 0
@@ -111,7 +111,7 @@ fn main() i32 {
     x = y = x + 3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentVariable
 // ERR 0
@@ -124,7 +124,7 @@ fn main() i32 {
     x = y = z;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentVariable2
 // ERR 0
@@ -138,7 +138,7 @@ fn main() i32 {
     x = y = x + 3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversion
 // ERR 1
@@ -150,7 +150,7 @@ fn main() i32 {
     x = y = 5;
     return y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversion2
 // ERR 1
@@ -163,7 +163,7 @@ fn main() i32 {
     x = y = x + 3;
     return y;
 }
-// SEP
+
 
 // NAME TestNegativeAssignment
 // ERR 0
@@ -174,7 +174,7 @@ fn main() i32 {
     x = -5;
     return x;
 }
-// SEP
+
 
 // NAME TestNegativeReAssignment
 // ERR 0
@@ -185,7 +185,7 @@ fn main() i32 {
     x = -12;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentSubtraction
 // ERR 0
@@ -196,7 +196,7 @@ fn main() i32 {
     x = 5 - 3;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentMultiplication
 // ERR 0
@@ -207,7 +207,7 @@ fn main() i32 {
     x = 5 * 3;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentDivision
 // ERR 0
@@ -218,7 +218,7 @@ fn main() i32 {
     x = 6 / 3;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentModulo
 // ERR 0
@@ -229,7 +229,7 @@ fn main() i32 {
     x = 7 % 3;
     return x;
 }
-// SEP
+
 
 // NAME TestAssignmentNegativeOverflow
 // ERR 1
@@ -240,7 +240,7 @@ fn main() i32 {
     x = -129;
     return 0;
 }
-// SEP
+
 
 // NAME TestAssignmentNegativeOverflow2
 // ERR 1
@@ -251,7 +251,7 @@ fn main() i32 {
     x = -128 - 1;
     return 0;
 }
-// SEP
+
 
 // NAME TestAssignmentPositiveOverflow
 // ERR 1
@@ -262,7 +262,7 @@ fn main() i32 {
     x = 127 + 1;
     return 0;
 }
-// SEP
+
 
 // NAME TestAssignmentPositiveOverflow2
 // ERR 1
@@ -273,7 +273,7 @@ fn main() i32 {
     x = 128;
     return 0;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegative
 // ERR 0
@@ -285,7 +285,7 @@ fn main() i32 {
     x = y = -5;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegativeReAssignment
 // ERR 0
@@ -297,7 +297,7 @@ fn main() i32 {
     x = y = -12;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegativeAdd
 // ERR 0
@@ -309,7 +309,7 @@ fn main() i32 {
     x = y = -5 + -3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegativeVariable
 // ERR 0
@@ -323,7 +323,7 @@ fn main() i32 {
     x = y = x + -3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegativeVariable2
 // ERR 0
@@ -336,7 +336,7 @@ fn main() i32 {
     x = y = z;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNegativeVariable3
 // ERR 0
@@ -351,7 +351,7 @@ fn main() i32 {
     x = y = x + -3;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversionNegative
 // ERR 1
@@ -363,7 +363,7 @@ fn main() i32 {
     x = y = -5;
     return y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversionNegative2
 // ERR 1
@@ -376,7 +376,7 @@ fn main() i32 {
     x = y = x + -3;
     return y;
 }
-// SEP
+
 
 // NAME TestAssignmentZero
 // ERR 0
@@ -387,7 +387,7 @@ fn main() i32 {
     x = 0;
     return x;
 }
-// SEP
+
 
 // NAME TestReAssignmentZero
 // ERR 0
@@ -398,7 +398,7 @@ fn main() i32 {
     x = 0;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZero
 // ERR 0
@@ -410,7 +410,7 @@ fn main() i32 {
     x = y = 0;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZeroReAssignment
 // ERR 0
@@ -422,7 +422,7 @@ fn main() i32 {
     x = y = 0;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZeroAdd
 // ERR 0
@@ -434,7 +434,7 @@ fn main() i32 {
     x = y = 0 + 0;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZeroVariable
 // ERR 0
@@ -447,7 +447,7 @@ fn main() i32 {
     x = y = x + 0;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZeroVariable2
 // ERR 0
@@ -460,7 +460,7 @@ fn main() i32 {
     x = y = z;
     return x + y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentZeroVariable3
 // ERR 0
@@ -474,7 +474,7 @@ fn main() i32 {
     x = y = x + 0;
     return x;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversionZero
 // ERR 1
@@ -486,7 +486,7 @@ fn main() i32 {
     x = y = 0;
     return y;
 }
-// SEP
+
 
 // NAME TestChainedAssignmentNontrivialConversionZero2
 // ERR 1
@@ -499,7 +499,7 @@ fn main() i32 {
     x = y = x + 0;
     return y;
 }
-// SEP
+
 
 // NAME TypelessIntegerAssignment
 // ERR 0
@@ -509,7 +509,7 @@ fn main() i32 {
     var x = 5;
     return x;
 }
-// SEP
+
 
 // NAME TypelessIntegerDeclarationWithoutInitialization
 // ERR 1
@@ -520,7 +520,7 @@ fn main() i32 {
     x = 5;
     return x;
 }
-// SEP
+
 
 // NAME TypelessIntegerInitializationWithAssignment
 // ERR 0
@@ -531,7 +531,7 @@ fn main() i32 {
     var y = x = -1
     return x;
 }
-// SEP
+
 
 // NAME TypelessBooleanAssignment
 // ERR 0
@@ -545,7 +545,7 @@ fn main() i32 {
     
     return 0;
 }
-// SEP
+
 
 // NAME TypelessBooleanDeclarationWithoutInitialization
 // ERR 0
@@ -560,7 +560,7 @@ fn main() i32 {
 
     return 0;
 }
-// SEP
+
 
 // NAME TypelessBooleanInitializationWithAssignment
 // ERR 0
@@ -575,7 +575,7 @@ fn main() i32 {
         return 0;
     }
 }
-// SEP
+
 
 // NAME BasicStringAssignment
 // ERR 0
@@ -585,7 +585,7 @@ fn main() i32 {
     var x: str = "hello";
     return 5;
 }
-// SEP
+
 
 // NAME TypelessStringAssignment
 // ERR 0
@@ -595,7 +595,7 @@ fn main() i32 {
     var x = "hello";
     return 5;
 }
-// SEP
+
 
 // NAME TypelessStringDeclarationWithoutInitialization
 // ERR 0
@@ -606,7 +606,7 @@ fn main() i32 {
     x = "hello";
     return 5;
 }
-// SEP
+
 
 // NAME TypelessStringInitializationWithAssignment
 // ERR 0
@@ -617,7 +617,7 @@ fn main() i32 {
     var y = x = "world";
     return 5;
 }
-// SEP
+
 
 // NAME StringAssignmentToInteger
 // ERR 1
@@ -627,7 +627,7 @@ fn main() i32 {
     var x: i32 = "hello";
     return 5;
 }
-// SEP
+
 
 // NAME StringAssignmentToBoolean
 // ERR 1
@@ -637,7 +637,7 @@ fn main() i32 {
     var x: bool = "hello";
     return 5;
 }
-// SEP
+
 
 // NAME IntegerAssignmentToString
 // ERR 1
@@ -647,7 +647,7 @@ fn main() i32 {
     var x: str = 5;
     return 5;
 }
-// SEP
+
 
 // NAME BooleanAssignmentToString
 // ERR 1
@@ -657,7 +657,7 @@ fn main() i32 {
     var x: str = true;
     return 5;
 }
-// SEP
+
 
 // NAME StringReassignmentToInteger
 // ERR 1
@@ -668,7 +668,7 @@ fn main() i32 {
     x = 5;
     return 5;
 }
-// SEP
+
 
 // NAME StringReassignmentToBoolean
 // ERR 1
@@ -679,7 +679,7 @@ fn main() i32 {
     x = true;
     return 5;
 }
-// SEP
+
 
 // NAME AssignVoid
 // ERR 1
@@ -689,7 +689,7 @@ fn main() i32 {
     var x: void = 5;
     return 5;
 }
-// SEP
+
 
 // NAME AssignVoidFromFunction
 // ERR 1

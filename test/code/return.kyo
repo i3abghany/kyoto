@@ -5,7 +5,7 @@
 fn main() i32 {
     return 0;
 }
-// SEP
+
 
 // NAME TestReturnSimple2
 // ERR 0
@@ -14,7 +14,7 @@ fn main() i32 {
 fn main() i32 {
     return 1;
 }
-// SEP
+
 
 // NAME TestMissingReturn
 // ERR 1
@@ -22,7 +22,7 @@ fn main() i32 {
 
 fn main() i32 {
 }
-// SEP
+
 
 // NAME TestReturnNegative
 // ERR 0
@@ -31,7 +31,7 @@ fn main() i32 {
 fn main() i32 {
     return -1;
 }
-// SEP
+
 
 // NAME InvalidReturnType
 // ERR 1
@@ -42,7 +42,7 @@ fn main() i32 {
     var y: i8 = x + 1;
     return y;
 }
-// SEP
+
 
 // NAME InvalidReturnTypeAdd
 // ERR 1
@@ -54,7 +54,7 @@ fn main() i32 {
     var z: i8 = x + y;
     return z;
 }
-// SEP
+
 
 // NAME NontrivialExtension
 // ERR 1
@@ -65,7 +65,7 @@ fn main() i32 {
     var y: i8 = x + 1;
     return y;
 }
-// SEP
+
 
 // NAME NontrivialTruncation
 // ERR 1
@@ -76,7 +76,7 @@ fn main() i32 {
     var y: i8 = x;
     return y;
 }
-// SEP
+
 
 // NAME NoReturn
 // ERR 1
@@ -85,7 +85,7 @@ fn main() i32 {
 fn main() i32 {
     var x: i8 = 10;
 }
-// SEP
+
 
 // NAME VoidNoReturn
 // ERR 0
@@ -97,7 +97,7 @@ fn main() i32 {
     func();
     return 5;
 }
-// SEP
+
 
 // NAME VoidNotReturnMultiplePaths
 // ERR 0
