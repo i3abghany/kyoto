@@ -237,9 +237,7 @@ llvm::Value* UnaryNode::gen()
     else if (op == UnaryOp::Positive) return expr_val;
     else if (op == UnaryOp::PrefixDecrement) return gen_prefix_decrement();
     else if (op == UnaryOp::PrefixIncrement) return gen_prefix_increment();
-    else {
-        assert(false && "Unknown unary operator");
-    }
+    else assert(false && "Unknown unary operator");
 
     return nullptr;
 }
@@ -251,8 +249,9 @@ llvm::Value* UnaryNode::gen_prefix_increment()
     auto expr_ltype = expr->get_type(compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
 
-    if (expr->is_trivially_evaluable() || !expr_ktype.is_integer()) {
-        throw std::runtime_error(fmt::format("Cannot apply op `++` to expression `{}`", expr->to_string()));
+    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype.is_integer()) {
+        throw std::runtime_error(fmt::format("Cannot apply op `++` to {}expression `{}`",
+                                             expr_ktype.is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
     auto* expr_ptr = expr->gen_ptr();
@@ -271,8 +270,9 @@ llvm::Value* UnaryNode::gen_prefix_decrement()
     auto expr_ltype = expr->get_type(compiler.get_context());
     auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
 
-    if (expr->is_trivially_evaluable() || !expr_ktype.is_integer()) {
-        throw std::runtime_error(fmt::format("Cannot apply op `++` to expression `{}`", expr->to_string()));
+    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype.is_integer()) {
+        throw std::runtime_error(fmt::format("Cannot apply op `--` to {}expression `{}`",
+                                             expr_ktype.is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
     auto* expr_ptr = expr->gen_ptr();

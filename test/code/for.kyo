@@ -122,3 +122,16 @@ fn main() i32 {
     }
     return sum;
 }
+
+
+// NAME ForLoopWithIncrementOpUpdate
+// ERR 0
+// RET 55
+
+fn main() i32 {
+    var sum = 0;
+    for (var i = 0; i <= 10; ++i) {
+        sum = sum + i;
+    }
+    return sum;
+}

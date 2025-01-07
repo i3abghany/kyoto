@@ -198,7 +198,8 @@ std::any ASTBuilderVisitor::visitNegationExpression(kyoto::KyotoParser::Negation
 
 std::any ASTBuilderVisitor::visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx)
 {
-    return visit(ctx->expression());
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::Positive, compiler);
 }
 
 std::any ASTBuilderVisitor::visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx)
