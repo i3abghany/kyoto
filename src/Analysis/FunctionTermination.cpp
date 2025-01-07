@@ -8,6 +8,8 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instruction.h"
 
+#include "kyoto/ModuleCompiler.h"
+
 FunctionTerminationPass::FunctionTerminationPass(ModuleCompiler& compiler)
     : compiler(compiler)
 {
@@ -71,11 +73,26 @@ void ensure_single_terminator(llvm::BasicBlock& bb)
     }
 }
 
+void FunctionTerminationPass::ensure_void_return(llvm::Function& func)
+{
+    for (auto& bb : func) {
+        if (bb.getTerminator()) continue;
+        if (bb.getParent()->getReturnType()->isVoidTy()) {
+            compiler.get_builder().SetInsertPoint(&bb);
+            compiler.get_builder().CreateRetVoid();
+        }
+    }
+}
+
 void FunctionTerminationPass::verify_function_termination(llvm::Function& func)
 {
     remove_unreachable_blocks(func);
 
     for (auto& bb : func) {
         ensure_single_terminator(bb);
+    }
+
+    if (func.getReturnType()->isVoidTy()) {
+        ensure_void_return(func);
     }
 }
