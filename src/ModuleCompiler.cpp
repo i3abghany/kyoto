@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
@@ -27,8 +28,10 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/raw_ostream.h"
-
-class KType;
+#include "kyoto/KType.h"
+#include "llvm/IR/Argument.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Value.h"
 
 ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     : code(code)

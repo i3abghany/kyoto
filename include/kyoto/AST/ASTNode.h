@@ -90,33 +90,6 @@ public:
     [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
 };
 
-class DeclarationStatementNode : public ASTNode {
-    std::string name;
-    KType* type;
-    ModuleCompiler& compiler;
-
-public:
-    DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler);
-    ~DeclarationStatementNode();
-
-    [[nodiscard]] std::string to_string() const override;
-    [[nodiscard]] llvm::Value* gen() override;
-};
-
-class FullDeclarationStatementNode : public ASTNode {
-    std::string name;
-    KType* type;
-    ExpressionNode* expr;
-    ModuleCompiler& compiler;
-
-public:
-    FullDeclarationStatementNode(std::string name, KType* type, ExpressionNode* expr, ModuleCompiler& compiler);
-    ~FullDeclarationStatementNode();
-
-    [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
-};
-
 class AssignmentNode : public ExpressionNode {
 public:
     AssignmentNode(std::string name, ExpressionNode* expr, ModuleCompiler& compiler);

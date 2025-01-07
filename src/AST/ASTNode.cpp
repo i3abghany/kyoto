@@ -1,9 +1,9 @@
-#include <cassert>
 #include <fmt/core.h>
+#include <stdint.h>
+#include <cassert>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -14,14 +14,12 @@
 #include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
 #include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/Twine.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Type.h"
 #include "llvm/Support/Casting.h"
@@ -148,51 +146,6 @@ llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
     return symbol.value().alloc->getAllocatedType();
 }
 
-DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler)
-    : name(name)
-    , type(ktype)
-    , compiler(compiler)
-{
-}
-
-DeclarationStatementNode::~DeclarationStatementNode()
-{
-    delete type;
-}
-
-std::string DeclarationStatementNode::to_string() const
-{
-    return fmt::format("DeclarationNode({}, {})", name, type->to_string());
-}
-
-llvm::Value* DeclarationStatementNode::gen()
-{
-    auto* ltype = get_llvm_type(type, compiler.get_context());
-    auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-    compiler.add_symbol(name, Symbol::primitive(val, dynamic_cast<PrimitiveType*>(type)->get_kind()));
-    return val;
-}
-
-FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KType* ktype, ExpressionNode* expr,
-                                                           ModuleCompiler& compiler)
-    : name(name)
-    , type(ktype)
-    , expr(expr)
-    , compiler(compiler)
-{
-}
-
-FullDeclarationStatementNode::~FullDeclarationStatementNode()
-{
-    delete type;
-    delete expr;
-}
-
-std::string FullDeclarationStatementNode::to_string() const
-{
-    return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
-}
-
 void ExpressionNode::check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
                                              const std::string& target_name)
 {
@@ -269,42 +222,6 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
     }
 
     assert(false && "Unreachable");
-}
-
-llvm::Value* FullDeclarationStatementNode::gen()
-{
-    if (!type) {
-        auto* expr_type = expr->get_type(compiler.get_context());
-        type = new PrimitiveType(PrimitiveType::from_llvm_type(expr_type).get_kind());
-    }
-
-    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    auto* ktype = dynamic_cast<PrimitiveType*>(type);
-
-    if (ktype->is_void()) {
-        throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
-    } else if (pt.is_void()) {
-        throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
-    }
-
-    auto* ltype = get_llvm_type(type, compiler.get_context());
-    auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-
-    llvm::Value* expr_val = nullptr;
-    if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
-        expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
-    } else if (ktype->is_string() && pt.is_string()) {
-        expr_val = expr->gen();
-    } else {
-        throw std::runtime_error(
-            fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                        expr->to_string(), pt.to_string(), name, type->to_string()));
-    }
-
-    compiler.get_builder().CreateStore(expr_val, alloca);
-    compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type)->get_kind()));
-
-    return alloca;
 }
 
 AssignmentNode::AssignmentNode(std::string name, ExpressionNode* expr, ModuleCompiler& compiler)

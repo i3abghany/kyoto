@@ -7,8 +7,9 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instruction.h"
-
 #include "kyoto/ModuleCompiler.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Type.h"
 
 FunctionTerminationPass::FunctionTerminationPass(ModuleCompiler& compiler)
     : compiler(compiler)

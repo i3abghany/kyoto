@@ -18,6 +18,7 @@ class KType;
 namespace llvm {
 class raw_string_ostream;
 class BasicBlock;
+class Function;
 }
 
 class ModuleCompiler {
