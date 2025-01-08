@@ -6,7 +6,7 @@ fn fibo(n: i32) i32 {
 }
 
 fn main() i32 {
-    for (var i = 0; i <= 10; i = i + 1) {
+    for (var i = 0; i <= 10; ++i) {
         printf("fibo(%d) = %d!\n", i, fibo(i));
     }
     return 0;
