@@ -49,7 +49,7 @@ FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KTy
 
 FullDeclarationStatementNode::~FullDeclarationStatementNode()
 {
-    delete type;
+    if (type && !type->is_void()) delete type;
     delete expr;
 }
 
@@ -65,8 +65,7 @@ llvm::Value* FullDeclarationStatementNode::gen()
         type = KType::from_llvm_type(expr_type);
     }
 
-    auto* pt = KType::from_llvm_type(expr->get_type(compiler.get_context()));
-
+    auto pt = std::unique_ptr<KType>(KType::from_llvm_type(expr->get_type(compiler.get_context())));
     if (type->is_void()) {
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
     } else if (pt->is_void()) {
