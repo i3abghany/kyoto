@@ -64,12 +64,12 @@ size_t SymbolTable::n_scopes() const
 
 Symbol Symbol::primitive(llvm::AllocaInst* value, PrimitiveType::Kind kind)
 {
-    return Symbol(value, true, kind);
+    auto* type = new PrimitiveType(kind);
+    return Symbol(value, true, type);
 }
 
-Symbol::Symbol(llvm::AllocaInst* alloc, bool is_primitive, PrimitiveType::Kind kind)
+Symbol::Symbol(llvm::AllocaInst* alloc, bool is_primitive, KType* type)
     : alloc(alloc)
-    , is_primitive(is_primitive)
-    , kind(kind)
+    , type(type)
 {
 }

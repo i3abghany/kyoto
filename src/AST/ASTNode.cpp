@@ -24,7 +24,13 @@ class LLVMContext;
 llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
 {
     auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
-    assert(primitive_type && "Only primitive types are supported");
+    if (!primitive_type) {
+        auto ptr_type = dynamic_cast<const PointerType*>(type);
+        if (!ptr_type) {
+            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
+        }
+        return llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
+    }
 
     switch (primitive_type->get_kind()) {
     case PrimitiveType::Kind::Boolean:
@@ -127,23 +133,21 @@ llvm::Value* ReturnStatementNode::gen()
 {
     auto* fn_ret_type = compiler.get_fn_return_type();
 
-    auto* ret_ktype = dynamic_cast<PrimitiveType*>(fn_ret_type);
-    auto expr_ktype = expr ? PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()))
-                           : PrimitiveType(PrimitiveType::Kind::Void);
+    auto* expr_ktype = expr ? KType::from_llvm_type(expr->get_type(compiler.get_context())) : KType::get_void();
     auto fn_name = compiler.get_current_function_node()->get_name();
 
     llvm::Value* expr_val = nullptr;
-    if (ret_ktype->is_void() && !expr) {
+    if (fn_ret_type->is_void() && !expr) {
         return compiler.get_builder().CreateRetVoid();
-    } else if (ret_ktype->is_integer() && expr_ktype.is_integer()
-               || ret_ktype->is_boolean() && expr_ktype.is_boolean()) {
+    } else if (fn_ret_type->is_integer() && expr_ktype->is_integer()
+               || fn_ret_type->is_boolean() && expr_ktype->is_boolean()) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return", fn_name);
-    } else if (ret_ktype->is_string() && expr_ktype.is_string()) {
+    } else if (fn_ret_type->is_string() && expr_ktype->is_string()) {
         expr_val = expr->gen();
     } else {
         throw std::runtime_error(fmt::format(
             "Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
-            expr->to_string(), expr_ktype.to_string(), fn_name, fn_ret_type->to_string()));
+            expr->to_string(), expr_ktype->to_string(), fn_name, fn_ret_type->to_string()));
     }
 
     return compiler.get_builder().CreateRet(expr_val);
@@ -197,7 +201,8 @@ FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args,
 
 FunctionNode::~FunctionNode()
 {
-    delete ret_type;
+    // the void type is a singleton, so we don't need to delete it
+    if (!ret_type->is_void()) delete ret_type;
     delete body;
     for (auto& arg : args)
         delete arg.type;

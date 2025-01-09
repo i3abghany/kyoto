@@ -17,11 +17,10 @@ class Value;
 
 struct Symbol {
     llvm::AllocaInst* alloc;
-    bool is_primitive;
-    PrimitiveType::Kind kind;
+    KType* type;
 
     static Symbol primitive(llvm::AllocaInst* value, PrimitiveType::Kind kind);
-    Symbol(llvm::AllocaInst* value, bool is_primitive, PrimitiveType::Kind kind);
+    Symbol(llvm::AllocaInst* value, bool is_primitive, KType* type);
     Symbol() = default;
 };
 

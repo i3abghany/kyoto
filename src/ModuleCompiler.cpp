@@ -167,7 +167,8 @@ void ModuleCompiler::push_scope()
 {
     symbol_table.push_scope();
 
-    // global scope + outer-most function scope
+    // We insert function arguments into the symbol table. This is once we are
+    // in the second scope as the first scope is the global scope.
     if (symbol_table.n_scopes() == 2) {
         int i = 0;
         for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
@@ -177,7 +178,7 @@ void ModuleCompiler::push_scope()
             auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
             builder.CreateStore(arg, arg_alloc);
             symbol_table.add_symbol(arg_name,
-                                    Symbol::primitive(arg_alloc, PrimitiveType::from_llvm_type(arg_type).get_kind()));
+                                    Symbol { arg_alloc, arg_type->isPointerTy(), KType::from_llvm_type(arg_type) });
         }
     }
 }

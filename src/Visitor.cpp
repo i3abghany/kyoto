@@ -44,14 +44,11 @@ std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
     auto name = ctx->IDENTIFIER()->getText();
     std::vector<FunctionNode::Parameter> args;
     for (auto& paramCtx : ctx->parameterList()->parameter()) {
-        auto type_str = paramCtx->type()->getText();
-        // FIXME: only accounts for primitive types
-        auto type = parse_primitive_type(type_str);
-        args.push_back({ paramCtx->IDENTIFIER()->getText(), new PrimitiveType(type) });
+        auto* type = std::any_cast<KType*>(visit(paramCtx->type()));
+        args.push_back({ paramCtx->IDENTIFIER()->getText(), type });
     }
 
-    auto ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
-    auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
+    auto* ret_type = std::any_cast<KType*>(visit(ctx->type()));
     auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
     return (ASTNode*)new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
 }
@@ -61,15 +58,12 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
     auto name = ctx->IDENTIFIER()->getText();
     std::vector<FunctionNode::Parameter> args;
 
-    for (auto paramCtx : ctx->parameterList()->parameter()) {
-        auto type_str = paramCtx->type()->getText();
-        // FIXME: only accounts for primitive types
-        auto type = parse_primitive_type(type_str);
-        args.push_back({ paramCtx->IDENTIFIER()->getText(), new PrimitiveType(type) });
+    for (auto param_ctx : ctx->parameterList()->parameter()) {
+        auto type = std::any_cast<KType*>(visit(param_ctx->type()));
+        args.push_back({ param_ctx->IDENTIFIER()->getText(), type });
     }
 
-    auto ret_type_str = ctx->type() ? ctx->type()->getText() : "void";
-    auto ret_type = new PrimitiveType(parse_primitive_type(ret_type_str));
+    auto* ret_type = ctx->type() ? std::any_cast<KType*>(visit(ctx->type())) : KType::get_void();
     ASTNode* body = nullptr;
     try {
         body = std::any_cast<ASTNode*>(visit(ctx->block()));
@@ -98,16 +92,14 @@ std::any ASTBuilderVisitor::visitExpressionStatement(kyoto::KyotoParser::Express
 
 std::any ASTBuilderVisitor::visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx)
 {
-    std::string type_str = ctx->type()->getText();
-    auto type = new PrimitiveType(parse_primitive_type(type_str));
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
     std::string name = ctx->IDENTIFIER()->getText();
     return (ASTNode*)new DeclarationStatementNode(name, type, compiler);
 }
 
 std::any ASTBuilderVisitor::visitRegularDeclaration(kyoto::KyotoParser::RegularDeclarationContext* ctx)
 {
-    std::string type_str = ctx->type()->getText();
-    auto type = new PrimitiveType(parse_primitive_type(type_str));
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
@@ -366,6 +358,15 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
     return (ASTNode*)new ForStatementNode(init, condition, update, body, compiler);
 }
 
+std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)
+{
+    // String is a special case. It does not use pointer type syntax. `str` is a synonym for `char*`.
+    if (ctx->STRING()) return (KType*)new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
+
+    if (ctx->type()) return (KType*)new PointerType(std::any_cast<KType*>(visit(ctx->type())));
+    else return (KType*)new PrimitiveType(parse_primitive_type(ctx->getText()));
+}
+
 PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type) const
 {
     if (type == "bool") return PrimitiveType::Kind::Boolean;
@@ -376,7 +377,6 @@ PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& t
     if (type == "i64") return PrimitiveType::Kind::I64;
     if (type == "f32") return PrimitiveType::Kind::F32;
     if (type == "f64") return PrimitiveType::Kind::F64;
-    if (type == "str") return PrimitiveType::Kind::String;
     if (type == "void") return PrimitiveType::Kind::Void;
     return PrimitiveType::Kind::Unknown;
 }
