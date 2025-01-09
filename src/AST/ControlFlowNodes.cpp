@@ -77,10 +77,10 @@ llvm::Value* IfStatementNode::gen()
 
     for (size_t i = 0; i < body_bbs.size(); i++) {
         auto* cond_type = conditions[i]->get_type(compiler.get_context());
-        auto cond_ktype = PrimitiveType::from_llvm_type(cond_type);
+        auto* cond_ktype = KType::from_llvm_type(cond_type);
 
-        if (cond_ktype.get_kind() != PrimitiveType::Kind::Boolean) {
-            throw std::runtime_error(fmt::format("If condition must be of type bool, got {}", cond_ktype.to_string()));
+        if (!cond_ktype->is_boolean()) {
+            throw std::runtime_error(fmt::format("If condition must be of type bool, got {}", cond_ktype->to_string()));
         }
 
         compiler.get_builder().SetInsertPoint(jumps_bbs[i]);
@@ -148,8 +148,9 @@ llvm::Value* ForStatementNode::gen()
         auto* cond_type = condition->get_expr()->get_type(compiler.get_context());
         auto cond_ktype = PrimitiveType::from_llvm_type(cond_type);
 
-        if (cond_ktype.get_kind() != PrimitiveType::Kind::Boolean) {
-            throw std::runtime_error(fmt::format("For condition must be of type bool, got {}", cond_ktype.to_string()));
+        if (!cond_ktype->is_boolean()) {
+            throw std::runtime_error(
+                fmt::format("For condition must be of type bool, got {}", cond_ktype->to_string()));
         }
 
         // if evaluates to false, set the insert point to the out block

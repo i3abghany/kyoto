@@ -33,7 +33,8 @@ llvm::Value* DeclarationStatementNode::gen()
 {
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
-    compiler.add_symbol(name, Symbol::primitive(val, dynamic_cast<PrimitiveType*>(type)->get_kind()));
+
+    compiler.add_symbol(name, Symbol { val, !type->is_pointer(), type });
     return val;
 }
 
@@ -61,15 +62,14 @@ llvm::Value* FullDeclarationStatementNode::gen()
 {
     if (!type) {
         auto* expr_type = expr->get_type(compiler.get_context());
-        type = new PrimitiveType(PrimitiveType::from_llvm_type(expr_type).get_kind());
+        type = KType::from_llvm_type(expr_type);
     }
 
-    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    auto* ktype = dynamic_cast<PrimitiveType*>(type);
+    auto* pt = KType::from_llvm_type(expr->get_type(compiler.get_context()));
 
-    if (ktype->is_void()) {
+    if (type->is_void()) {
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
-    } else if (pt.is_void()) {
+    } else if (pt->is_void()) {
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
 
@@ -77,18 +77,17 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
     llvm::Value* expr_val = nullptr;
-    if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
+    if (type->is_integer() && pt->is_integer() || type->is_boolean() && pt->is_boolean()) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
-    } else if (ktype->is_string() && pt.is_string()) {
+    } else if (type->is_string() && pt->is_string()) {
         expr_val = expr->gen();
     } else {
         throw std::runtime_error(
             fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                        expr->to_string(), pt.to_string(), name, type->to_string()));
+                        expr->to_string(), pt->to_string(), name, type->to_string()));
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
-    compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type)->get_kind()));
-
+    compiler.add_symbol(name, Symbol { alloca, !type->is_pointer(), type });
     return alloca;
 }

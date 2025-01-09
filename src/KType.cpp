@@ -4,6 +4,12 @@
 
 #include "llvm/IR/Type.h"
 
+KType* KType::get_void()
+{
+    static PrimitiveType void_type(PrimitiveType::Kind::Void);
+    return &void_type;
+}
+
 PrimitiveType::PrimitiveType(Kind kind)
     : kind(kind)
 {
@@ -28,14 +34,20 @@ std::string PrimitiveType::to_string() const
         return "F32";
     case Kind::F64:
         return "F64";
-    case Kind::String:
-        return "String";
     case Kind::Void:
         return "Void";
     case Kind::Unknown:
         return "Unknown";
     }
     return "Unknown";
+}
+
+bool PrimitiveType::operator==(const KType& other) const
+{
+    auto* other_primitive = dynamic_cast<const PrimitiveType*>(&other);
+    if (!other_primitive) return false;
+
+    return kind == other_primitive->kind;
 }
 
 bool PrimitiveType::is_integer() const
@@ -61,11 +73,6 @@ bool PrimitiveType::is_numeric() const
 bool PrimitiveType::is_char() const
 {
     return kind == Kind::Char;
-}
-
-bool PrimitiveType::is_string() const
-{
-    return kind == Kind::String;
 }
 
 bool PrimitiveType::is_void() const
@@ -104,22 +111,62 @@ PrimitiveType::Kind PrimitiveType::get_kind() const
     return kind;
 }
 
-PrimitiveType PrimitiveType::from_llvm_type(const llvm::Type* type)
+KType* KType::from_llvm_type(const llvm::Type* type)
 {
-    if (type->isIntegerTy(1)) return PrimitiveType(Kind::Boolean);
-    if (type->isIntegerTy(8)) return PrimitiveType(Kind::I8);
-    if (type->isIntegerTy(16)) return PrimitiveType(Kind::I16);
-    if (type->isIntegerTy(32)) return PrimitiveType(Kind::I32);
-    if (type->isIntegerTy(64)) return PrimitiveType(Kind::I64);
+    using Kind = PrimitiveType::Kind;
+    if (type->isIntegerTy(1)) return new PrimitiveType(Kind::Boolean);
+    if (type->isIntegerTy(8)) return new PrimitiveType(Kind::I8);
+    if (type->isIntegerTy(16)) return new PrimitiveType(Kind::I16);
+    if (type->isIntegerTy(32)) return new PrimitiveType(Kind::I32);
+    if (type->isIntegerTy(64)) return new PrimitiveType(Kind::I64);
 
-    if (type->isFloatTy()) return PrimitiveType(Kind::F32);
-    if (type->isDoubleTy()) return PrimitiveType(Kind::F64);
+    if (type->isFloatTy()) return new PrimitiveType(Kind::F32);
+    if (type->isDoubleTy()) return new PrimitiveType(Kind::F64);
 
     // The only "pointer" type we support for now is string, so we can safely
     // return it here.
-    if (type->isPointerTy()) return PrimitiveType(Kind::String);
+    if (type->isPointerTy()) return new PointerType(new PrimitiveType(Kind::Char));
 
-    if (type->isVoidTy()) return PrimitiveType(Kind::Void);
+    if (type->isVoidTy()) return new PrimitiveType(Kind::Void);
 
-    return PrimitiveType(Kind::Unknown);
+    return new PrimitiveType(Kind::Unknown);
+}
+
+PointerType::PointerType(KType* pointee)
+    : pointee(pointee)
+{
+}
+
+PointerType::~PointerType()
+{
+    delete pointee;
+}
+
+std::string PointerType::to_string() const
+{
+    return pointee->to_string() + "*";
+}
+
+bool PointerType::is_pointer() const
+{
+    return true;
+}
+
+KType* PointerType::get_pointee() const
+{
+    return pointee;
+}
+
+bool PointerType::is_string() const
+{
+    auto* pt = pointee->as<PrimitiveType>();
+    return pt && pt->get_kind() == PrimitiveType::Kind::Char;
+}
+
+bool PointerType::operator==(const KType& other) const
+{
+    auto* other_pointer = dynamic_cast<const PointerType*>(&other);
+    if (!other_pointer) return false;
+
+    return *pointee == *other_pointer->pointee;
 }

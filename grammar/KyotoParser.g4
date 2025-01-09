@@ -116,6 +116,8 @@ parameterList:
 
 parameter: IDENTIFIER COLON type;
 
+pointerSuffix: ASTERISK;
+
 type:
 	BOOLEAN
 	| CHAR
@@ -126,4 +128,5 @@ type:
 	| F32
 	| F64
 	| STRING
-	| VOID;
+	| VOID
+	| type pointerSuffix+;

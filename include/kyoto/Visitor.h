@@ -58,6 +58,8 @@ public:
     std::any visitForCondition(kyoto::KyotoParser::ForConditionContext* ctx) override;
     std::any visitForUpdate(kyoto::KyotoParser::ForUpdateContext* ctx) override;
 
+    std::any visitType(kyoto::KyotoParser::TypeContext* ctx) override;
+
 private:
     PrimitiveType::Kind parse_primitive_type(const std::string& type) const;
     std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind) const;

@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <fmt/core.h>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 
@@ -45,14 +44,14 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
 {
     if (!expr->is_trivially_evaluable()) return nullptr;
 
-    auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
-    auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    check_boolean_promotion(&expr_ktype, target_type, target_name);
+    auto* target_type = target_ktype->as<PrimitiveType>();
+    auto* expr_ktype = KType::from_llvm_type(expr->get_type(compiler.get_context()))->as<PrimitiveType>();
+    check_boolean_promotion(expr_ktype, target_type, target_name);
 
     auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr->trivial_gen());
     assert(constant_int && "Trivial value must be a constant int");
-    auto int_val = target_type->is_boolean() || expr_ktype.is_boolean() ? constant_int->getZExtValue()
-                                                                        : constant_int->getSExtValue();
+    auto int_val = target_type->is_boolean() || expr_ktype->is_boolean() ? constant_int->getZExtValue()
+                                                                         : constant_int->getSExtValue();
 
     check_int_range_fit(int_val, target_type, compiler, expr->to_string(), target_name);
     return llvm::ConstantInt::get(get_llvm_type(target_type, compiler.get_context()), int_val, true);
@@ -77,13 +76,13 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
                                                        const std::string& target_name)
 {
     auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
-    auto expr_ktype = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype.get_kind(), target_type->get_kind());
+    auto* expr_ktype = KType::from_llvm_type(expr->get_type(compiler.get_context()))->as<PrimitiveType>();
+    bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype->get_kind(), target_type->get_kind());
     bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
     if (!is_compatible && !is_trivially_evaluable) {
         throw std::runtime_error(fmt::format("Cannot {} value of type `{}`. Expected `{}`{}", what,
-                                             expr_ktype.to_string(), target_type->to_string(),
+                                             expr_ktype->to_string(), target_type->to_string(),
                                              target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
     }
 
@@ -92,7 +91,7 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
     }
 
     if (is_compatible) {
-        return dynamic_integer_conversion(expr->gen(), &expr_ktype, target_type, compiler);
+        return dynamic_integer_conversion(expr->gen(), expr_ktype, target_type, compiler);
     }
 
     assert(false && "Unreachable");
@@ -135,7 +134,6 @@ llvm::Type* IdentifierExpressionNode::get_type(llvm::LLVMContext& context) const
     if (!symbol.has_value()) {
         throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
     }
-    auto stored_type = symbol.value().kind;
     return symbol.value().alloc->getAllocatedType();
 }
 
@@ -164,19 +162,18 @@ llvm::Value* AssignmentNode::gen()
     }
 
     auto symbol = symbol_opt.value();
-    auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
+    auto* type = symbol.type;
 
-    auto* ktype = dynamic_cast<PrimitiveType*>(type.get());
     llvm::Value* expr_val = nullptr;
-    auto pt = PrimitiveType::from_llvm_type(expr->get_type(compiler.get_context()));
-    if (ktype->is_integer() && pt.is_integer() || ktype->is_boolean() && pt.is_boolean()) {
-        expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
-    } else if (ktype->is_string() && pt.is_string()) {
+    auto* pt = KType::from_llvm_type(expr->get_type(compiler.get_context()));
+    if (type->is_integer() && pt->is_integer() || type->is_boolean() && pt->is_boolean()) {
+        expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
+    } else if (type->is_string() && pt->is_string()) {
         expr_val = expr->gen();
     } else {
         throw std::runtime_error(
             fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                        expr->to_string(), pt.to_string(), name, type->to_string()));
+                        expr->to_string(), pt->to_string(), name, type->to_string()));
     }
 
     compiler.get_builder().CreateStore(expr_val, symbol.alloc);
@@ -197,9 +194,9 @@ llvm::Value* AssignmentNode::trivial_gen()
     }
 
     auto symbol = symbol_opt.value();
-    auto type = std::unique_ptr<KType>(new PrimitiveType(symbol.kind));
-    auto* ltype = get_llvm_type(type.get(), compiler.get_context());
-    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type.get(), compiler, "assign", name);
+    auto* type = symbol.type;
+    auto* ltype = get_llvm_type(type, compiler.get_context());
+    auto* expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
     compiler.get_builder().CreateStore(expr_val, symbol.alloc);
 
     return expr_val;
@@ -246,12 +243,12 @@ llvm::Value* UnaryNode::gen_prefix_increment()
 {
     assert(op == UnaryOp::PrefixIncrement && "Expected prefix increment unary");
 
-    auto expr_ltype = expr->get_type(compiler.get_context());
-    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+    auto* expr_ltype = expr->get_type(compiler.get_context());
+    auto* expr_ktype = KType::from_llvm_type(expr_ltype);
 
-    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype.is_integer()) {
+    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
         throw std::runtime_error(fmt::format("Cannot apply op `++` to {}expression `{}`",
-                                             expr_ktype.is_integer() ? "" : "lvalue", expr->to_string()));
+                                             expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
     auto* expr_ptr = expr->gen_ptr();
@@ -267,12 +264,12 @@ llvm::Value* UnaryNode::gen_prefix_decrement()
 {
     assert(op == UnaryOp::PrefixDecrement && "Expected prefix decrement unary");
 
-    auto expr_ltype = expr->get_type(compiler.get_context());
-    auto expr_ktype = PrimitiveType::from_llvm_type(expr_ltype);
+    auto* expr_ltype = expr->get_type(compiler.get_context());
+    auto* expr_ktype = KType::from_llvm_type(expr_ltype);
 
-    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype.is_integer()) {
+    if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
         throw std::runtime_error(fmt::format("Cannot apply op `--` to {}expression `{}`",
-                                             expr_ktype.is_integer() ? "" : "lvalue", expr->to_string()));
+                                             expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
     auto* expr_ptr = expr->gen_ptr();
