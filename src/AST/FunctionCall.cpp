@@ -1,5 +1,6 @@
 #include "kyoto/AST/FunctionCall.h"
 
+#include <assert.h>
 #include <fmt/core.h>
 #include <stddef.h>
 #include <stdexcept>
@@ -65,7 +66,7 @@ llvm::Type* FunctionCall::get_type(llvm::LLVMContext& context) const
 
 llvm::Value* FunctionCall::trivial_gen()
 {
-    throw std::runtime_error("Function call is not trivially evaluable");
+    assert(false && "Function call is not trivially evaluable");
     return nullptr;
 }
 
