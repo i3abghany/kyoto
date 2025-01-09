@@ -1,5 +1,6 @@
 #include <cassert>
 #include <fmt/core.h>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>

@@ -1,6 +1,7 @@
 #include "kyoto/AST/ControlFlowNodes.h"
 
 #include <fmt/core.h>
+#include <memory>
 #include <stddef.h>
 #include <stdexcept>
 #include <utility>

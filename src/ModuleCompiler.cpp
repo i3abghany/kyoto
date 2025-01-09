@@ -1,6 +1,7 @@
 #include "kyoto/ModuleCompiler.h"
 
 #include <any>
+#include <assert.h>
 #include <cstdlib>
 #include <exception>
 #include <iostream>

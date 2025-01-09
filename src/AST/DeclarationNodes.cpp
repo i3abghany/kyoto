@@ -1,6 +1,7 @@
 #include "kyoto/AST/DeclarationNodes.h"
 
 #include <fmt/core.h>
+#include <memory>
 #include <stdexcept>
 
 #include "kyoto/AST/ExpressionNode.h"

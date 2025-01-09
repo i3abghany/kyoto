@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <fmt/core.h>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
