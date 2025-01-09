@@ -170,6 +170,12 @@ std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::Identi
     return (ExpressionNode*)new IdentifierExpressionNode(ctx->IDENTIFIER()->getText(), compiler);
 }
 
+std::any ASTBuilderVisitor::visitAddressOfExpression(kyoto::KyotoParser::AddressOfExpressionContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::AddressOf, compiler);
+}
+
 std::any ASTBuilderVisitor::visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx)
 {
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));

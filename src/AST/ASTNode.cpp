@@ -30,7 +30,8 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context
         if (!ptr_type) {
             throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
         }
-        return llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
+        // return llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
+        return llvm::PointerType::get(context, 0);
     }
 
     switch (primitive_type->get_kind()) {

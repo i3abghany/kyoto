@@ -90,6 +90,7 @@ public:
         Positive,
         PrefixIncrement,
         PrefixDecrement,
+        AddressOf,
     };
 
     UnaryNode(ExpressionNode* expr, UnaryOp op, ModuleCompiler& compiler);

@@ -236,6 +236,7 @@ llvm::Value* UnaryNode::gen()
     else if (op == UnaryOp::Positive) return expr_val;
     else if (op == UnaryOp::PrefixDecrement) return gen_prefix_decrement();
     else if (op == UnaryOp::PrefixIncrement) return gen_prefix_increment();
+    else if (op == UnaryOp::AddressOf) return expr->gen_ptr();
     else assert(false && "Unknown unary operator");
 
     return nullptr;
@@ -306,6 +307,7 @@ bool UnaryNode::is_trivially_evaluable() const
 
 llvm::Type* UnaryNode::get_type(llvm::LLVMContext& context) const
 {
+    if (op == UnaryOp::AddressOf) return llvm::PointerType::get(context, 0);
     return expr->get_type(context);
 }
 

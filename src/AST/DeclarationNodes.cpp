@@ -81,6 +81,14 @@ llvm::Value* FullDeclarationStatementNode::gen()
         expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
     } else if (type->is_string() && pt->is_string()) {
         expr_val = expr->gen();
+    } else if (type->is_pointer() && pt->is_pointer()) {
+        if (type == pt.get()) {
+            expr_val = expr->gen_ptr();
+        } else {
+            throw std::runtime_error(
+                fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                            expr->to_string(), pt->to_string(), name, type->to_string()));
+        }
     } else {
         throw std::runtime_error(
             fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
