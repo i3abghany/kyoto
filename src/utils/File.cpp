@@ -10,6 +10,7 @@
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/pipe.hpp>
+#include <boost/process/search_path.hpp>
 #include <fmt/core.h>
 #include <fstream>
 #include <iterator>
@@ -42,9 +43,15 @@ int32_t File::execute_ir(const std::string& ir)
 {
     auto temp_file = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("temp-%%%%-%%%%.ll");
     std::ofstream ofs(temp_file.string());
-    assert(ofs.is_open());
+    if (!ofs.is_open()) {
+        throw std::runtime_error("Failed to open temporary file");
+    }
     ofs << ir;
     ofs.close();
+
+    if (!is_executable("lli")) {
+        throw std::runtime_error("Could not find `lli` in PATH");
+    }
 
     boost::process::ipstream error_stream;
     boost::process::child proc { "lli " + temp_file.string(), boost::process::std_err > error_stream };
@@ -52,6 +59,12 @@ int32_t File::execute_ir(const std::string& ir)
     int exit_code = proc.exit_code();
     boost::filesystem::remove(temp_file);
     return ((exit_code & 0xFF) << 24) >> 24;
+}
+
+bool File::is_executable(const std::string& name)
+{
+    auto path = boost::process::search_path(name);
+    return !path.empty();
 }
 
 std::vector<TestCase> File::split_test_cases(const std::string& source)
