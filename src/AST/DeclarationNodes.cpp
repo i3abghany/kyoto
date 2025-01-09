@@ -34,12 +34,7 @@ llvm::Value* DeclarationStatementNode::gen()
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
-    if (type->is_string()) {
-        compiler.add_symbol(name, Symbol { val, false, type });
-    } else {
-        compiler.add_symbol(name, Symbol::primitive(val, dynamic_cast<PrimitiveType*>(type)->get_kind()));
-    }
-
+    compiler.add_symbol(name, Symbol { val, !type->is_pointer(), type });
     return val;
 }
 
@@ -93,11 +88,6 @@ llvm::Value* FullDeclarationStatementNode::gen()
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
-    if (type->is_string()) {
-        compiler.add_symbol(name, Symbol { alloca, false, pt });
-    } else {
-        compiler.add_symbol(name, Symbol::primitive(alloca, dynamic_cast<PrimitiveType*>(type)->get_kind()));
-    }
-
+    compiler.add_symbol(name, Symbol { alloca, !type->is_pointer(), type });
     return alloca;
 }
