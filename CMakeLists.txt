@@ -62,6 +62,3 @@ target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} 
 
 include(GoogleTest)
 gtest_discover_tests(ktest)
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -fno-omit-frame-pointer")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address,undefined")
