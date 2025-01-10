@@ -144,14 +144,12 @@ std::optional<std::string> ModuleCompiler::gen_ir()
     if (!verify_module(err)) {
         std::cerr << "Error: " << err.str() << std::endl;
         return std::nullopt;
-    } else {
-        std::string llvm_ir;
-        llvm::raw_string_ostream os(llvm_ir);
-        module->print(os, nullptr);
-        return os.str();
     }
 
-    return std::nullopt;
+    std::string llvm_ir;
+    llvm::raw_string_ostream os(llvm_ir);
+    module->print(os, nullptr);
+    return os.str();
 }
 
 std::optional<Symbol> ModuleCompiler::get_symbol(const std::string& name)
@@ -161,7 +159,7 @@ std::optional<Symbol> ModuleCompiler::get_symbol(const std::string& name)
 
 void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 {
-    symbol_table.add_symbol(name, std::move(symbol));
+    symbol_table.add_symbol(name, symbol);
 }
 
 void ModuleCompiler::push_scope()
@@ -178,8 +176,9 @@ void ModuleCompiler::push_scope()
             auto arg_name = current_fn_node->get_params()[i++].name;
             auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
             builder.CreateStore(arg, arg_alloc);
-            symbol_table.add_symbol(arg_name,
-                                    Symbol { arg_alloc, arg_type->isPointerTy(), KType::from_llvm_type(arg_type) });
+            symbol_table.add_symbol(
+                arg_name,
+                Symbol { arg_alloc, arg_type->isPointerTy(), current_fn_node->get_params()[i - 1].type->copy() });
         }
     }
 }
