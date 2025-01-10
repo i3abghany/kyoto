@@ -108,7 +108,7 @@ IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompi
 
 std::string IdentifierExpressionNode::to_string() const
 {
-    return fmt::format("IdentifierNode({})", name);
+    return fmt::format("Identifier({})", name);
 }
 
 llvm::Value* IdentifierExpressionNode::gen()
@@ -164,7 +164,7 @@ AssignmentNode::~AssignmentNode()
 
 std::string AssignmentNode::to_string() const
 {
-    return fmt::format("AssignmentNode({}, {})", assignee->to_string(), expr->to_string());
+    return fmt::format("Assignment({}, {})", assignee->to_string(), expr->to_string());
 }
 
 llvm::Value* AssignmentNode::gen_deref_assignment()
@@ -180,14 +180,19 @@ llvm::Value* AssignmentNode::gen_deref_assignment()
     auto* expr_ktype = expr->get_ktype();
     size_t derefs = 0;
 
-    auto* tmp_expr = dynamic_cast<UnaryNode*>(assignee);
+    auto* latest = assignee;
     while (true) {
-        if (!tmp_expr || tmp_expr->get_op() != UnaryNode::UnaryOp::Dereference) break;
+        auto* d = dynamic_cast<UnaryNode*>(latest);
+        if (!d || d->get_op() != UnaryNode::UnaryOp::Dereference) break;
+        latest = d->get_expr();
         derefs++;
-        tmp_expr = dynamic_cast<UnaryNode*>(tmp_expr->get_expr());
     }
 
-    std::cout << "DEREFS: " << derefs << " FOR: " << assignee->to_string() << std::endl;
+    if (derefs > pktype->ptr_level()) {
+        throw std::runtime_error(
+            fmt::format("Invalid dereference operator in assignment to `{}`", assignee->to_string()));
+    }
+
     auto* expected_type = assignee->get_ktype();
     for (auto i = 0; i < derefs; i++) {
         const auto* c = dynamic_cast<PointerType*>(expected_type);
@@ -304,7 +309,7 @@ UnaryNode::~UnaryNode()
 
 std::string UnaryNode::to_string() const
 {
-    return fmt::format("UnaryNode({}, {})", op_to_string(), expr->to_string());
+    return fmt::format("Unary({}, {})", op_to_string(), expr->to_string());
 }
 
 llvm::Value* UnaryNode::gen()

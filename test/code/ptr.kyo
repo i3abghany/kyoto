@@ -1,0 +1,64 @@
+// NAME SimplePointerTest
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32* = &x;
+    *y = 2;
+    return x;
+}
+
+// NAME DoublePointerTest
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32* = &x;
+    var z: i32** = &y;
+    *y = 2;
+    **z = 3;
+    return x;
+}
+
+// NAME TriplePointerTest
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32* = &x;
+    var z: i32** = &y;
+    var w: i32*** = &z;
+    *y = 2;
+    **z = 3;
+    ***w = 4;
+    return x;
+}
+
+// NAME WrongNumberOfDereferences
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32* = &x;
+    var z: i32** = &y;
+    var w: i32*** = &z;
+    **w = 4;
+    return x;
+}
+
+// NAME WrongNumberOfDereferences2
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32* = &x;
+    var z: i32** = &y;
+    var w: i32*** = &z;
+    ****w = 4;
+    return x;
+}
