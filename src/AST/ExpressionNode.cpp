@@ -167,41 +167,18 @@ std::string AssignmentNode::to_string() const
     return fmt::format("Assignment({}, {})", assignee->to_string(), expr->to_string());
 }
 
-llvm::Value* AssignmentNode::gen_deref_assignment()
+llvm::Value* AssignmentNode::gen_deref_assignment() const
 {
     auto* deref = dynamic_cast<UnaryNode*>(assignee);
     assert(deref && "Expected dereference unary node");
 
     auto* pktype = deref->get_ktype();
-    if (!pktype->is_pointer()) {
-        throw std::runtime_error(fmt::format("Cannot dereference non-pointer type `{}`", pktype->to_string()));
-    }
+    const auto* expr_ktype = expr->get_ktype();
 
-    auto* expr_ktype = expr->get_ktype();
-    size_t derefs = 0;
-
-    auto* latest = assignee;
-    while (true) {
-        auto* d = dynamic_cast<UnaryNode*>(latest);
-        if (!d || d->get_op() != UnaryNode::UnaryOp::Dereference) break;
-        latest = d->get_expr();
-        derefs++;
-    }
-
-    if (derefs > pktype->ptr_level()) {
-        throw std::runtime_error(
-            fmt::format("Invalid dereference operator in assignment to `{}`", assignee->to_string()));
-    }
-
-    auto* expected_type = assignee->get_ktype();
-    for (size_t i = 0; i < derefs; i++) {
-        expected_type = dynamic_cast<PointerType*>(expected_type)->get_pointee();
-    }
-
-    if (!expr_ktype->operator==(*expected_type)) {
+    if (!expr_ktype->operator==(*pktype)) {
         throw std::runtime_error(fmt::format("Cannot assign expression {} (type {}) to lvalue {} (type {})",
                                              expr->to_string(), expr_ktype->to_string(), assignee->to_string(),
-                                             expected_type->to_string()));
+                                             pktype->to_string()));
     }
 
     auto* addr = assignee->gen_ptr();

@@ -2,12 +2,14 @@
 
 #include <assert.h>
 #include <fmt/core.h>
+#include <optional>
 #include <stddef.h>
 #include <stdexcept>
 #include <utility>
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/IR/Function.h"
@@ -56,9 +58,23 @@ llvm::Value* FunctionCall::gen()
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 
+llvm::Value* FunctionCall::gen_ptr() const
+{
+    assert(get_ktype()->is_pointer() && "Function does not return a pointer");
+    std::vector<llvm::Value*> arg_values;
+    for (auto& arg : args) {
+        arg_values.push_back(arg->gen());
+    }
+    auto* fn = compiler.get_module()->getFunction(name);
+    if (!fn) {
+        throw std::runtime_error(fmt::format("Function `{}` not found", name));
+    }
+    return compiler.get_builder().CreateCall(fn, arg_values);
+}
+
 llvm::Type* FunctionCall::gen_type(llvm::LLVMContext& context) const
 {
-    auto* fn = compiler.get_module()->getFunction(name);
+    const auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
     }
@@ -68,12 +84,11 @@ llvm::Type* FunctionCall::gen_type(llvm::LLVMContext& context) const
 llvm::Value* FunctionCall::trivial_gen()
 {
     assert(false && "Function call is not trivially evaluable");
-    return nullptr;
 }
 
 KType* FunctionCall::get_ktype() const
 {
-    return compiler.get_current_function_node()->get_ret_type();
+    return compiler.get_function(name).value()->get_ret_type();
 }
 
 bool FunctionCall::is_trivially_evaluable() const

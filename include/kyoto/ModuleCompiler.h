@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 #include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
@@ -38,6 +39,9 @@ public:
     std::optional<Symbol> get_symbol(const std::string& name);
     void add_symbol(const std::string& name, Symbol symbol);
 
+    void add_function(FunctionNode* node);
+    std::optional<FunctionNode*> get_function(const std::string& name);
+
     void push_scope();
     void pop_scope();
 
@@ -56,10 +60,11 @@ public:
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
-    void ensure_main_fn();
+    void ensure_main_fn() const;
     void llvm_pass();
 
 private:
+    std::unordered_map<std::string, FunctionNode*> functions;
     FunctionNode* current_fn_node = nullptr;
     llvm::Function* current_fn = nullptr;
     KType* curr_fn_ret_type = nullptr;

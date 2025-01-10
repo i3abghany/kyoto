@@ -160,6 +160,16 @@ void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 {
     symbol_table.add_symbol(name, symbol);
 }
+void ModuleCompiler::add_function(FunctionNode* node)
+{
+    functions[node->get_name()] = node;
+}
+
+std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name)
+{
+    if (functions.contains(name)) return functions[name];
+    return std::nullopt;
+}
 
 void ModuleCompiler::push_scope()
 {
