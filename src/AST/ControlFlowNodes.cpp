@@ -24,9 +24,9 @@ IfStatementNode::IfStatementNode(std::vector<ExpressionNode*> conditions, std::v
 
 IfStatementNode::~IfStatementNode()
 {
-    for (auto* cond : conditions)
+    for (const auto* cond : conditions)
         delete cond;
-    for (auto* body : bodies)
+    for (const auto* body : bodies)
         delete body;
 }
 
@@ -76,9 +76,8 @@ llvm::Value* IfStatementNode::gen()
     compiler.get_builder().CreateBr(jumps_bbs[0]);
 
     for (size_t i = 0; i < body_bbs.size(); i++) {
-        auto* cond_ktype = conditions[i]->get_ktype();
 
-        if (!cond_ktype->is_boolean()) {
+        if (const auto* cond_ktype = conditions[i]->get_ktype(); !cond_ktype->is_boolean()) {
             throw std::runtime_error(fmt::format("If condition must be of type bool, got {}", cond_ktype->to_string()));
         }
 
@@ -128,7 +127,6 @@ std::string ForStatementNode::to_string() const
 
 llvm::Value* ForStatementNode::gen()
 {
-    auto* fn = compiler.get_builder().GetInsertBlock()->getParent();
     auto* cond_bb = condition ? compiler.create_basic_block("for_cond") : nullptr;
     auto* body_bb = compiler.create_basic_block("for_body");
     auto* update_bb = update ? compiler.create_basic_block("for_update") : nullptr;
@@ -142,7 +140,7 @@ llvm::Value* ForStatementNode::gen()
     }
 
     bool trivial_false_cond = false;
-    if (condition->get_expr()->is_trivially_evaluable()) {
+    if (condition && condition->get_expr()->is_trivially_evaluable()) {
         auto* cond_val = condition->get_expr()->gen();
         auto* cond_ktype = condition->get_expr()->get_ktype();
 

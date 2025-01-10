@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <fmt/core.h>
-#include <stddef.h>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
@@ -28,7 +27,7 @@ std::string NumberNode::to_string() const
 
 llvm::Value* NumberNode::gen()
 {
-    auto primitive_type = dynamic_cast<PrimitiveType*>(type);
+    const auto primitive_type = dynamic_cast<PrimitiveType*>(type);
     assert(primitive_type && "NumberNode type must be a primitive type");
     size_t width = primitive_type->width();
     auto b = primitive_type->is_boolean();
@@ -60,7 +59,7 @@ KType* NumberNode::get_ktype() const
 
 void NumberNode::cast_to(PrimitiveType::Kind target_kind)
 {
-    auto target_type = new PrimitiveType(target_kind);
+    const auto target_type = new PrimitiveType(target_kind);
     delete type;
     type = target_type;
 }

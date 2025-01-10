@@ -36,10 +36,9 @@ std::string PrimitiveType::to_string() const
         return "F64";
     case Kind::Void:
         return "Void";
-    case Kind::Unknown:
+    default:
         return "Unknown";
     }
-    return "Unknown";
 }
 
 bool PrimitiveType::operator==(const KType& other) const
@@ -164,7 +163,7 @@ KType* PointerType::get_pointee() const
 
 bool PointerType::is_string() const
 {
-    auto* pt = dynamic_cast<PrimitiveType*>(pointee);
+    const auto* pt = dynamic_cast<PrimitiveType*>(pointee);
     return pt && pt->get_kind() == PrimitiveType::Kind::Char;
 }
 

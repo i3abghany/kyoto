@@ -4,8 +4,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
-#include <boost/fusion/sequence/intrinsic/at_key.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/io.hpp>
@@ -14,11 +12,9 @@
 #include <fmt/core.h>
 #include <fstream>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <stddef.h>
 #include <stdexcept>
-#include <utility>
 
 #include "kyoto/utils/Test.h"
 
@@ -30,12 +26,12 @@ std::string File::get_source(const std::string_view filename)
     if (!ifs.is_open()) {
         throw std::runtime_error(fmt::format("Failed to open file: {}", filename));
     }
-    return std::string { std::istreambuf_iterator<char>(ifs), {} };
+    return std::string { std::istreambuf_iterator(ifs), {} };
 }
 
 std::vector<TestCase> File::get_test_cases(const std::string_view filename)
 {
-    auto source = get_source(filename);
+    const auto source = get_source(filename);
     return split_test_cases(source);
 }
 
@@ -63,7 +59,7 @@ int32_t File::execute_ir(const std::string& ir)
 
 bool File::is_executable(const std::string& name)
 {
-    auto path = boost::process::search_path(name);
+    const auto path = boost::process::search_path(name);
     return !path.empty();
 }
 
@@ -73,7 +69,6 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
     size_t start = 0;
     const char* data = source.data();
     constexpr const char* delim = "// NAME";
-    constexpr size_t delim_len = 7;
     size_t delim_pos = 0;
     while ((delim_pos = source.find(delim, start + 1)) != std::string::npos) {
         std::string test_case = { data + start, delim_pos - start };
@@ -90,7 +85,6 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
 
 TestCase File::parse_test_case(const std::string& test_case)
 {
-    std::string name;
     std::string code;
     int32_t expected_return = 0;
     bool error = false;
@@ -100,7 +94,7 @@ TestCase File::parse_test_case(const std::string& test_case)
 
     std::getline(iss, line);
     assert(line.starts_with("// NAME "));
-    name = line.substr(7);
+    const std::string name = line.substr(7);
 
     std::getline(iss, line);
     assert(line.starts_with("// ERR "));

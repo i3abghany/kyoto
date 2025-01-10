@@ -4,8 +4,8 @@
 
 TypeResolver::TypeResolver() { }
 
-std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveType::Kind lhs,
-                                                                      PrimitiveType::Kind rhs) const
+std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(const PrimitiveType::Kind lhs,
+                                                                      const PrimitiveType::Kind rhs) const
 {
     // FIXME: figure out whether we want to do an elaborate promotion scheme
     // like the C standard mandates
@@ -13,15 +13,15 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(PrimitiveT
     return std::nullopt;
 }
 
-std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_cmp(PrimitiveType::Kind lhs,
-                                                                    PrimitiveType::Kind rhs) const
+std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_cmp(const PrimitiveType::Kind lhs,
+                                                                    const PrimitiveType::Kind rhs) const
 {
     if (lhs == rhs) return PrimitiveType::Kind::Boolean;
     return std::nullopt;
 }
 
-std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_logical(PrimitiveType::Kind lhs,
-                                                                        PrimitiveType::Kind rhs) const
+std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_logical(const PrimitiveType::Kind lhs,
+                                                                        const PrimitiveType::Kind rhs) const
 {
     if (lhs == PrimitiveType::Kind::Boolean && rhs == PrimitiveType::Kind::Boolean) {
         return PrimitiveType::Kind::Boolean;
@@ -29,7 +29,7 @@ std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_logical(Primitiv
     return std::nullopt;
 }
 
-bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind to) const
+bool TypeResolver::promotable_to(const PrimitiveType::Kind from, const PrimitiveType::Kind to) const
 {
     auto pfrom = PrimitiveType(from);
     auto pto = PrimitiveType(to);
@@ -37,7 +37,7 @@ bool TypeResolver::promotable_to(PrimitiveType::Kind from, PrimitiveType::Kind t
         || pfrom.is_boolean() && pto.is_boolean() || pfrom.is_floating_point() && pto.is_floating_point();
 }
 
-bool TypeResolver::fits_in(int64_t val, PrimitiveType::Kind kind) const
+bool TypeResolver::fits_in(const int64_t val, const PrimitiveType::Kind kind) const
 {
     auto pkind = PrimitiveType(kind);
     switch (pkind.get_kind()) {
@@ -52,7 +52,6 @@ bool TypeResolver::fits_in(int64_t val, PrimitiveType::Kind kind) const
     case PrimitiveType::Kind::Boolean:
         return val == 0 || val == 1;
     default:
-        break;
+        return false;
     }
-    return false;
 }

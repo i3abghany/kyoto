@@ -108,3 +108,19 @@ fn main() i32 {
     f(&x, y);
     return x + y;
 }
+
+// NAME ReturnPointer
+// ERR 0
+// RET 1
+
+fn f(x: i32*) i32* {
+    *x = 12;
+    return x;
+}
+
+fn main() i32 {
+    var x: i32 = 0;
+    var z: i32* = f(&x);
+    *z = 1;
+    return x;
+}

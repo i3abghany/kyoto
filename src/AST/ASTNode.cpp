@@ -23,13 +23,11 @@ class LLVMContext;
 
 llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
 {
-    auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
+    const auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
     if (!primitive_type) {
-        auto ptr_type = dynamic_cast<const PointerType*>(type);
-        if (!ptr_type) {
+        if (!dynamic_cast<const PointerType*>(type)) {
             throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
         }
-        // return llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
         return llvm::PointerType::get(context, 0);
     }
 
@@ -68,7 +66,7 @@ ProgramNode::ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
 
 ProgramNode::~ProgramNode()
 {
-    for (auto* node : nodes)
+    for (const auto* node : nodes)
         delete node;
 }
 
@@ -134,21 +132,34 @@ llvm::Value* ReturnStatementNode::gen()
 {
     auto* fn_ret_type = compiler.get_fn_return_type();
 
-    auto* expr_ktype = expr ? expr->get_ktype() : KType::get_void();
+    const auto* expr_ktype = expr ? expr->get_ktype() : KType::get_void();
     auto fn_name = compiler.get_current_function_node()->get_name();
 
-    llvm::Value* expr_val = nullptr;
-    if (fn_ret_type->is_void() && !expr) {
+    if (fn_ret_type->is_void()) {
+        if (expr)
+            throw std::runtime_error(fmt::format("Expected return type void, got expression `{}` (type `{}`)",
+                                                 expr->to_string(), expr->get_ktype()->to_string()));
         return compiler.get_builder().CreateRetVoid();
-    } else if (fn_ret_type->is_integer() && expr_ktype->is_integer()
-               || fn_ret_type->is_boolean() && expr_ktype->is_boolean()) {
+    }
+
+    if (!expr) throw std::runtime_error(fmt::format("Expected return type `{}`", fn_ret_type->to_string()));
+
+    llvm::Value* expr_val = nullptr;
+    if (fn_ret_type->is_integer() && expr_ktype->is_integer()
+        || fn_ret_type->is_boolean() && expr_ktype->is_boolean()) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return", fn_name);
     } else if (fn_ret_type->is_string() && expr_ktype->is_string()) {
         expr_val = expr->gen();
     } else {
-        throw std::runtime_error(fmt::format(
-            "Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
-            expr->to_string(), expr_ktype->to_string(), fn_name, fn_ret_type->to_string()));
+        if (fn_ret_type->is_pointer() && expr_ktype->is_pointer() && fn_ret_type->operator==(*expr_ktype)) {
+            expr_val = expr->gen_ptr();
+            expr_val = compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler.get_context()), expr_val);
+            assert(expr_val && "Expression must be a pointer");
+        } else {
+            throw std::runtime_error(fmt::format(
+                "Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
+                expr->to_string(), expr_ktype->to_string(), fn_name, fn_ret_type->to_string()));
+        }
     }
 
     return compiler.get_builder().CreateRet(expr_val);
@@ -189,15 +200,16 @@ llvm::Value* BlockNode::gen()
     return nullptr;
 }
 
-FunctionNode::FunctionNode(const std::string& name, std::vector<Parameter> args, bool varargs, KType* ret_type,
-                           ASTNode* body, ModuleCompiler& compiler)
-    : name(name)
+FunctionNode::FunctionNode(std::string name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
+                           ModuleCompiler& compiler)
+    : name(std::move(name))
     , args(std::move(args))
     , varargs(varargs)
     , ret_type(ret_type)
     , body(body)
     , compiler(compiler)
 {
+    compiler.add_function(this);
 }
 
 FunctionNode::~FunctionNode()
@@ -212,8 +224,8 @@ FunctionNode::~FunctionNode()
 std::string FunctionNode::to_string() const
 {
     std::string args_str;
-    for (const auto& arg : args) {
-        args_str += arg.name + ": " + arg.type->to_string() + ", ";
+    for (const auto& [name, type] : args) {
+        args_str += name + ": " + type->to_string() + ", ";
     }
     return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body->to_string());
 }

@@ -8,10 +8,10 @@
 class ModuleCompiler;
 class ExpressionNode;
 
-class IfStatementNode : public ASTNode {
+class IfStatementNode final : public ASTNode {
 public:
     IfStatementNode(std::vector<ExpressionNode*> conditions, std::vector<ASTNode*> bodies, ModuleCompiler& compiler);
-    ~IfStatementNode();
+    ~IfStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -28,7 +28,7 @@ class ForStatementNode : public ASTNode {
 public:
     ForStatementNode(ASTNode* init, ExpressionStatementNode* condition, ExpressionNode* update, ASTNode* body,
                      ModuleCompiler& compiler);
-    ~ForStatementNode();
+    ~ForStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;

@@ -65,10 +65,12 @@ llvm::Value* FullDeclarationStatementNode::gen()
         type = expr->get_ktype()->copy();
     }
 
-    auto expr_ktype = expr->get_ktype();
+    const auto expr_ktype = expr->get_ktype();
     if (type->is_void()) {
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
-    } else if (expr_ktype->is_void()) {
+    }
+
+    if (expr_ktype->is_void()) {
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
 
