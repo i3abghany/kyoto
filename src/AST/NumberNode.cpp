@@ -4,7 +4,6 @@
 #include <fmt/core.h>
 #include <stddef.h>
 
-#include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/APInt.h"

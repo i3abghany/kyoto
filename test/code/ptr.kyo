@@ -62,3 +62,49 @@ fn main() i32 {
     ****w = 4;
     return x;
 }
+
+// NAME DereferencePointerToPointer
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: i32 = 1;
+    var k: i32* = &x;
+    var z: i32** = &k;
+    *z = &y;
+    *k = 2;
+    return y;
+}
+
+// NAME PointerFunctionArgument
+// ERR 0
+// RET 18
+
+fn f(x: i32*, y: i32*) void {
+    *x = 12;
+    *y = 6;
+}
+
+fn main() i32 {
+    var x: i32 = 0;
+    var y: i32 = 0;
+    f(&x, &y);
+    return x + y;
+}
+
+// NAME WrongFunctionArgument
+// ERR 1
+// RET 0
+
+fn f(x: i32, y: i32) void {
+    x = 12;
+    y = 6;
+}
+
+fn main() i32 {
+    var x: i32 = 0;
+    var y: i32 = 0;
+    f(&x, y);
+    return x + y;
+}

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <fmt/core.h>
 #include <optional>
+#include <stddef.h>
 #include <stdexcept>
 #include <utility>
 
@@ -194,10 +195,8 @@ llvm::Value* AssignmentNode::gen_deref_assignment()
     }
 
     auto* expected_type = assignee->get_ktype();
-    for (auto i = 0; i < derefs; i++) {
-        const auto* c = dynamic_cast<PointerType*>(expected_type);
-        if (c == nullptr) break;
-        expected_type = c->get_pointee();
+    for (size_t i = 0; i < derefs; i++) {
+        expected_type = dynamic_cast<PointerType*>(expected_type)->get_pointee();
     }
 
     if (!expr_ktype->operator==(*expected_type)) {
