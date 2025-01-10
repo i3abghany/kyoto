@@ -29,6 +29,7 @@ public:
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
 
     std::any visitAddressOfExpression(kyoto::KyotoParser::AddressOfExpressionContext* ctx) override;
+    std::any visitDereferenceExpression(kyoto::KyotoParser::DereferenceExpressionContext* ctx) override;
 
     std::any visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx) override;
     std::any visitPrefixDecrementExpression(kyoto::KyotoParser::PrefixDecrementExpressionContext* ctx) override;

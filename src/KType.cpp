@@ -180,3 +180,8 @@ KType* PointerType::copy() const
 {
     return new PointerType(pointee->copy());
 }
+
+size_t PointerType::ptr_level() const
+{
+    return 1 + pointee->ptr_level();
+}

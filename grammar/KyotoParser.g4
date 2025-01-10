@@ -28,6 +28,7 @@ expression:
 	| STRING_LITERAL #stringExpression
 	| IDENTIFIER #identifierExpression
 	| LPAREN expression RPAREN #parenthesizedExpression
+	| ASTERISK expression #dereferenceExpression
 	| AMPERSAND expression #addressOfExpression
 	| PLUS_PLUS expression #prefixIncrementExpression
 	| MINUS_MINUS expression #prefixDecrementExpression

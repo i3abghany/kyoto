@@ -42,24 +42,27 @@ public:
 };
 
 class IdentifierExpressionNode : public ExpressionNode {
-    std::string name;
-    ModuleCompiler& compiler;
-
 public:
     IdentifierExpressionNode(std::string name, ModuleCompiler& compiler);
-    ~IdentifierExpressionNode() = default;
+    ~IdentifierExpressionNode() override = default;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
     [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
     [[nodiscard]] KType* get_ktype() const override;
+
+    [[nodiscard]] const std::string& get_name() const { return name; }
+
+private:
+    std::string name;
+    ModuleCompiler& compiler;
 };
 
 class AssignmentNode : public ExpressionNode {
 public:
-    AssignmentNode(std::string name, ExpressionNode* expr, ModuleCompiler& compiler);
-    ~AssignmentNode();
+    AssignmentNode(ExpressionNode* assignee, ExpressionNode* expr, ModuleCompiler& compiler);
+    ~AssignmentNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -69,7 +72,10 @@ public:
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
 private:
-    std::string name;
+    [[nodiscard]] llvm::Value* gen_deref_assignment();
+
+private:
+    ExpressionNode* assignee;
     ExpressionNode* expr;
     ModuleCompiler& compiler;
 };
@@ -80,7 +86,7 @@ class ReturnStatementNode : public ASTNode {
 
 public:
     ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler);
-    ~ReturnStatementNode();
+    ~ReturnStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     llvm::Value* gen() override;
@@ -94,10 +100,11 @@ public:
         PrefixIncrement,
         PrefixDecrement,
         AddressOf,
+        Dereference,
     };
 
     UnaryNode(ExpressionNode* expr, UnaryOp op, ModuleCompiler& compiler);
-    ~UnaryNode();
+    ~UnaryNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -106,6 +113,9 @@ public:
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
+
+    [[nodiscard]] ExpressionNode* get_expr() const { return expr; }
+    [[nodiscard]] UnaryOp get_op() const { return op; }
 
 private:
     std::string op_to_string() const;

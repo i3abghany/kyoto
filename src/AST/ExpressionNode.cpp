@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
@@ -49,10 +50,10 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
     check_boolean_promotion(expr_ktype, target_type, target_name);
 
-    auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr->trivial_gen());
+    const auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr->trivial_gen());
     assert(constant_int && "Trivial value must be a constant int");
-    auto int_val = target_type->is_boolean() || expr_ktype->is_boolean() ? constant_int->getZExtValue()
-                                                                         : constant_int->getSExtValue();
+    const auto int_val = target_type->is_boolean() || expr_ktype->is_boolean() ? constant_int->getZExtValue()
+                                                                               : constant_int->getSExtValue();
 
     check_int_range_fit(int_val, target_type, compiler, expr->to_string(), target_name);
     return llvm::ConstantInt::get(get_llvm_type(target_type, compiler.get_context()), int_val, true);
@@ -65,7 +66,8 @@ llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, P
 
     if (expr_ktype->width() > target_type->width()) {
         return compiler.get_builder().CreateTrunc(expr_val, ltype);
-    } else if (expr_ktype->width() < target_type->width()) {
+    }
+    if (expr_ktype->width() < target_type->width()) {
         return compiler.get_builder().CreateSExt(expr_val, ltype);
     }
 
@@ -87,7 +89,7 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
                                              target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
     }
 
-    if (auto* trivial = ExpressionNode::promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {
+    if (auto* trivial = promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {
         return trivial;
     }
 
@@ -99,14 +101,14 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KTy
 }
 
 IdentifierExpressionNode::IdentifierExpressionNode(std::string name, ModuleCompiler& compiler)
-    : name(name)
+    : name(std::move(name))
     , compiler(compiler)
 {
 }
 
 std::string IdentifierExpressionNode::to_string() const
 {
-    return fmt::format("IdentifierNode({})", name);
+    return fmt::format("Identifier({})", name);
 }
 
 llvm::Value* IdentifierExpressionNode::gen()
@@ -147,8 +149,8 @@ KType* IdentifierExpressionNode::get_ktype() const
     return symbol.value().type;
 }
 
-AssignmentNode::AssignmentNode(std::string name, ExpressionNode* expr, ModuleCompiler& compiler)
-    : name(name)
+AssignmentNode::AssignmentNode(ExpressionNode* assignee, ExpressionNode* expr, ModuleCompiler& compiler)
+    : assignee(assignee)
     , expr(expr)
     , compiler(compiler)
 {
@@ -156,16 +158,73 @@ AssignmentNode::AssignmentNode(std::string name, ExpressionNode* expr, ModuleCom
 
 AssignmentNode::~AssignmentNode()
 {
+    delete assignee;
     delete expr;
 }
 
 std::string AssignmentNode::to_string() const
 {
-    return fmt::format("AssignmentNode({}, {})", name, expr->to_string());
+    return fmt::format("Assignment({}, {})", assignee->to_string(), expr->to_string());
+}
+
+llvm::Value* AssignmentNode::gen_deref_assignment()
+{
+    auto* deref = dynamic_cast<UnaryNode*>(assignee);
+    assert(deref && "Expected dereference unary node");
+
+    auto* pktype = deref->get_ktype();
+    if (!pktype->is_pointer()) {
+        throw std::runtime_error(fmt::format("Cannot dereference non-pointer type `{}`", pktype->to_string()));
+    }
+
+    auto* expr_ktype = expr->get_ktype();
+    size_t derefs = 0;
+
+    auto* latest = assignee;
+    while (true) {
+        auto* d = dynamic_cast<UnaryNode*>(latest);
+        if (!d || d->get_op() != UnaryNode::UnaryOp::Dereference) break;
+        latest = d->get_expr();
+        derefs++;
+    }
+
+    if (derefs > pktype->ptr_level()) {
+        throw std::runtime_error(
+            fmt::format("Invalid dereference operator in assignment to `{}`", assignee->to_string()));
+    }
+
+    auto* expected_type = assignee->get_ktype();
+    for (auto i = 0; i < derefs; i++) {
+        const auto* c = dynamic_cast<PointerType*>(expected_type);
+        if (c == nullptr) break;
+        expected_type = c->get_pointee();
+    }
+
+    if (!expr_ktype->operator==(*expected_type)) {
+        throw std::runtime_error(fmt::format("Cannot assign expression {} (type {}) to lvalue {} (type {})",
+                                             expr->to_string(), expr_ktype->to_string(), assignee->to_string(),
+                                             expected_type->to_string()));
+    }
+
+    auto* addr = assignee->gen_ptr();
+    auto* expr_val = expr->gen();
+    return compiler.get_builder().CreateStore(expr_val, addr);
 }
 
 llvm::Value* AssignmentNode::gen()
 {
+    if (assignee->is_trivially_evaluable()) {
+        throw std::runtime_error(fmt::format("Cannot assign to a non-lvalue `{}`", assignee->to_string()));
+    }
+
+    auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
+    auto* deref = dynamic_cast<UnaryNode*>(assignee);
+
+    if (deref) return gen_deref_assignment();
+
+    std::string name;
+    if (identifier) name = identifier->get_name();
+
     auto symbol_opt = compiler.get_symbol(name);
     if (!symbol_opt.has_value()) {
         throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
@@ -201,6 +260,14 @@ llvm::Type* AssignmentNode::gen_type(llvm::LLVMContext& context) const
 
 llvm::Value* AssignmentNode::trivial_gen()
 {
+    auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
+    if (!identifier) {
+        throw std::runtime_error(
+            fmt::format("Expected lvalue on the left side of assignment, got `{}`", assignee->to_string()));
+    }
+
+    std::string name = identifier->get_name();
+
     auto symbol_opt = compiler.get_symbol(name);
     if (!symbol_opt.has_value()) {
         assert(false && "Unknown symbol");
@@ -242,7 +309,7 @@ UnaryNode::~UnaryNode()
 
 std::string UnaryNode::to_string() const
 {
-    return fmt::format("UnaryNode({}, {})", op_to_string(), expr->to_string());
+    return fmt::format("Unary({}, {})", op_to_string(), expr->to_string());
 }
 
 llvm::Value* UnaryNode::gen()
@@ -253,8 +320,23 @@ llvm::Value* UnaryNode::gen()
     else if (op == UnaryOp::Positive) return expr_val;
     else if (op == UnaryOp::PrefixDecrement) return gen_prefix_decrement();
     else if (op == UnaryOp::PrefixIncrement) return gen_prefix_increment();
-    else if (op == UnaryOp::AddressOf) return expr->gen_ptr();
-    else assert(false && "Unknown unary operator");
+    else if (op == UnaryOp::AddressOf) {
+        auto* ptr = expr->gen_ptr();
+        if (!ptr) {
+            throw std::runtime_error(fmt::format("Cannot take the address of expression `{}` (type `{}`)",
+                                                 expr->to_string(), expr->get_ktype()->to_string()));
+        }
+        return ptr;
+    } else if (op == UnaryOp::Dereference) {
+        auto* expr_ktype = expr->get_ktype();
+        if (!expr_ktype->is_pointer()) {
+            throw std::runtime_error(
+                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+        }
+        auto* pointee_type = expr_ktype->as<PointerType>()->get_pointee();
+        auto* addr = expr->gen();
+        return compiler.get_builder().CreateLoad(get_llvm_type(pointee_type, compiler.get_context()), addr, "deref");
+    } else assert(false && "Unknown unary operator");
 
     return nullptr;
 }
@@ -262,6 +344,16 @@ llvm::Value* UnaryNode::gen()
 llvm::Value* UnaryNode::gen_ptr() const
 {
     if (op == UnaryOp::AddressOf) return expr->gen_ptr();
+    else if (op == UnaryOp::Dereference) {
+        auto* expr_ktype = expr->get_ktype();
+        if (!expr_ktype->is_pointer()) {
+            throw std::runtime_error(
+                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+        }
+        auto* pointee_type = expr_ktype->as<PointerType>()->get_pointee();
+        auto* addr = expr->gen();
+        return addr;
+    }
     return nullptr;
 }
 
@@ -270,6 +362,14 @@ KType* UnaryNode::get_ktype() const
     if (op == UnaryOp::AddressOf) {
         if (!type) type = new PointerType(expr->get_ktype());
         return type;
+    }
+    if (op == UnaryOp::Dereference) {
+        auto* expr_ktype = expr->get_ktype();
+        if (!expr_ktype->is_pointer()) {
+            throw std::runtime_error(
+                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+        }
+        return expr_ktype->as<PointerType>();
     }
     return expr->get_ktype();
 }
@@ -339,6 +439,8 @@ bool UnaryNode::is_trivially_evaluable() const
 llvm::Type* UnaryNode::gen_type(llvm::LLVMContext& context) const
 {
     if (op == UnaryOp::AddressOf) return llvm::PointerType::get(context, 0);
+    if (op == UnaryOp::Dereference)
+        return expr->get_ktype()->is_pointer() ? llvm::PointerType::get(context, 0) : expr->gen_type(context);
     return expr->gen_type(context);
 }
 
@@ -355,6 +457,8 @@ std::string UnaryNode::op_to_string() const
         return "--";
     case UnaryOp::AddressOf:
         return "&";
+    case UnaryOp::Dereference:
+        return "*";
     default:
         return "";
     }

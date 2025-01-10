@@ -56,6 +56,7 @@ add_executable(
     test/TestScope.cpp
     test/TestFor.cpp
     test/TestFunction.cpp
+    test/TestPointers.cpp
 )
 
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
