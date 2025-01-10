@@ -50,7 +50,6 @@ public:
 
 private:
     ExpressionNode* expr;
-    ModuleCompiler& compiler;
 };
 
 class BlockNode final : public ASTNode {

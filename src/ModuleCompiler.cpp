@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <llvm/IR/IRBuilder.h>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -39,7 +40,6 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , name(name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
-    , symbol_table(*this, module.get())
 {
 }
 

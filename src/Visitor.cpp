@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <optional>
 #include <regex>
+#include <stddef.h>
 #include <stdexcept>
 #include <stdint.h>
 #include <string>

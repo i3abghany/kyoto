@@ -93,7 +93,6 @@ llvm::Value* ProgramNode::gen()
 
 ExpressionStatementNode::ExpressionStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)
-    , compiler(compiler)
 {
 }
 

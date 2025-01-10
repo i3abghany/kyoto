@@ -68,7 +68,6 @@ private:
     FunctionNode* current_fn_node = nullptr;
     llvm::Function* current_fn = nullptr;
     KType* curr_fn_ret_type = nullptr;
-    bool fn_termination_error = false;
 
     std::string code;
     std::string name;

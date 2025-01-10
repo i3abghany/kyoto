@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <fmt/core.h>
+#include <stddef.h>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

@@ -34,16 +34,15 @@ public:
 };
 
 class SymbolTable {
-    std::vector<Scope> scopes;
-    ModuleCompiler& compiler;
-    llvm::Module* module;
-
 public:
-    SymbolTable(ModuleCompiler& compiler, llvm::Module* module);
+    SymbolTable();
 
     void push_scope();
     void pop_scope();
     void add_symbol(const std::string& name, Symbol symbol);
     std::optional<Symbol> get_symbol(const std::string& name);
     size_t n_scopes() const;
+
+private:
+    std::vector<Scope> scopes;
 };

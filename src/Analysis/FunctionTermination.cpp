@@ -1,5 +1,7 @@
 #include "kyoto/Analysis/FunctionTermination.h"
 
+#include <llvm/IR/Analysis.h>
+#include <llvm/IR/PassManager.h>
 #include <vector>
 
 #include "kyoto/ModuleCompiler.h"

@@ -9,11 +9,8 @@
 #include "kyoto/KType.h"
 #include "kyoto/SymbolTable.h"
 
-class ModuleCompiler;
-
 namespace llvm {
 class AllocaInst;
-class Module;
 }
 
 void Scope::add_symbol(const std::string& name, const Symbol& value)
@@ -26,11 +23,7 @@ std::optional<Symbol> Scope::get_symbol(const std::string& name)
     return symbols.contains(name) ? std::optional { symbols[name] } : std::nullopt;
 }
 
-SymbolTable::SymbolTable(ModuleCompiler& compiler, llvm::Module* module)
-    : compiler(compiler)
-    , module(module)
-{
-}
+SymbolTable::SymbolTable() { }
 
 void SymbolTable::push_scope()
 {

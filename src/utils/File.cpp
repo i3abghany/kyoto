@@ -4,6 +4,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/fusion/algorithm/iteration/for_each.hpp>
+#include <boost/fusion/sequence/intrinsic/at_key.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/io.hpp>
@@ -12,9 +14,11 @@
 #include <fmt/core.h>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <stddef.h>
 #include <stdexcept>
+#include <utility>
 
 #include "kyoto/utils/Test.h"
 

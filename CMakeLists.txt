@@ -44,9 +44,7 @@ add_executable(
 
 target_link_libraries(kyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
 
-add_executable(
-    ktest
-    ${SOURCES}
+set(TEST_SOURCES
     test/TestDriver.cpp
     test/TestReturn.cpp
     test/TestFunctionTermination.cpp
@@ -57,6 +55,12 @@ add_executable(
     test/TestFor.cpp
     test/TestFunction.cpp
     test/TestPointers.cpp
+)
+
+add_executable(
+    ktest
+    ${SOURCES}
+    ${TEST_SOURCES}
 )
 
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
