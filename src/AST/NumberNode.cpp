@@ -38,7 +38,7 @@ llvm::Value* NumberNode::gen()
 
 llvm::Type* NumberNode::gen_type(llvm::LLVMContext& context) const
 {
-    return ASTNode::get_llvm_type(type, context);
+    return get_llvm_type(type, context);
 }
 
 bool NumberNode::is_trivially_evaluable() const

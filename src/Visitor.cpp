@@ -114,15 +114,16 @@ std::any ASTBuilderVisitor::visitTypelessDeclaration(kyoto::KyotoParser::Typeles
 
 std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx)
 {
-    auto* lhs_expr = dynamic_cast<kyoto::KyotoParser::IdentifierExpressionContext*>(ctx->expression(0));
-    if (!lhs_expr) {
-        throw std::runtime_error(fmt::format("Expected an identifier on the left-hand side of the assignment. Got `{}`",
-                                             ctx->expression(0)->getText()));
+    auto* lhs_id_expr = dynamic_cast<kyoto::KyotoParser::IdentifierExpressionContext*>(ctx->expression(0));
+    auto* lhs_deref_expr = dynamic_cast<kyoto::KyotoParser::DereferenceExpressionContext*>(ctx->expression(0));
+    if (!lhs_id_expr && !lhs_deref_expr) {
+        throw std::runtime_error(
+            fmt::format("Expected lvalue on the left side of assignment, got `{}`", ctx->expression(0)->getText()));
     }
 
-    auto name = lhs_expr->IDENTIFIER()->getText();
+    auto assignee = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
-    return (ExpressionNode*)new AssignmentNode(name, expr, compiler);
+    return (ExpressionNode*)new AssignmentNode(assignee, expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx)
@@ -174,6 +175,12 @@ std::any ASTBuilderVisitor::visitAddressOfExpression(kyoto::KyotoParser::Address
 {
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::AddressOf, compiler);
+}
+
+std::any ASTBuilderVisitor::visitDereferenceExpression(kyoto::KyotoParser::DereferenceExpressionContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::Dereference, compiler);
 }
 
 std::any ASTBuilderVisitor::visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx)
