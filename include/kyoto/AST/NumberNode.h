@@ -8,14 +8,14 @@
 
 class ModuleCompiler;
 
-class NumberNode : public ExpressionNode {
+class NumberNode final : public ExpressionNode {
     int64_t value;
     KType* type;
     ModuleCompiler& compiler;
 
 public:
     NumberNode(int64_t value, KType* ktype, ModuleCompiler& compiler);
-    ~NumberNode();
+    ~NumberNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;

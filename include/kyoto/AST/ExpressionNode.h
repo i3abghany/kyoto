@@ -8,11 +8,12 @@
 class ModuleCompiler;
 class KType;
 class PrimitiveType;
+
 namespace llvm {
 class LLVMContext;
 class Type;
 class Value;
-} // namespace llvm
+}
 
 class ExpressionNode : public ASTNode {
 public:
@@ -72,7 +73,7 @@ public:
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
 private:
-    [[nodiscard]] llvm::Value* gen_deref_assignment();
+    [[nodiscard]] llvm::Value* gen_deref_assignment() const;
 
 private:
     ExpressionNode* assignee;
@@ -121,8 +122,8 @@ private:
     std::string op_to_string() const;
     bool simple_op() const;
 
-    llvm::Value* gen_prefix_increment();
-    llvm::Value* gen_prefix_decrement();
+    llvm::Value* gen_prefix_increment() const;
+    llvm::Value* gen_prefix_decrement() const;
 
 private:
     mutable KType* type;

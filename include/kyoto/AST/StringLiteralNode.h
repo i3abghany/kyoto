@@ -7,10 +7,10 @@
 
 class ModuleCompiler;
 
-class StringLiteralNode : public ExpressionNode {
+class StringLiteralNode final : public ExpressionNode {
 public:
     StringLiteralNode(std::string value, ModuleCompiler& compiler);
-    ~StringLiteralNode();
+    ~StringLiteralNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;

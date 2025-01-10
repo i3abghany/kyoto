@@ -25,7 +25,7 @@ FunctionCall::FunctionCall(std::string name, std::vector<ExpressionNode*> args, 
 
 FunctionCall::~FunctionCall()
 {
-    for (auto arg : args) {
+    for (const auto arg : args) {
         delete arg;
     }
 }

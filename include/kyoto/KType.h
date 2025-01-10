@@ -1,7 +1,6 @@
 #pragma once
 
 #include <fmt/core.h>
-#include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
@@ -47,7 +46,6 @@ class PrimitiveType : public KType {
 public:
     enum class Kind { Boolean, Char, I8, I16, I32, I64, F32, F64, String, Void, Unknown };
 
-public:
     explicit PrimitiveType(Kind kind);
     std::string to_string() const override;
     bool operator==(const KType& other) const override;
@@ -65,13 +63,13 @@ public:
     Kind get_kind() const;
 
 private:
-    PrimitiveType::Kind kind;
+    Kind kind;
 };
 
 class PointerType : public KType {
 public:
     explicit PointerType(KType* pointee);
-    ~PointerType();
+    ~PointerType() override;
     std::string to_string() const override;
     bool operator==(const KType& other) const override;
     KType* copy() const override;

@@ -40,7 +40,6 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
     , symbol_table(*this, module.get())
-    , type_resolver()
 {
 }
 
@@ -83,9 +82,9 @@ void ModuleCompiler::llvm_pass()
     MPM.run(*module, MAM);
 }
 
-void ModuleCompiler::ensure_main_fn()
+void ModuleCompiler::ensure_main_fn() const
 {
-    auto* main_fn = module->getFunction("main");
+    const auto* main_fn = module->getFunction("main");
     if (!main_fn) {
         throw std::runtime_error("Main function not found");
     }
@@ -98,7 +97,7 @@ void ModuleCompiler::ensure_main_fn()
 
 void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
 {
-    auto* llvm_type = bb.getParent()->getReturnType();
+    const auto* llvm_type = bb.getParent()->getReturnType();
 
     if (!llvm_type) {
         return;
@@ -124,8 +123,8 @@ llvm::BasicBlock* ModuleCompiler::create_basic_block(const std::string& name)
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
     auto report_error = [](const std::string& msg) {
-        constexpr const char* RED = "\033[0;31m";
-        constexpr const char* NC = "\033[0m";
+        constexpr auto RED = "\033[0;31m";
+        constexpr auto NC = "\033[0m";
         std::cerr << RED << "Error: " << NC << msg << std::endl;
     };
 

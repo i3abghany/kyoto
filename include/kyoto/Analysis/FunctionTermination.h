@@ -10,9 +10,9 @@ class Function;
 class BasicBlock;
 }
 
-struct FunctionTerminationPass : public llvm::PassInfoMixin<FunctionTerminationPass> {
+struct FunctionTerminationPass : llvm::PassInfoMixin<FunctionTerminationPass> {
 
-    FunctionTerminationPass(ModuleCompiler& compiler);
+    explicit FunctionTerminationPass(ModuleCompiler& compiler);
 
     llvm::PreservedAnalyses run(llvm::Function& func, llvm::FunctionAnalysisManager& FAM);
 

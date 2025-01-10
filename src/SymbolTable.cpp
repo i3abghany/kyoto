@@ -67,8 +67,8 @@ Symbol Symbol::primitive(llvm::AllocaInst* value, PrimitiveType::Kind kind)
     return Symbol(value, true, new PrimitiveType(kind));
 }
 
-Symbol::Symbol(llvm::AllocaInst* alloc, bool is_primitive, KType* type)
-    : alloc(alloc)
+Symbol::Symbol(llvm::AllocaInst* value, bool is_primitive, KType* type)
+    : alloc(value)
     , type(type)
 {
 }

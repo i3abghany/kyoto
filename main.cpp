@@ -62,14 +62,12 @@ int run(int argc, const char* argv[])
     auto output = vm["output"].as<std::string>();
     auto ir = compiler.gen_ir();
 
-    if (!ir) {
-        return 1;
-    }
+    if (!ir) return 1;
 
     std::ofstream ofs(output);
     ofs << *ir;
 
-    if (vm.count("run")) {
+    if (vm.contains("run")) {
         return utils::File::execute_ir(*ir);
     }
 

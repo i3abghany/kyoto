@@ -12,9 +12,8 @@ class ExpressionNode;
 
 namespace llvm {
 class LLVMContext;
-}
-namespace llvm {
 class Value;
+
 }
 
 class ASTNode {
@@ -27,22 +26,22 @@ protected:
     static llvm::Type* get_llvm_type(const KType* type, llvm::LLVMContext& context);
 };
 
-class ProgramNode : public ASTNode {
+class ProgramNode final : public ASTNode {
     std::vector<ASTNode*> nodes;
     ModuleCompiler& compiler;
 
 public:
     ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
-    ~ProgramNode();
+    ~ProgramNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 };
 
-class ExpressionStatementNode : public ASTNode {
+class ExpressionStatementNode final : public ASTNode {
 public:
     ExpressionStatementNode(ExpressionNode* expr, ModuleCompiler& compiler);
-    ~ExpressionStatementNode();
+    ~ExpressionStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -54,10 +53,10 @@ private:
     ModuleCompiler& compiler;
 };
 
-class BlockNode : public ASTNode {
+class BlockNode final : public ASTNode {
 public:
     BlockNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
-    ~BlockNode();
+    ~BlockNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -69,16 +68,16 @@ private:
     ModuleCompiler& compiler;
 };
 
-class FunctionNode : public ASTNode {
+class FunctionNode final : public ASTNode {
 public:
     struct Parameter {
         std::string name;
         KType* type;
     };
 
-    FunctionNode(const std::string& name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
+    FunctionNode(std::string name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
                  ModuleCompiler& compiler);
-    ~FunctionNode();
+    ~FunctionNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;

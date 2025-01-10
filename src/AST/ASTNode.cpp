@@ -68,7 +68,7 @@ ProgramNode::ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler)
 
 ProgramNode::~ProgramNode()
 {
-    for (auto* node : nodes)
+    for (const auto* node : nodes)
         delete node;
 }
 
@@ -212,8 +212,8 @@ FunctionNode::~FunctionNode()
 std::string FunctionNode::to_string() const
 {
     std::string args_str;
-    for (const auto& arg : args) {
-        args_str += arg.name + ": " + arg.type->to_string() + ", ";
+    for (const auto& [name, type] : args) {
+        args_str += name + ": " + type->to_string() + ", ";
     }
     return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body->to_string());
 }
