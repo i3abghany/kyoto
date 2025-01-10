@@ -145,8 +145,8 @@ llvm::Value* ReturnStatementNode::gen()
     if (!expr) throw std::runtime_error(fmt::format("Expected return type `{}`", fn_ret_type->to_string()));
 
     llvm::Value* expr_val = nullptr;
-    if (fn_ret_type->is_integer() && expr_ktype->is_integer()
-        || fn_ret_type->is_boolean() && expr_ktype->is_boolean()) {
+    if ((fn_ret_type->is_integer() && expr_ktype->is_integer())
+        || (fn_ret_type->is_boolean() && expr_ktype->is_boolean())) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, fn_ret_type, compiler, "return", fn_name);
     } else if (fn_ret_type->is_string() && expr_ktype->is_string()) {
         expr_val = expr->gen();

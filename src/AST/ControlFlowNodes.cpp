@@ -175,7 +175,7 @@ llvm::Value* ForStatementNode::gen()
     if (update) {
         compiler.get_builder().CreateBr(update_bb);
         compiler.get_builder().SetInsertPoint(update_bb);
-        update->gen();
+        auto* _ = update->gen();
         compiler.get_builder().CreateBr(cond_bb);
     } else {
         compiler.get_builder().CreateBr(cond_bb ? cond_bb : body_bb);

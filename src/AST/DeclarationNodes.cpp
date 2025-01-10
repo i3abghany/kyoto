@@ -78,7 +78,7 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
     llvm::Value* expr_val = nullptr;
-    if (type->is_integer() && expr_ktype->is_integer() || type->is_boolean() && expr_ktype->is_boolean()) {
+    if ((type->is_integer() && expr_ktype->is_integer()) || (type->is_boolean() && expr_ktype->is_boolean())) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
     } else if (type->is_string() && expr_ktype->is_string()) {
         expr_val = expr->gen();

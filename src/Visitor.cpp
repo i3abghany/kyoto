@@ -377,7 +377,7 @@ std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)
     if (ctx->STRING()) return (KType*)new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
     if (ctx->type()) {
         KType* type = std::any_cast<KType*>(visit(ctx->type()));
-        for (int i = 0; i < ctx->pointerSuffix().size(); i++)
+        for (size_t i = 0; i < ctx->pointerSuffix().size(); i++)
             type = new PointerType(type);
         return type;
     }

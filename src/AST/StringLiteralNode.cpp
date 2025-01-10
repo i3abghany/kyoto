@@ -10,8 +10,8 @@
 #include "llvm/IR/IRBuilder.h"
 
 StringLiteralNode::StringLiteralNode(std::string value, ModuleCompiler& compiler)
-    : value(std::move(value))
-    , type(nullptr)
+    : type(nullptr)
+    , value(std::move(value))
     , compiler(compiler)
 {
 }
