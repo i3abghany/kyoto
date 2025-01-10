@@ -86,6 +86,8 @@ public:
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
     [[nodiscard]] std::string get_name() const { return name; }
 
+    [[nodiscard]] KType* get_ret_type() const { return ret_type; }
+
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;
 

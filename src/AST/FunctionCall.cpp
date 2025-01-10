@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -68,6 +69,11 @@ llvm::Value* FunctionCall::trivial_gen()
 {
     assert(false && "Function call is not trivially evaluable");
     return nullptr;
+}
+
+KType* FunctionCall::get_ktype() const
+{
+    return compiler.get_current_function_node()->get_ret_type();
 }
 
 bool FunctionCall::is_trivially_evaluable() const
