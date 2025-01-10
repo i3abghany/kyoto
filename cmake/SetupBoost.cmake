@@ -1,5 +1,5 @@
 set(REQUIRED_BOOST_COMPONENTS system filesystem program_options)
-find_package(Boost 1.74.0 REQUIRED COMPONENTS ${REQUIRED_BOOST_COMPONENTS})
+find_package(Boost REQUIRED COMPONENTS ${REQUIRED_BOOST_COMPONENTS})
 
 if (Boost_FOUND)
     message(STATUS "Boost found. Include dir: ${Boost_INCLUDE_DIRS}")
