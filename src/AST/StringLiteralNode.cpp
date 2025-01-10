@@ -11,11 +11,15 @@
 
 StringLiteralNode::StringLiteralNode(std::string value, ModuleCompiler& compiler)
     : value(std::move(value))
+    , type(nullptr)
     , compiler(compiler)
 {
 }
 
-StringLiteralNode::~StringLiteralNode() { }
+StringLiteralNode::~StringLiteralNode()
+{
+    delete type;
+}
 
 std::string StringLiteralNode::to_string() const
 {
@@ -29,7 +33,7 @@ llvm::Value* StringLiteralNode::gen()
     return str;
 }
 
-llvm::Type* StringLiteralNode::get_type(llvm::LLVMContext& context) const
+llvm::Type* StringLiteralNode::gen_type(llvm::LLVMContext& context) const
 {
     return llvm::PointerType::get(llvm::IntegerType::get(context, 8), 0);
 }
@@ -42,4 +46,12 @@ llvm::Value* StringLiteralNode::trivial_gen()
 bool StringLiteralNode::is_trivially_evaluable() const
 {
     return true;
+}
+
+KType* StringLiteralNode::get_ktype() const
+{
+    if (!type) {
+        type = new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
+    }
+    return type;
 }

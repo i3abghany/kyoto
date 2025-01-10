@@ -19,7 +19,8 @@ public:
     virtual ~ExpressionNode() = default;
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual llvm::Value* gen() = 0;
-    [[nodiscard]] virtual llvm::Type* get_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Type* gen_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual KType* get_ktype() const { return nullptr; }
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
     [[nodiscard]] virtual llvm::Value* gen_ptr() const { return nullptr; }
@@ -51,7 +52,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
-    [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] KType* get_ktype() const override;
 };
 
 class AssignmentNode : public ExpressionNode {
@@ -61,8 +63,9 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
-    [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
+    [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
 private:
@@ -90,6 +93,7 @@ public:
         Positive,
         PrefixIncrement,
         PrefixDecrement,
+        AddressOf,
     };
 
     UnaryNode(ExpressionNode* expr, UnaryOp op, ModuleCompiler& compiler);
@@ -97,7 +101,9 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
-    [[nodiscard]] llvm::Type* get_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Value* gen_ptr() const override;
+    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
@@ -109,6 +115,7 @@ private:
     llvm::Value* gen_prefix_decrement();
 
 private:
+    mutable KType* type;
     ExpressionNode* expr;
     UnaryOp op;
     ModuleCompiler& compiler;

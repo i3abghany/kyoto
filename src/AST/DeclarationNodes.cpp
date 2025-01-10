@@ -1,5 +1,6 @@
 #include "kyoto/AST/DeclarationNodes.h"
 
+#include <assert.h>
 #include <fmt/core.h>
 #include <stdexcept>
 
@@ -49,7 +50,7 @@ FullDeclarationStatementNode::FullDeclarationStatementNode(std::string name, KTy
 
 FullDeclarationStatementNode::~FullDeclarationStatementNode()
 {
-    delete type;
+    if (type && !type->is_void()) delete type;
     delete expr;
 }
 
@@ -61,15 +62,14 @@ std::string FullDeclarationStatementNode::to_string() const
 llvm::Value* FullDeclarationStatementNode::gen()
 {
     if (!type) {
-        auto* expr_type = expr->get_type(compiler.get_context());
+        auto* expr_type = expr->gen_type(compiler.get_context());
         type = KType::from_llvm_type(expr_type);
     }
 
-    auto* pt = KType::from_llvm_type(expr->get_type(compiler.get_context()));
-
+    auto expr_ktype = expr->get_ktype();
     if (type->is_void()) {
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
-    } else if (pt->is_void()) {
+    } else if (expr_ktype->is_void()) {
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
 
@@ -77,14 +77,19 @@ llvm::Value* FullDeclarationStatementNode::gen()
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
     llvm::Value* expr_val = nullptr;
-    if (type->is_integer() && pt->is_integer() || type->is_boolean() && pt->is_boolean()) {
+    if (type->is_integer() && expr_ktype->is_integer() || type->is_boolean() && expr_ktype->is_boolean()) {
         expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
-    } else if (type->is_string() && pt->is_string()) {
+    } else if (type->is_string() && expr_ktype->is_string()) {
         expr_val = expr->gen();
     } else {
-        throw std::runtime_error(
-            fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                        expr->to_string(), pt->to_string(), name, type->to_string()));
+        if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
+            expr_val = expr->gen_ptr();
+            assert(expr_val && "Expression must be a pointer");
+        } else {
+            throw std::runtime_error(
+                fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                            expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
+        }
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);

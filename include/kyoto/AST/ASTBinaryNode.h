@@ -13,6 +13,7 @@ class Value;
 #define BINARY_NODE_INTERFACE(name)                                               \
     class name : public ExpressionNode {                                          \
         ExpressionNode *lhs, *rhs;                                                \
+        mutable KType* type = nullptr;                                            \
         ModuleCompiler& compiler;                                                 \
                                                                                   \
     public:                                                                       \
@@ -20,7 +21,8 @@ class Value;
         ~name();                                                                  \
         std::string to_string() const override;                                   \
         llvm::Value* gen() override;                                              \
-        llvm::Type* get_type(llvm::LLVMContext& context) const override;          \
+        llvm::Type* gen_type(llvm::LLVMContext& context) const override;          \
+        KType* get_ktype() const override;                                        \
         llvm::Value* trivial_gen() override;                                      \
         bool is_trivially_evaluable() const override;                             \
     }

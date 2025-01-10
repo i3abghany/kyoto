@@ -1,6 +1,7 @@
 #include "kyoto/ModuleCompiler.h"
 
 #include <any>
+#include <assert.h>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -185,6 +186,16 @@ void ModuleCompiler::push_scope()
 
 void ModuleCompiler::pop_scope()
 {
+    if (symbol_table.n_scopes() == 2) {
+        int i = 0;
+        for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
+            auto arg_name = current_fn_node->get_params()[i++].name;
+            auto s = symbol_table.get_symbol(arg_name);
+            assert(s.has_value() && "Expected symbol to be in the symbol table");
+            delete s.value().type;
+        }
+    }
+
     symbol_table.pop_scope();
 }
 
