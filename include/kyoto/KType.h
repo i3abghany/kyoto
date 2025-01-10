@@ -23,6 +23,7 @@ public:
     virtual bool is_numeric() const { return false; }
     virtual bool is_char() const { return false; }
 
+    virtual KType* copy() const = 0;
     virtual bool operator==(const KType& other) const = 0;
 
     static KType* get_void();
@@ -49,6 +50,7 @@ public:
     explicit PrimitiveType(Kind kind);
     std::string to_string() const override;
     bool operator==(const KType& other) const override;
+    KType* copy() const override;
 
     bool is_integer() const override;
     bool is_floating_point() const override;
@@ -71,6 +73,7 @@ public:
     ~PointerType();
     std::string to_string() const override;
     bool operator==(const KType& other) const override;
+    KType* copy() const override;
 
     KType* get_pointee() const;
     bool is_string() const override;

@@ -106,6 +106,11 @@ size_t PrimitiveType::width() const
     assert(false && "Unknown type");
 }
 
+KType* PrimitiveType::copy() const
+{
+    return new PrimitiveType(kind);
+}
+
 PrimitiveType::Kind PrimitiveType::get_kind() const
 {
     return kind;
@@ -169,4 +174,9 @@ bool PointerType::operator==(const KType& other) const
     if (!other_pointer) return false;
 
     return *pointee == *other_pointer->pointee;
+}
+
+KType* PointerType::copy() const
+{
+    return new PointerType(pointee->copy());
 }

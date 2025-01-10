@@ -1,7 +1,6 @@
 #include "kyoto/AST/ControlFlowNodes.h"
 
 #include <fmt/core.h>
-#include <memory>
 #include <stddef.h>
 #include <stdexcept>
 #include <utility>
@@ -77,8 +76,7 @@ llvm::Value* IfStatementNode::gen()
     compiler.get_builder().CreateBr(jumps_bbs[0]);
 
     for (size_t i = 0; i < body_bbs.size(); i++) {
-        auto* cond_type = conditions[i]->gen_type(compiler.get_context());
-        auto cond_ktype = std::unique_ptr<KType>(KType::from_llvm_type(cond_type));
+        auto* cond_ktype = conditions[i]->get_ktype();
 
         if (!cond_ktype->is_boolean()) {
             throw std::runtime_error(fmt::format("If condition must be of type bool, got {}", cond_ktype->to_string()));
@@ -146,8 +144,7 @@ llvm::Value* ForStatementNode::gen()
     bool trivial_false_cond = false;
     if (condition->get_expr()->is_trivially_evaluable()) {
         auto* cond_val = condition->get_expr()->gen();
-        auto* cond_type = condition->get_expr()->gen_type(compiler.get_context());
-        auto cond_ktype = std::unique_ptr<KType>(KType::from_llvm_type(cond_type));
+        auto* cond_ktype = condition->get_expr()->get_ktype();
 
         if (!cond_ktype->is_boolean()) {
             throw std::runtime_error(
