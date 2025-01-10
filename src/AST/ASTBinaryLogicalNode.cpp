@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <fmt/core.h>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -35,10 +34,8 @@
     {                                                                                                               \
         auto* lhs_val = lhs->gen();                                                                                 \
         auto* rhs_val = rhs->gen();                                                                                 \
-        auto lhs_ktype = std::unique_ptr<PrimitiveType>(                                                            \
-            KType::from_llvm_type(lhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                     \
-        auto rhs_ktype = std::unique_ptr<PrimitiveType>(                                                            \
-            KType::from_llvm_type(rhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                     \
+        auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                    \
+        auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
         auto t = compiler.get_type_resolver().resolve_binary_logical(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
         if (!t.has_value()) {                                                                                       \
             throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
@@ -59,10 +56,8 @@
         assert(is_trivially_evaluable());                                                                           \
         auto* lhs_val = lhs->trivial_gen();                                                                         \
         auto* rhs_val = rhs->trivial_gen();                                                                         \
-        auto lhs_ktype = std::unique_ptr<PrimitiveType>(                                                            \
-            KType::from_llvm_type(lhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                     \
-        auto rhs_ktype = std::unique_ptr<PrimitiveType>(                                                            \
-            KType::from_llvm_type(rhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                     \
+        auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                    \
+        auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
         auto t = compiler.get_type_resolver().resolve_binary_logical(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
         if (!t.has_value()) {                                                                                       \
             throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
@@ -73,14 +68,7 @@
     KType* name::get_ktype() const                                                                                  \
     {                                                                                                               \
         if (type) return type;                                                                                      \
-        auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                    \
-        auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
-        auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind());   \
-        if (!t.has_value()) {                                                                                       \
-            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
-                                                 lhs_ktype->to_string(), rhs_ktype->to_string()));                  \
-        }                                                                                                           \
-        return type = new PrimitiveType(t.value());                                                                 \
+        return type = new PrimitiveType(PrimitiveType::Kind::Boolean);                                              \
     }
 
 LOGICAL_BINARY_NODE_IMPL(LogicalAndNode, &&, CreateAnd);

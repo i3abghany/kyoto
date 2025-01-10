@@ -62,8 +62,7 @@ std::string FullDeclarationStatementNode::to_string() const
 llvm::Value* FullDeclarationStatementNode::gen()
 {
     if (!type) {
-        auto* expr_type = expr->gen_type(compiler.get_context());
-        type = KType::from_llvm_type(expr_type);
+        type = expr->get_ktype()->copy();
     }
 
     auto expr_ktype = expr->get_ktype();
