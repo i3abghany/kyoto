@@ -159,7 +159,7 @@ KType* PointerType::get_pointee() const
 
 bool PointerType::is_string() const
 {
-    auto* pt = pointee->as<PrimitiveType>();
+    auto* pt = dynamic_cast<PrimitiveType*>(pointee);
     return pt && pt->get_kind() == PrimitiveType::Kind::Char;
 }
 

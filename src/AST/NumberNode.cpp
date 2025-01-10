@@ -36,7 +36,7 @@ llvm::Value* NumberNode::gen()
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(b ? 1 : width * 8, value, b ? false : true));
 }
 
-llvm::Type* NumberNode::get_type(llvm::LLVMContext& context) const
+llvm::Type* NumberNode::gen_type(llvm::LLVMContext& context) const
 {
     return ASTNode::get_llvm_type(type, context);
 }
@@ -52,6 +52,11 @@ llvm::Value* NumberNode::trivial_gen()
     assert(primitive_type && "NumberNode type must be a primitive type");
     // return the maximum-width integer constant
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(64, value, true));
+}
+
+KType* NumberNode::get_ktype() const
+{
+    return type;
 }
 
 void NumberNode::cast_to(PrimitiveType::Kind target_kind)

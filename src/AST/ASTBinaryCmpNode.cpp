@@ -24,6 +24,7 @@
     }                                                                                                             \
     name::~name()                                                                                                 \
     {                                                                                                             \
+        delete type;                                                                                              \
         delete lhs;                                                                                               \
         delete rhs;                                                                                               \
     }                                                                                                             \
@@ -36,9 +37,9 @@
         auto* lhs_val = lhs->gen();                                                                               \
         auto* rhs_val = rhs->gen();                                                                               \
         auto lhs_ktype = std::unique_ptr<PrimitiveType>(                                                          \
-            KType::from_llvm_type(lhs->get_type(compiler.get_context()))->as<PrimitiveType>());                   \
+            KType::from_llvm_type(lhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                   \
         auto rhs_ktype = std::unique_ptr<PrimitiveType>(                                                          \
-            KType::from_llvm_type(rhs->get_type(compiler.get_context()))->as<PrimitiveType>());                   \
+            KType::from_llvm_type(rhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                   \
         if (lhs_ktype->width() > rhs_ktype->width()) {                                                            \
             rhs_val = compiler.get_builder().CreateSExt(rhs_val, lhs_val->getType(), "sext");                     \
             rhs_ktype                                                                                             \
@@ -56,7 +57,7 @@
         auto* check = compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                               \
         return compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                                      \
     }                                                                                                             \
-    llvm::Type* name::get_type(llvm::LLVMContext& context) const                                                  \
+    llvm::Type* name::gen_type(llvm::LLVMContext& context) const                                                  \
     {                                                                                                             \
         return llvm::Type::getInt1Ty(context);                                                                    \
     }                                                                                                             \
@@ -70,6 +71,18 @@
         auto* lhs_val = lhs->trivial_gen();                                                                       \
         auto* rhs_val = rhs->trivial_gen();                                                                       \
         return compiler.get_builder().llvm_sop(lhs_val, rhs_val, #op "val");                                      \
+    }                                                                                                             \
+    KType* name::get_ktype() const                                                                                \
+    {                                                                                                             \
+        if (type) return type;                                                                                    \
+        auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                  \
+        auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                  \
+        auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
+        if (!t.has_value()) {                                                                                     \
+            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,   \
+                                                 lhs_ktype->to_string(), rhs_ktype->to_string()));                \
+        }                                                                                                         \
+        return type = new PrimitiveType(t.value());                                                               \
     }
 
 CMP_BINARY_NODE_IMPL(EqNode, ==, CreateICmpEQ);

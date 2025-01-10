@@ -135,7 +135,7 @@ llvm::Value* ReturnStatementNode::gen()
 {
     auto* fn_ret_type = compiler.get_fn_return_type();
 
-    auto expr_ktype = expr ? std::unique_ptr<KType>(KType::from_llvm_type(expr->get_type(compiler.get_context())))
+    auto expr_ktype = expr ? std::unique_ptr<KType>(KType::from_llvm_type(expr->gen_type(compiler.get_context())))
                            : std::unique_ptr<KType>(KType::get_void());
     auto fn_name = compiler.get_current_function_node()->get_name();
 

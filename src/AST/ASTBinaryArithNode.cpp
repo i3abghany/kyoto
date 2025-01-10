@@ -24,6 +24,7 @@
     }                                                                                                                 \
     name::~name()                                                                                                     \
     {                                                                                                                 \
+        delete type;                                                                                                  \
         delete lhs;                                                                                                   \
         delete rhs;                                                                                                   \
     }                                                                                                                 \
@@ -36,9 +37,9 @@
         auto* lhs_val = lhs->gen();                                                                                   \
         auto* rhs_val = rhs->gen();                                                                                   \
         auto lhs_ktype = std::unique_ptr<PrimitiveType>(                                                              \
-            KType::from_llvm_type(lhs->get_type(compiler.get_context()))->as<PrimitiveType>());                       \
+            KType::from_llvm_type(lhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                       \
         auto rhs_ktype = std::unique_ptr<PrimitiveType>(                                                              \
-            KType::from_llvm_type(rhs->get_type(compiler.get_context()))->as<PrimitiveType>());                       \
+            KType::from_llvm_type(rhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                       \
         if (lhs_ktype->width() > rhs_ktype->width()) {                                                                \
             rhs_val = compiler.get_builder().CreateSExt(rhs_val, lhs_val->getType(), "sext");                         \
             rhs_ktype                                                                                                 \
@@ -54,20 +55,20 @@
                                                  lhs_ktype->to_string(), rhs_ktype->to_string()));                    \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                           \
     }                                                                                                                 \
-    llvm::Type* name::get_type(llvm::LLVMContext& context) const                                                      \
+    llvm::Type* name::gen_type(llvm::LLVMContext& context) const                                                      \
     {                                                                                                                 \
         auto lhs_ktype = std::unique_ptr<PrimitiveType>(                                                              \
-            KType::from_llvm_type(lhs->get_type(compiler.get_context()))->as<PrimitiveType>());                       \
+            KType::from_llvm_type(lhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                       \
         auto rhs_ktype = std::unique_ptr<PrimitiveType>(                                                              \
-            KType::from_llvm_type(rhs->get_type(compiler.get_context()))->as<PrimitiveType>());                       \
+            KType::from_llvm_type(rhs->gen_type(compiler.get_context()))->as<PrimitiveType>());                       \
         if (auto* num = dynamic_cast<NumberNode*>(lhs); num) {                                                        \
             num->cast_to(rhs_ktype->get_kind());                                                                      \
             lhs_ktype                                                                                                 \
-                = std::unique_ptr<PrimitiveType>(KType::from_llvm_type(rhs->get_type(context))->as<PrimitiveType>()); \
+                = std::unique_ptr<PrimitiveType>(KType::from_llvm_type(rhs->gen_type(context))->as<PrimitiveType>()); \
         } else if (auto* num = dynamic_cast<NumberNode*>(rhs); num) {                                                 \
             num->cast_to(lhs_ktype->get_kind());                                                                      \
             rhs_ktype                                                                                                 \
-                = std::unique_ptr<PrimitiveType>(KType::from_llvm_type(lhs->get_type(context))->as<PrimitiveType>()); \
+                = std::unique_ptr<PrimitiveType>(KType::from_llvm_type(lhs->gen_type(context))->as<PrimitiveType>()); \
         }                                                                                                             \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind());     \
         if (!t.has_value()) {                                                                                         \
@@ -78,6 +79,18 @@
         auto res = ASTNode::get_llvm_type(ktype, context);                                                            \
         delete ktype;                                                                                                 \
         return res;                                                                                                   \
+    }                                                                                                                 \
+    KType* name::get_ktype() const                                                                                    \
+    {                                                                                                                 \
+        if (type) return type;                                                                                        \
+        auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                      \
+        auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                      \
+        auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind());     \
+        if (!t.has_value()) {                                                                                         \
+            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,       \
+                                                 lhs_ktype->to_string(), rhs_ktype->to_string()));                    \
+        }                                                                                                             \
+        return type = new PrimitiveType(t.value());                                                                   \
     }
 
 #define ARITH_BINARY_NODE_IMPL_WITH_TRIVIAL_EVAL(name, op, llvm_op)            \
