@@ -61,6 +61,9 @@ public:
     std::any visitForCondition(kyoto::KyotoParser::ForConditionContext* ctx) override;
     std::any visitForUpdate(kyoto::KyotoParser::ForUpdateContext* ctx) override;
 
+    std::any visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx) override;
+    std::any visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx) override;
+
     std::any visitType(kyoto::KyotoParser::TypeContext* ctx) override;
 
 private:

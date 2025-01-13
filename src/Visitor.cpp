@@ -1,16 +1,19 @@
 #include <any>
-#include <array>
 #include <assert.h>
 #include <fmt/core.h>
+#include <initializer_list>
 #include <optional>
 #include <regex>
+#include <stddef.h>
 #include <stdexcept>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
 #include "KyotoParser.h"
 #include "kyoto/AST/ASTBinaryNode.h"
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/ControlFlowNodes.h"
 #include "kyoto/AST/DeclarationNodes.h"
 #include "kyoto/AST/ExpressionNode.h"
@@ -364,6 +367,23 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
 
     auto* body = std::any_cast<ASTNode*>(visit(ctx->block()));
     return (ASTNode*)new ForStatementNode(init, condition, update, body, compiler);
+}
+
+std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx)
+{
+    std::vector<ASTNode*> components;
+    for (const auto& component : ctx->classComponents()->classComponent()) {
+        components.push_back(std::any_cast<ASTNode*>(visit(component)));
+    }
+    return (ASTNode*)new ClassDefinitionNode(ctx->IDENTIFIER()->getText(), components, compiler);
+}
+
+std::any ASTBuilderVisitor::visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx)
+{
+    if (ctx->functionDefinition()) return visit(ctx->functionDefinition());
+    if (ctx->declaration()) return visit(ctx->declaration());
+    if (ctx->fullDeclaration()) return visit(ctx->fullDeclaration());
+    return nullptr;
 }
 
 std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)

@@ -6,9 +6,19 @@ options {
 
 program: topLevel* EOF;
 
-topLevel: functionDefinition | fullDeclaration | cdecl;
+topLevel: functionDefinition | fullDeclaration | cdecl | classDefinition;
 
 block: OPEN_BRACE statement* CLOSE_BRACE;
+
+classDefinition: CLASS IDENTIFIER OPEN_BRACE classComponents CLOSE_BRACE;
+
+classComponents: classComponent*;
+
+classComponent:
+    declaration
+    | fullDeclaration
+    | functionDefinition
+    ;
 
 statement:
 	block
