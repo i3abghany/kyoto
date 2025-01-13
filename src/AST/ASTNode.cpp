@@ -226,7 +226,8 @@ std::string FunctionNode::to_string() const
     for (const auto& [name, type] : args) {
         args_str += name + ": " + type->to_string() + ", ";
     }
-    return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body->to_string());
+    if (varargs) args_str += "...";
+    return fmt::format("FunctionNode({}, {}, [{}], [{}])", ret_type->to_string(), name, args_str, body->to_string());
 }
 
 llvm::Value* FunctionNode::gen()
