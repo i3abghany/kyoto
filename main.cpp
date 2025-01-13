@@ -37,14 +37,14 @@ int run(int argc, const char* argv[])
     po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
     po::notify(vm);
 
-    if (vm.count("help")) {
+    if (vm.contains("help")) {
         print_usage(argv[0], desc);
         return 0;
     }
 
-    if (!vm.count("files")) {
-        constexpr const char* RED = "\033[0;31m";
-        constexpr const char* NC = "\033[0m";
+    if (!vm.contains("files")) {
+        constexpr auto* RED = "\033[0;31m";
+        constexpr auto* NC = "\033[0m";
         std::cerr << RED << "Error: " << NC << "No input files provided" << std::endl;
         return 1;
     }
@@ -55,7 +55,7 @@ int run(int argc, const char* argv[])
         return 1;
     }
 
-    auto file = files[0];
+    const auto& file = files[0];
     auto source = utils::File::get_source(file);
     ModuleCompiler compiler(source);
 
