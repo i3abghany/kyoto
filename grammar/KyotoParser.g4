@@ -121,4 +121,5 @@ type:
 	| F64
 	| STRING
 	| VOID
+	| IDENTIFIER
 	| type pointerSuffix+;

@@ -30,6 +30,7 @@ set(SOURCES
     src/AST/ASTBinaryCmpNode.cpp
     src/AST/ASTBinaryLogicalNode.cpp
     src/AST/NumberNode.cpp
+    src/Resolution/ConstructorResolution.cpp
     src/ModuleCompiler.cpp
     src/SymbolTable.cpp
     src/KType.cpp

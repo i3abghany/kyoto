@@ -17,6 +17,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/Analysis/FunctionTermination.h"
 #include "kyoto/KType.h"
+#include "kyoto/Resolution/ConstructorResolution.h"
 #include "kyoto/Visitor.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Analysis/CGSCCPassManager.h"
@@ -130,6 +131,8 @@ std::optional<std::string> ModuleCompiler::gen_ir()
 
     try {
         auto program = std::unique_ptr<ASTNode>(parse_program());
+        ConstructorResolver constructor_resolver(*this);
+        constructor_resolver.visit(program.get());
         program->gen();
         llvm_pass();
         ensure_main_fn();

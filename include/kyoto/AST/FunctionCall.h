@@ -8,7 +8,7 @@
 
 class ModuleCompiler;
 
-class FunctionCall : ExpressionNode {
+class FunctionCall : public ExpressionNode {
 public:
     FunctionCall(std::string name, std::vector<ExpressionNode*> args, ModuleCompiler& compiler);
     ~FunctionCall();
@@ -31,7 +31,7 @@ public:
 
 private:
     std::string name;
-    bool is_constructor;
+    bool is_constructor { false };
     std::vector<ExpressionNode*> args;
     ModuleCompiler& compiler;
 };
