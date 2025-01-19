@@ -185,21 +185,22 @@ void ModuleCompiler::push_scope()
             auto arg_name = current_fn_node->get_params()[i++].name;
             auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
             builder.CreateStore(arg, arg_alloc);
-            symbol_table.add_symbol(
-                arg_name,
-                Symbol { arg_alloc, arg_type->isPointerTy(), current_fn_node->get_params()[i - 1].type->copy() });
+            symbol_table.add_symbol(arg_name, Symbol { arg_alloc, current_fn_node->get_params()[i - 1].type->copy() });
         }
     }
 }
 
 void ModuleCompiler::pop_scope()
 {
+    // destruct the types of the function arguments. `2` is the global scope and
+    // the function scope. Whene we pop the function, we destruct the types of
+    // the function arguments.
     if (symbol_table.n_scopes() == 2) {
         int i = 0;
         for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
             auto arg_name = current_fn_node->get_params()[i++].name;
             auto s = symbol_table.get_symbol(arg_name);
-            assert(s.has_value() && "Expected symbol to be in the symbol table");
+            assert(s.has_value() && "Expected function parameter symbol to be in the symbol table");
             delete s.value().type;
         }
     }
