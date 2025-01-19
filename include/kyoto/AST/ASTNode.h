@@ -83,6 +83,7 @@ public:
 
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
     [[nodiscard]] std::string get_name() const { return name; }
+    [[nodiscard]] ASTNode* get_body() const { return body; }
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
 

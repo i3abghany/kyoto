@@ -374,11 +374,11 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
 std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx)
 {
     std::vector<ASTNode*> components;
-    compiler.set_current_class(ctx->IDENTIFIER(0)->getText());
+    compiler.push_class(ctx->IDENTIFIER(0)->getText());
     for (const auto& component : ctx->classComponents()->classComponent()) {
         components.push_back(std::any_cast<ASTNode*>(visit(component)));
     }
-    compiler.set_current_class("");
+    compiler.pop_class();
     std::string parent = ctx->IDENTIFIER().size() > 1 ? ctx->IDENTIFIER(1)->getText() : "";
     return (ASTNode*)new ClassDefinitionNode(ctx->IDENTIFIER(0)->getText(), parent, components, compiler);
 }

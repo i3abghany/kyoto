@@ -23,8 +23,12 @@ public:
     [[nodiscard]] const std::string& get_name() const { return name; }
     [[nodiscard]] const std::vector<ExpressionNode*>& get_args() const { return args; }
 
+    [[nodiscard]] bool is_constructor_call() const { return is_constructor; }
+    void set_as_constructor_call() { is_constructor = true; }
+
 private:
     std::string name;
+    bool is_constructor;
     std::vector<ExpressionNode*> args;
     ModuleCompiler& compiler;
 };

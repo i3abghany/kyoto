@@ -219,14 +219,25 @@ void ModuleCompiler::set_current_function(FunctionNode* node, llvm::Function* fu
     current_fn = func;
 }
 
-void ModuleCompiler::set_current_class(std::string name)
+void ModuleCompiler::push_class(std::string name)
 {
     current_class = std::move(name);
+    classes.insert(current_class);
+}
+
+void ModuleCompiler::pop_class()
+{
+    current_class = "";
 }
 
 std::string ModuleCompiler::get_current_class() const
 {
     return current_class;
+}
+
+bool ModuleCompiler::class_exists(const std::string& name) const
+{
+    return classes.contains(name);
 }
 
 void ModuleCompiler::push_fn_return_type(KType* type)
