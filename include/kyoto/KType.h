@@ -26,7 +26,6 @@ public:
     virtual bool is_char() const { return false; }
 
     virtual KType* copy() const = 0;
-    virtual size_t ptr_level() const { return 0; }
     virtual bool operator==(const KType& other) const = 0;
 
     static KType* get_void();
