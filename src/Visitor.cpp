@@ -409,6 +409,7 @@ std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)
 {
     // String is a special case. It does not use pointer type syntax. `str` is a synonym for `char*`.
     if (ctx->STRING()) return (KType*)new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
+    if (ctx->IDENTIFIER()) return (KType*)new ClassType(ctx->IDENTIFIER()->getText());
     if (ctx->type()) {
         auto* type = std::any_cast<KType*>(visit(ctx->type()));
         for (size_t i = 0; i < ctx->pointerSuffix().size(); i++)

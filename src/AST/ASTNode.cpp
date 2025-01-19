@@ -24,19 +24,23 @@ class LLVMContext;
 
 llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
 {
-    const auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
-    if (!primitive_type) {
-        if (!dynamic_cast<const PointerType*>(type)) {
-            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
-        }
+    if (type->is_pointer()) {
         return llvm::PointerType::get(context, 0);
     }
 
+    // TODO: handle class types
+
+    if (!type->is_primitive()) {
+        if (!dynamic_cast<const PointerType*>(type)) {
+            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
+        }
+    }
+
+    const auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
     switch (primitive_type->get_kind()) {
     case PrimitiveType::Kind::Boolean:
         return llvm::Type::getInt1Ty(context);
     case PrimitiveType::Kind::Char:
-        return llvm::Type::getInt8Ty(context);
     case PrimitiveType::Kind::I8:
         return llvm::Type::getInt8Ty(context);
     case PrimitiveType::Kind::I16:

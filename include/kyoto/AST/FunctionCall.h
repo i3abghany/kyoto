@@ -27,7 +27,11 @@ public:
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { args.begin(), args.end() }; }
 
     [[nodiscard]] bool is_constructor_call() const { return is_constructor; }
-    void set_as_constructor_call() { is_constructor = true; }
+    void set_as_constructor_call()
+    {
+        is_constructor = true;
+        name += "_constructor";
+    }
 
 private:
     std::string name;

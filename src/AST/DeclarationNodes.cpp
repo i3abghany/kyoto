@@ -13,6 +13,8 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
 
+#include <kyoto/AST/FunctionCall.h>
+
 DeclarationStatementNode::DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler)
     : name(name)
     , type(ktype)
@@ -70,7 +72,9 @@ llvm::Value* FullDeclarationStatementNode::gen()
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
     }
 
-    if (expr_ktype->is_void()) {
+    bool void_expr = expr_ktype->is_void() && expr->is<FunctionCall>()
+        && !dynamic_cast<FunctionCall*>(expr)->is_constructor_call();
+    if (void_expr) {
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
 
