@@ -35,7 +35,7 @@ llvm::Value* DeclarationStatementNode::gen()
     auto* ltype = get_llvm_type(type, compiler.get_context());
     auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
-    compiler.add_symbol(name, Symbol { val, !type->is_pointer(), type });
+    compiler.add_symbol(name, Symbol { val, type });
     return val;
 }
 
@@ -94,6 +94,6 @@ llvm::Value* FullDeclarationStatementNode::gen()
     }
 
     compiler.get_builder().CreateStore(expr_val, alloca);
-    compiler.add_symbol(name, Symbol { alloca, !type->is_pointer(), type });
+    compiler.add_symbol(name, Symbol { alloca, type });
     return alloca;
 }
