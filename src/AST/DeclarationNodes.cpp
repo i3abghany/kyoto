@@ -34,7 +34,7 @@ std::string DeclarationStatementNode::to_string() const
 
 llvm::Value* DeclarationStatementNode::gen()
 {
-    auto* ltype = get_llvm_type(type, compiler.get_context());
+    auto* ltype = get_llvm_type(type, compiler);
     auto* val = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
     compiler.add_symbol(name, Symbol { val, type });
@@ -78,7 +78,7 @@ llvm::Value* FullDeclarationStatementNode::gen()
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
 
-    auto* ltype = get_llvm_type(type, compiler.get_context());
+    auto* ltype = get_llvm_type(type, compiler);
     auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
 
     llvm::Value* expr_val = nullptr;

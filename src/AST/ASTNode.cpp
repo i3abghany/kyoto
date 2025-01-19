@@ -22,8 +22,9 @@ namespace llvm {
 class LLVMContext;
 }
 
-llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
+llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
 {
+    auto& context = compiler.get_context();
     if (type->is_pointer()) {
         return llvm::PointerType::get(context, 0);
     }
@@ -162,7 +163,7 @@ llvm::Value* ReturnStatementNode::gen()
     } else {
         if (fn_ret_type->is_pointer() && expr_ktype->is_pointer() && fn_ret_type->operator==(*expr_ktype)) {
             expr_val = expr->gen_ptr();
-            expr_val = compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler.get_context()), expr_val);
+            expr_val = compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler), expr_val);
             assert(expr_val && "Expression must be a pointer");
         } else {
             throw std::runtime_error(fmt::format(
@@ -242,7 +243,7 @@ std::string FunctionNode::to_string() const
 
 llvm::Value* FunctionNode::gen()
 {
-    auto* return_ltype = get_llvm_type(ret_type, compiler.get_context());
+    auto* return_ltype = get_llvm_type(ret_type, compiler);
     auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
     auto* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
 
@@ -263,7 +264,7 @@ std::vector<llvm::Type*> FunctionNode::get_arg_types() const
 {
     std::vector<llvm::Type*> types;
     for (const auto& arg : args) {
-        auto* ltype = get_llvm_type(arg.type, compiler.get_context());
+        auto* ltype = get_llvm_type(arg.type, compiler);
         types.push_back(ltype);
     }
     return types;

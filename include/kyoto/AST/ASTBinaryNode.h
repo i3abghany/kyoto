@@ -21,7 +21,7 @@ class Value;
         ~name();                                                                                   \
         std::string to_string() const override;                                                    \
         llvm::Value* gen() override;                                                               \
-        llvm::Type* gen_type(llvm::LLVMContext& context) const override;                           \
+        llvm::Type* gen_type() const override;                                                     \
         [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { lhs, rhs }; } \
         KType* get_ktype() const override;                                                         \
         llvm::Value* trivial_gen() override;                                                       \

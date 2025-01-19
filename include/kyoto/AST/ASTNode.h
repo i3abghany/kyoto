@@ -25,8 +25,7 @@ public:
 
     template <typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
 
-protected:
-    static llvm::Type* get_llvm_type(const KType* type, llvm::LLVMContext& context);
+    static llvm::Type* get_llvm_type(const KType* type, ModuleCompiler& compiler);
 };
 
 class ProgramNode final : public ASTNode {

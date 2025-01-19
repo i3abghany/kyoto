@@ -21,7 +21,7 @@ public:
     virtual ~ExpressionNode() = default;
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual llvm::Value* gen() = 0;
-    [[nodiscard]] virtual llvm::Type* gen_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Type* gen_type() const = 0;
     [[nodiscard]] virtual KType* get_ktype() const { return nullptr; }
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
@@ -53,7 +53,7 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] KType* get_ktype() const override;
 
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
@@ -72,7 +72,7 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
@@ -118,7 +118,7 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;

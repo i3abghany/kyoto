@@ -50,7 +50,7 @@
                                                  lhs_ktype->to_string(), rhs_ktype->to_string()));                \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                       \
     }                                                                                                             \
-    llvm::Type* name::gen_type(llvm::LLVMContext& context) const                                                  \
+    llvm::Type* name::gen_type() const                                                                            \
     {                                                                                                             \
         auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                  \
         auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                  \
@@ -67,7 +67,7 @@
                                                  lhs_ktype->to_string(), rhs_ktype->to_string()));                \
         }                                                                                                         \
         auto ktype = new PrimitiveType(t.value());                                                                \
-        auto res = ASTNode::get_llvm_type(ktype, context);                                                        \
+        auto res = ASTNode::get_llvm_type(ktype, compiler);                                                       \
         delete ktype;                                                                                             \
         return res;                                                                                               \
     }                                                                                                             \

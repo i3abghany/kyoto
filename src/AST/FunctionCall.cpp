@@ -76,7 +76,7 @@ llvm::Value* FunctionCall::gen_ptr() const
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 
-llvm::Type* FunctionCall::gen_type(llvm::LLVMContext& context) const
+llvm::Type* FunctionCall::gen_type() const
 {
     const auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {

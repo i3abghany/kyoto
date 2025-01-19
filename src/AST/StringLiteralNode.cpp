@@ -33,9 +33,9 @@ llvm::Value* StringLiteralNode::gen()
     return str;
 }
 
-llvm::Type* StringLiteralNode::gen_type(llvm::LLVMContext& context) const
+llvm::Type* StringLiteralNode::gen_type() const
 {
-    return llvm::PointerType::get(llvm::IntegerType::get(context, 8), 0);
+    return llvm::PointerType::get(llvm::IntegerType::get(compiler.get_context(), 8), 0);
 }
 
 llvm::Value* StringLiteralNode::trivial_gen()
