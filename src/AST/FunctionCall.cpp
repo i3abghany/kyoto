@@ -55,6 +55,10 @@ llvm::Value* FunctionCall::gen()
     if (!fn) {
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
     }
+    if (fn->arg_size() != arg_values.size()) {
+        throw std::runtime_error(
+            fmt::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));
+    }
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 

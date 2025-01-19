@@ -182,3 +182,27 @@ fn f() i32 {
 fn main() i32 {
     return f();
 }
+
+// NAME LessArgumentsThanExpected
+// ERR 1
+// RET 0
+
+fn f(x: i32, y: i32) i32 {
+    return x + y;
+}
+
+fn main() i32 {
+    return f(1);
+}
+
+// NAME MoreArgumentsThanExpected
+// ERR 1
+// RET 0
+
+fn f(x: i32) i32 {
+    return x;
+}
+
+fn main() i32 {
+    return f(1, 2);
+}
