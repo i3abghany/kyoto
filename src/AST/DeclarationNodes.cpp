@@ -97,3 +97,8 @@ llvm::Value* FullDeclarationStatementNode::gen()
     compiler.add_symbol(name, Symbol { alloca, type });
     return alloca;
 }
+
+std::vector<ASTNode*> FullDeclarationStatementNode::get_children() const
+{
+    return { expr };
+}

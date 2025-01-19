@@ -112,6 +112,11 @@ llvm::Value* ExpressionStatementNode::gen()
     return expr->gen();
 }
 
+std::vector<ASTNode*> ExpressionStatementNode::get_children() const
+{
+    return { expr };
+}
+
 ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)
     , compiler(compiler)

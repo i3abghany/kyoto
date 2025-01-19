@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 #include "kyoto/AST/ExpressionNode.h"
 #include "kyoto/KType.h"
@@ -23,6 +24,8 @@ public:
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
 
     void cast_to(PrimitiveType::Kind target_type);
 };

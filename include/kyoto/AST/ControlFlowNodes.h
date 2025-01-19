@@ -16,6 +16,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
+
     bool has_else() const { return conditions.size() != bodies.size(); }
 
 private:
@@ -32,6 +34,8 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
 private:
     ASTNode* init;

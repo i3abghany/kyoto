@@ -15,6 +15,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return components; }
+
 private:
     std::string name;
     std::string parent;

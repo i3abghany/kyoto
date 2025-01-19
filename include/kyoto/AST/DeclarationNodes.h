@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 
@@ -16,6 +17,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
+
 private:
     std::string name;
     KType* type;
@@ -28,7 +31,8 @@ public:
     ~FullDeclarationStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
 private:
     std::string name;

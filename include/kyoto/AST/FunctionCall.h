@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ExpressionNode.h"
 
 class ModuleCompiler;
@@ -22,6 +23,8 @@ public:
 
     [[nodiscard]] const std::string& get_name() const { return name; }
     [[nodiscard]] const std::vector<ExpressionNode*>& get_args() const { return args; }
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { args.begin(), args.end() }; }
 
     [[nodiscard]] bool is_constructor_call() const { return is_constructor; }
     void set_as_constructor_call() { is_constructor = true; }

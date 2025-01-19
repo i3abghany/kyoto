@@ -21,21 +21,27 @@ public:
     virtual ~ASTNode() = default;
     [[nodiscard]] virtual std::string to_string() const = 0;
     virtual llvm::Value* gen() = 0;
+    virtual std::vector<ASTNode*> get_children() const = 0;
+
+    template <typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
 
 protected:
     static llvm::Type* get_llvm_type(const KType* type, llvm::LLVMContext& context);
 };
 
 class ProgramNode final : public ASTNode {
-    std::vector<ASTNode*> nodes;
-    ModuleCompiler& compiler;
-
 public:
     ProgramNode(std::vector<ASTNode*> nodes, ModuleCompiler& compiler);
     ~ProgramNode() override;
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return nodes; }
+
+private:
+    std::vector<ASTNode*> nodes;
+    ModuleCompiler& compiler;
 };
 
 class ExpressionStatementNode final : public ASTNode {
@@ -47,6 +53,8 @@ public:
     [[nodiscard]] llvm::Value* gen() override;
 
     [[nodiscard]] ExpressionNode* get_expr() const { return expr; }
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
 private:
     ExpressionNode* expr;
@@ -60,7 +68,7 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
-    [[nodiscard]] const std::vector<ASTNode*>& get_nodes() const { return nodes; }
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return nodes; }
 
 private:
     std::vector<ASTNode*> nodes;
@@ -83,7 +91,7 @@ public:
 
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
     [[nodiscard]] std::string get_name() const { return name; }
-    [[nodiscard]] ASTNode* get_body() const { return body; }
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { body }; }
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
 
