@@ -1,5 +1,6 @@
 #include <cassert>
 #include <fmt/core.h>
+#include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -257,4 +258,9 @@ std::vector<llvm::Type*> FunctionNode::get_arg_types() const
         types.push_back(ltype);
     }
     return types;
+}
+
+void FunctionNode::insert_arg(const Parameter& arg, size_t index)
+{
+    args.insert(args.begin() + index, arg);
 }

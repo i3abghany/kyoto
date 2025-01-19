@@ -63,6 +63,7 @@ public:
 
     std::any visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx) override;
     std::any visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx) override;
+    std::any visitConstructorDefinition(kyoto::KyotoParser::ConstructorDefinitionContext* ctx) override;
 
     std::any visitType(kyoto::KyotoParser::TypeContext* ctx) override;
 

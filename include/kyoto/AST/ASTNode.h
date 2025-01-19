@@ -67,7 +67,7 @@ private:
     ModuleCompiler& compiler;
 };
 
-class FunctionNode final : public ASTNode {
+class FunctionNode : public ASTNode {
 public:
     struct Parameter {
         std::string name;
@@ -85,6 +85,9 @@ public:
     [[nodiscard]] std::string get_name() const { return name; }
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
+
+protected:
+    void insert_arg(const Parameter& arg, size_t index);
 
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;

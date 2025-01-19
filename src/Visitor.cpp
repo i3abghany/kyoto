@@ -57,7 +57,9 @@ std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
 
 std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx)
 {
-    const auto name = ctx->IDENTIFIER()->getText();
+    auto name = ctx->IDENTIFIER()->getText();
+    if (compiler.get_current_class() != "") name = compiler.get_current_class() + "_" + name;
+
     std::vector<FunctionNode::Parameter> args;
 
     for (const auto param_ctx : ctx->parameterList()->parameter()) {
@@ -383,7 +385,21 @@ std::any ASTBuilderVisitor::visitClassComponent(kyoto::KyotoParser::ClassCompone
     if (ctx->functionDefinition()) return visit(ctx->functionDefinition());
     if (ctx->declaration()) return visit(ctx->declaration());
     if (ctx->fullDeclaration()) return visit(ctx->fullDeclaration());
+    if (ctx->constructorDefinition()) return visit(ctx->constructorDefinition());
     return nullptr;
+}
+
+std::any ASTBuilderVisitor::visitConstructorDefinition(kyoto::KyotoParser::ConstructorDefinitionContext* ctx)
+{
+    std::vector<FunctionNode::Parameter> args;
+    for (const auto param_ctx : ctx->parameterList()->parameter()) {
+        auto* type = std::any_cast<KType*>(visit(param_ctx->type()));
+        args.push_back({ param_ctx->IDENTIFIER()->getText(), type });
+    }
+
+    auto* body = std::any_cast<ASTNode*>(visit(ctx->block()));
+    auto name = compiler.get_current_class() + "_" + "constructor";
+    return (ASTNode*)new ConstructorNode(name, args, body, compiler);
 }
 
 std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)

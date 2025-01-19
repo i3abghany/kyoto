@@ -48,6 +48,9 @@ public:
     void set_current_function(FunctionNode* node, llvm::Function* func);
     FunctionNode* get_current_function_node() const;
 
+    void set_current_class(std::string name);
+    std::string get_current_class() const;
+
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();
     KType* get_fn_return_type() const;
@@ -71,6 +74,8 @@ private:
 
     std::string code;
     std::string name;
+
+    std::string current_class;
 
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
