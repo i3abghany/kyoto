@@ -98,6 +98,7 @@ class ClassType : public KType {
 public:
     explicit ClassType(std::string name);
     std::string to_string() const override;
+    [[nodiscard]] std::string get_name() const;
     [[nodiscard]] bool is_class() const override;
     bool operator==(const KType& other) const override;
     KType* copy() const override;

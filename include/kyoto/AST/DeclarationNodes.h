@@ -17,6 +17,8 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
 
+    [[nodiscard]] KType* get_ktype() const { return type; }
+    [[nodiscard]] std::string get_name() const { return name; }
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
 
 private:
