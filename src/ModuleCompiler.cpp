@@ -17,6 +17,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/Analysis/FunctionTermination.h"
 #include "kyoto/KType.h"
+#include "kyoto/Resolution/ClassIdentifierVisitor.h"
 #include "kyoto/Resolution/ConstructorResolution.h"
 #include "kyoto/Visitor.h"
 #include "llvm/ADT/APInt.h"
@@ -131,8 +132,13 @@ std::optional<std::string> ModuleCompiler::gen_ir()
 
     try {
         auto program = std::unique_ptr<ASTNode>(parse_program());
+
         ConstructorResolver constructor_resolver(*this);
         constructor_resolver.visit(program.get());
+
+        ClassIdentifierVisitor class_identifier_visitor(*this);
+        class_identifier_visitor.visit(program.get());
+
         program->gen();
         llvm_pass();
         ensure_main_fn();
@@ -241,6 +247,16 @@ std::string ModuleCompiler::get_current_class() const
 bool ModuleCompiler::class_exists(const std::string& name) const
 {
     return classes.contains(name);
+}
+
+void ModuleCompiler::add_llvm_struct(const std::string& name, llvm::StructType* type)
+{
+    struct_types[name] = type;
+}
+
+llvm::StructType* ModuleCompiler::get_llvm_struct(const std::string& name) const
+{
+    return struct_types.at(name);
 }
 
 void ModuleCompiler::push_fn_return_type(KType* type)

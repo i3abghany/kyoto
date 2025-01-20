@@ -193,6 +193,11 @@ ClassType::ClassType(std::string name)
 
 std::string ClassType::to_string() const
 {
+    return "Class " + name;
+}
+
+std::string ClassType::get_name() const
+{
     return name;
 }
 

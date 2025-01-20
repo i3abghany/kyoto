@@ -29,7 +29,9 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
         return llvm::PointerType::get(context, 0);
     }
 
-    // TODO: handle class types
+    if (type->is_class()) {
+        return compiler.get_llvm_struct(type->as<const ClassType>()->get_name());
+    }
 
     if (!type->is_primitive()) {
         if (!dynamic_cast<const PointerType*>(type)) {

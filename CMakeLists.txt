@@ -31,6 +31,7 @@ set(SOURCES
     src/AST/ASTBinaryLogicalNode.cpp
     src/AST/NumberNode.cpp
     src/Resolution/ConstructorResolution.cpp
+    src/Resolution/ClassIdentifierVisitor.cpp
     src/ModuleCompiler.cpp
     src/SymbolTable.cpp
     src/KType.cpp

@@ -36,7 +36,13 @@ std::string ClassDefinitionNode::to_string() const
 
 llvm::Value* ClassDefinitionNode::gen()
 {
-    std::cout << to_string() << std::endl;
+    for (const auto& component : components) {
+        if (component->is<FunctionNode>()) {
+            auto* fn = dynamic_cast<FunctionNode*>(component);
+            fn->insert_arg({ "self", new PointerType(new ClassType(name)) }, 0);
+            component->gen();
+        }
+    }
     return nullptr;
 }
 
@@ -44,7 +50,6 @@ ConstructorNode::ConstructorNode(std::string name, std::vector<FunctionNode::Par
                                  ModuleCompiler& compiler)
     : FunctionNode(std::move(name), std::move(args), false, KType::get_void(), body, compiler)
 {
-    FunctionNode::insert_arg({ "self", new PointerType(new ClassType(name)) }, 0);
 }
 
 ConstructorNode::~ConstructorNode() = default;
