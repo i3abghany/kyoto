@@ -35,9 +35,9 @@ llvm::Value* NumberNode::gen()
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(b ? 1 : width * 8, value, b ? false : true));
 }
 
-llvm::Type* NumberNode::gen_type(llvm::LLVMContext& context) const
+llvm::Type* NumberNode::gen_type() const
 {
-    return get_llvm_type(type, context);
+    return get_llvm_type(type, compiler);
 }
 
 bool NumberNode::is_trivially_evaluable() const

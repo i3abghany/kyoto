@@ -101,6 +101,21 @@ llvm::Value* IfStatementNode::gen()
     return nullptr;
 }
 
+std::vector<ASTNode*> IfStatementNode::get_children() const
+{
+    std::vector<ASTNode*> children;
+    children.reserve(conditions.size() + bodies.size());
+
+    for (size_t i = 0; i < conditions.size(); ++i) {
+        children.push_back(conditions[i]);
+        children.push_back(bodies[i]);
+    }
+
+    if (has_else()) children.push_back(bodies.back());
+
+    return children;
+}
+
 ForStatementNode::ForStatementNode(ASTNode* init, ExpressionStatementNode* condition, ExpressionNode* update,
                                    ASTNode* body, ModuleCompiler& compiler)
     : init(init)
@@ -183,4 +198,9 @@ llvm::Value* ForStatementNode::gen()
 
     compiler.get_builder().SetInsertPoint(out_bb);
     return nullptr;
+}
+
+std::vector<ASTNode*> ForStatementNode::get_children() const
+{
+    return { init, condition, update, body };
 }

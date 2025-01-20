@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 
@@ -20,11 +21,13 @@ public:
     virtual ~ExpressionNode() = default;
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual llvm::Value* gen() = 0;
-    [[nodiscard]] virtual llvm::Type* gen_type(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Type* gen_type() const = 0;
     [[nodiscard]] virtual KType* get_ktype() const { return nullptr; }
     [[nodiscard]] virtual llvm::Value* trivial_gen() { return nullptr; }
     [[nodiscard]] virtual bool is_trivially_evaluable() const { return false; }
     [[nodiscard]] virtual llvm::Value* gen_ptr() const { return nullptr; }
+
+    [[nodiscard]] virtual std::vector<ASTNode*> get_children() const = 0;
 
     static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
                                         const std::string& target_name);
@@ -50,8 +53,10 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] KType* get_ktype() const override;
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
 
     [[nodiscard]] const std::string& get_name() const { return name; }
 
@@ -67,10 +72,12 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
+
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { assignee, expr }; }
 
 private:
     [[nodiscard]] llvm::Value* gen_deref_assignment() const;
@@ -90,7 +97,8 @@ public:
     ~ReturnStatementNode() override;
 
     [[nodiscard]] std::string to_string() const override;
-    llvm::Value* gen() override;
+    [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { expr }; }
 };
 
 class UnaryNode : public ExpressionNode {
@@ -110,10 +118,11 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Value* gen_ptr() const override;
-    [[nodiscard]] llvm::Type* gen_type(llvm::LLVMContext& context) const override;
+    [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { expr }; }
 
     [[nodiscard]] ExpressionNode* get_expr() const { return expr; }
     [[nodiscard]] UnaryOp get_op() const { return op; }

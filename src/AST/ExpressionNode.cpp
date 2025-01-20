@@ -56,13 +56,13 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
                                                                                : constant_int->getSExtValue();
 
     check_int_range_fit(int_val, target_type, compiler, expr->to_string(), target_name);
-    return llvm::ConstantInt::get(get_llvm_type(target_type, compiler.get_context()), int_val, true);
+    return llvm::ConstantInt::get(get_llvm_type(target_type, compiler), int_val, true);
 }
 
 llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
                                                         PrimitiveType* target_type, ModuleCompiler& compiler)
 {
-    auto* ltype = get_llvm_type(target_type, compiler.get_context());
+    auto* ltype = get_llvm_type(target_type, compiler);
 
     if (expr_ktype->width() > target_type->width()) {
         return compiler.get_builder().CreateTrunc(expr_val, ltype);
@@ -131,7 +131,7 @@ llvm::Value* IdentifierExpressionNode::gen_ptr() const
     return symbol.alloc;
 }
 
-llvm::Type* IdentifierExpressionNode::gen_type(llvm::LLVMContext& context) const
+llvm::Type* IdentifierExpressionNode::gen_type() const
 {
     auto symbol = compiler.get_symbol(name);
     if (!symbol.has_value()) {
@@ -227,9 +227,9 @@ llvm::Value* AssignmentNode::gen()
     return expr_val;
 }
 
-llvm::Type* AssignmentNode::gen_type(llvm::LLVMContext& context) const
+llvm::Type* AssignmentNode::gen_type() const
 {
-    return expr->gen_type(context);
+    return expr->gen_type();
 }
 
 llvm::Value* AssignmentNode::trivial_gen()
@@ -310,7 +310,7 @@ llvm::Value* UnaryNode::gen()
         }
         const auto* pointee_type = expr_ktype->as<PointerType>()->get_pointee();
         auto* addr = expr->gen();
-        return compiler.get_builder().CreateLoad(get_llvm_type(pointee_type, compiler.get_context()), addr, "deref");
+        return compiler.get_builder().CreateLoad(get_llvm_type(pointee_type, compiler), addr, "deref");
     }
 
     assert(false && "Unknown unary operator");
@@ -353,7 +353,7 @@ llvm::Value* UnaryNode::gen_prefix_increment() const
     assert(op == UnaryOp::PrefixIncrement && "Expected prefix increment unary");
 
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
-    auto* expr_ltype = expr->gen_type(compiler.get_context());
+    auto* expr_ltype = expr->gen_type();
     if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
         throw std::runtime_error(fmt::format("Cannot apply op `++` to {}expression `{}`",
                                              expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
@@ -373,8 +373,7 @@ llvm::Value* UnaryNode::gen_prefix_decrement() const
     assert(op == UnaryOp::PrefixDecrement && "Expected prefix decrement unary");
 
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
-    auto* expr_ltype = expr->gen_type(compiler.get_context());
-
+    auto* expr_ltype = expr->gen_type();
     if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
         throw std::runtime_error(fmt::format("Cannot apply op `--` to {}expression `{}`",
                                              expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
@@ -392,7 +391,7 @@ llvm::Value* UnaryNode::trivial_gen()
 {
     assert(is_trivially_evaluable() && "Expression is not trivially evaluable");
     auto* expr_val = expr->trivial_gen();
-    auto expr_ltype = expr->gen_type(compiler.get_context());
+    auto expr_ltype = expr->gen_type();
 
     if (op == UnaryOp::Negate) {
         const auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
@@ -408,12 +407,12 @@ bool UnaryNode::is_trivially_evaluable() const
     return simple_op() && expr->is_trivially_evaluable();
 }
 
-llvm::Type* UnaryNode::gen_type(llvm::LLVMContext& context) const
+llvm::Type* UnaryNode::gen_type() const
 {
-    if (op == UnaryOp::AddressOf) return llvm::PointerType::get(context, 0);
+    if (op == UnaryOp::AddressOf) return llvm::PointerType::get(compiler.get_context(), 0);
     if (op == UnaryOp::Dereference)
-        return expr->get_ktype()->is_pointer() ? llvm::PointerType::get(context, 0) : expr->gen_type(context);
-    return expr->gen_type(context);
+        return expr->get_ktype()->is_pointer() ? llvm::PointerType::get(compiler.get_context(), 0) : expr->gen_type();
+    return expr->gen_type();
 }
 
 std::string UnaryNode::op_to_string() const

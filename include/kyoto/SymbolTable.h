@@ -21,7 +21,7 @@ struct Symbol {
     KType* type;
 
     static Symbol primitive(llvm::AllocaInst* value, PrimitiveType::Kind kind);
-    Symbol(llvm::AllocaInst* value, bool is_primitive, KType* type);
+    Symbol(llvm::AllocaInst* value, KType* type);
     Symbol() = default;
 };
 

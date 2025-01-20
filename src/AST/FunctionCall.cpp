@@ -55,6 +55,10 @@ llvm::Value* FunctionCall::gen()
     if (!fn) {
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
     }
+    if (fn->arg_size() != arg_values.size()) {
+        throw std::runtime_error(
+            fmt::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));
+    }
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 
@@ -72,7 +76,7 @@ llvm::Value* FunctionCall::gen_ptr() const
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 
-llvm::Type* FunctionCall::gen_type(llvm::LLVMContext& context) const
+llvm::Type* FunctionCall::gen_type() const
 {
     const auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
@@ -94,4 +98,8 @@ KType* FunctionCall::get_ktype() const
 bool FunctionCall::is_trivially_evaluable() const
 {
     return false;
+}
+void FunctionCall::insert_arg(ExpressionNode* node, size_t index)
+{
+    args.insert(args.begin() + index, node);
 }

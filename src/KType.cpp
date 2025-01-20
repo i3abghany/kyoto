@@ -1,6 +1,7 @@
 #include "kyoto/KType.h"
 
 #include <assert.h>
+#include <utility>
 
 #include "llvm/IR/Type.h"
 
@@ -39,6 +40,11 @@ std::string PrimitiveType::to_string() const
     default:
         return "Unknown";
     }
+}
+
+bool PrimitiveType::is_primitive() const
+{
+    return true;
 }
 
 bool PrimitiveType::operator==(const KType& other) const
@@ -180,7 +186,35 @@ KType* PointerType::copy() const
     return new PointerType(pointee->copy());
 }
 
-size_t PointerType::ptr_level() const
+ClassType::ClassType(std::string name)
+    : name(std::move(name))
 {
-    return 1 + pointee->ptr_level();
+}
+
+std::string ClassType::to_string() const
+{
+    return "Class " + name;
+}
+
+std::string ClassType::get_name() const
+{
+    return name;
+}
+
+bool ClassType::is_class() const
+{
+    return true;
+}
+
+bool ClassType::operator==(const KType& other) const
+{
+    auto* other_class = dynamic_cast<const ClassType*>(&other);
+    if (!other_class) return false;
+
+    return name == other_class->name;
+}
+
+KType* ClassType::copy() const
+{
+    return new ClassType(name);
 }

@@ -17,6 +17,8 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/Analysis/FunctionTermination.h"
 #include "kyoto/KType.h"
+#include "kyoto/Resolution/ClassIdentifierVisitor.h"
+#include "kyoto/Resolution/ConstructorResolution.h"
 #include "kyoto/Visitor.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Analysis/CGSCCPassManager.h"
@@ -130,6 +132,13 @@ std::optional<std::string> ModuleCompiler::gen_ir()
 
     try {
         auto program = std::unique_ptr<ASTNode>(parse_program());
+
+        ConstructorResolver constructor_resolver(*this);
+        constructor_resolver.visit(program.get());
+
+        ClassIdentifierVisitor class_identifier_visitor(*this);
+        class_identifier_visitor.visit(program.get());
+
         program->gen();
         llvm_pass();
         ensure_main_fn();
@@ -185,21 +194,22 @@ void ModuleCompiler::push_scope()
             auto arg_name = current_fn_node->get_params()[i++].name;
             auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
             builder.CreateStore(arg, arg_alloc);
-            symbol_table.add_symbol(
-                arg_name,
-                Symbol { arg_alloc, arg_type->isPointerTy(), current_fn_node->get_params()[i - 1].type->copy() });
+            symbol_table.add_symbol(arg_name, Symbol { arg_alloc, current_fn_node->get_params()[i - 1].type->copy() });
         }
     }
 }
 
 void ModuleCompiler::pop_scope()
 {
+    // destruct the types of the function arguments. `2` is the global scope and
+    // the function scope. Whene we pop the function, we destruct the types of
+    // the function arguments.
     if (symbol_table.n_scopes() == 2) {
         int i = 0;
         for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
             auto arg_name = current_fn_node->get_params()[i++].name;
             auto s = symbol_table.get_symbol(arg_name);
-            assert(s.has_value() && "Expected symbol to be in the symbol table");
+            assert(s.has_value() && "Expected function parameter symbol to be in the symbol table");
             delete s.value().type;
         }
     }
@@ -216,6 +226,37 @@ void ModuleCompiler::set_current_function(FunctionNode* node, llvm::Function* fu
 {
     current_fn_node = node;
     current_fn = func;
+}
+
+void ModuleCompiler::push_class(std::string name)
+{
+    current_class = std::move(name);
+    classes.insert(current_class);
+}
+
+void ModuleCompiler::pop_class()
+{
+    current_class = "";
+}
+
+std::string ModuleCompiler::get_current_class() const
+{
+    return current_class;
+}
+
+bool ModuleCompiler::class_exists(const std::string& name) const
+{
+    return classes.contains(name);
+}
+
+void ModuleCompiler::add_llvm_struct(const std::string& name, llvm::StructType* type)
+{
+    struct_types[name] = type;
+}
+
+llvm::StructType* ModuleCompiler::get_llvm_struct(const std::string& name) const
+{
+    return struct_types.at(name);
 }
 
 void ModuleCompiler::push_fn_return_type(KType* type)

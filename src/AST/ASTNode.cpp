@@ -1,5 +1,6 @@
 #include <cassert>
 #include <fmt/core.h>
+#include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -21,21 +22,28 @@ namespace llvm {
 class LLVMContext;
 }
 
-llvm::Type* ASTNode::get_llvm_type(const KType* type, llvm::LLVMContext& context)
+llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
 {
-    const auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
-    if (!primitive_type) {
-        if (!dynamic_cast<const PointerType*>(type)) {
-            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
-        }
+    auto& context = compiler.get_context();
+    if (type->is_pointer()) {
         return llvm::PointerType::get(context, 0);
     }
 
+    if (type->is_class()) {
+        return compiler.get_llvm_struct(type->as<const ClassType>()->get_name());
+    }
+
+    if (!type->is_primitive()) {
+        if (!dynamic_cast<const PointerType*>(type)) {
+            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
+        }
+    }
+
+    const auto primitive_type = dynamic_cast<const PrimitiveType*>(type);
     switch (primitive_type->get_kind()) {
     case PrimitiveType::Kind::Boolean:
         return llvm::Type::getInt1Ty(context);
     case PrimitiveType::Kind::Char:
-        return llvm::Type::getInt8Ty(context);
     case PrimitiveType::Kind::I8:
         return llvm::Type::getInt8Ty(context);
     case PrimitiveType::Kind::I16:
@@ -111,6 +119,11 @@ llvm::Value* ExpressionStatementNode::gen()
     return expr->gen();
 }
 
+std::vector<ASTNode*> ExpressionStatementNode::get_children() const
+{
+    return { expr };
+}
+
 ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)
     , compiler(compiler)
@@ -152,7 +165,7 @@ llvm::Value* ReturnStatementNode::gen()
     } else {
         if (fn_ret_type->is_pointer() && expr_ktype->is_pointer() && fn_ret_type->operator==(*expr_ktype)) {
             expr_val = expr->gen_ptr();
-            expr_val = compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler.get_context()), expr_val);
+            expr_val = compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler), expr_val);
             assert(expr_val && "Expression must be a pointer");
         } else {
             throw std::runtime_error(fmt::format(
@@ -226,12 +239,13 @@ std::string FunctionNode::to_string() const
     for (const auto& [name, type] : args) {
         args_str += name + ": " + type->to_string() + ", ";
     }
-    return fmt::format("FunctionNode({}, [{}], [{}])", name, args_str, body->to_string());
+    if (varargs) args_str += "...";
+    return fmt::format("FunctionNode({}, {}, [{}], [{}])", ret_type->to_string(), name, args_str, body->to_string());
 }
 
 llvm::Value* FunctionNode::gen()
 {
-    auto* return_ltype = get_llvm_type(ret_type, compiler.get_context());
+    auto* return_ltype = get_llvm_type(ret_type, compiler);
     auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
     auto* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
 
@@ -252,8 +266,13 @@ std::vector<llvm::Type*> FunctionNode::get_arg_types() const
 {
     std::vector<llvm::Type*> types;
     for (const auto& arg : args) {
-        auto* ltype = get_llvm_type(arg.type, compiler.get_context());
+        auto* ltype = get_llvm_type(arg.type, compiler);
         types.push_back(ltype);
     }
     return types;
+}
+
+void FunctionNode::insert_arg(const Parameter& arg, size_t index)
+{
+    args.insert(args.begin() + index, arg);
 }

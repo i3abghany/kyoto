@@ -22,6 +22,7 @@ set(SOURCES
     src/AST/ASTNode.cpp
     src/AST/StringLiteralNode.cpp
     src/AST/DeclarationNodes.cpp
+    src/AST/ClassDefinitionNode.cpp
     src/AST/ExpressionNode.cpp
     src/AST/FunctionCall.cpp
     src/AST/ControlFlowNodes.cpp
@@ -29,6 +30,8 @@ set(SOURCES
     src/AST/ASTBinaryCmpNode.cpp
     src/AST/ASTBinaryLogicalNode.cpp
     src/AST/NumberNode.cpp
+    src/Resolution/ConstructorResolution.cpp
+    src/Resolution/ClassIdentifierVisitor.cpp
     src/ModuleCompiler.cpp
     src/SymbolTable.cpp
     src/KType.cpp

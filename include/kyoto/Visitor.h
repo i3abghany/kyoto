@@ -8,9 +8,9 @@
 
 class ModuleCompiler;
 
-class ASTBuilderVisitor : public kyoto::KyotoParserBaseVisitor {
+class ASTBuilderVisitor final : public kyoto::KyotoParserBaseVisitor {
 public:
-    ASTBuilderVisitor(ModuleCompiler& compiler);
+    explicit ASTBuilderVisitor(ModuleCompiler& compiler);
     std::any visitProgram(kyoto::KyotoParser::ProgramContext* ctx) override;
     std::any visitCdecl(kyoto::KyotoParser::CdeclContext* ctx) override;
     std::any visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx) override;
@@ -61,14 +61,19 @@ public:
     std::any visitForCondition(kyoto::KyotoParser::ForConditionContext* ctx) override;
     std::any visitForUpdate(kyoto::KyotoParser::ForUpdateContext* ctx) override;
 
+    std::any visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx) override;
+    std::any visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx) override;
+    std::any visitConstructorDefinition(kyoto::KyotoParser::ConstructorDefinitionContext* ctx) override;
+
     std::any visitType(kyoto::KyotoParser::TypeContext* ctx) override;
 
 private:
-    PrimitiveType::Kind parse_primitive_type(const std::string& type) const;
-    std::optional<int64_t> parse_signed_integer_into(const std::string& str, const PrimitiveType::Kind kind) const;
-    std::optional<double> parse_double(const std::string& str) const;
-    std::optional<float> parse_float(const std::string& str) const;
-    std::optional<bool> parse_bool(const std::string& str) const;
+    [[nodiscard]] std::optional<int64_t> parse_signed_integer_into(const std::string& str,
+                                                                   PrimitiveType::Kind kind) const;
+    static PrimitiveType::Kind parse_primitive_type(const std::string& type);
+    static std::optional<double> parse_double(const std::string& str);
+    static std::optional<float> parse_float(const std::string& str);
+    static std::optional<bool> parse_bool(const std::string& str);
 
 private:
     ModuleCompiler& compiler;

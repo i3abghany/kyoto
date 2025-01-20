@@ -6,9 +6,22 @@ options {
 
 program: topLevel* EOF;
 
-topLevel: functionDefinition | fullDeclaration | cdecl;
+topLevel: functionDefinition | fullDeclaration | cdecl | classDefinition;
 
 block: OPEN_BRACE statement* CLOSE_BRACE;
+
+classDefinition: CLASS IDENTIFIER (COLON IDENTIFIER)? OPEN_BRACE classComponents CLOSE_BRACE;
+
+classComponents: classComponent*;
+
+classComponent:
+    declaration
+    | fullDeclaration
+	| constructorDefinition
+    | functionDefinition
+    ;
+
+constructorDefinition: CONSTRUCTOR LPAREN parameterList RPAREN block;
 
 statement:
 	block
@@ -108,4 +121,5 @@ type:
 	| F64
 	| STRING
 	| VOID
+	| IDENTIFIER
 	| type pointerSuffix+;

@@ -14,7 +14,9 @@ class KType {
 public:
     virtual ~KType() = default;
     virtual std::string to_string() const = 0;
+    virtual bool is_primitive() const { return false; }
     virtual bool is_pointer() const { return false; }
+    virtual bool is_class() const { return false; }
     virtual bool is_void() const { return false; }
     virtual bool is_string() const { return false; }
     virtual bool is_integer() const { return false; }
@@ -24,7 +26,6 @@ public:
     virtual bool is_char() const { return false; }
 
     virtual KType* copy() const = 0;
-    virtual size_t ptr_level() const { return 0; }
     virtual bool operator==(const KType& other) const = 0;
 
     static KType* get_void();
@@ -35,7 +36,16 @@ public:
     {
         auto* ptr = dynamic_cast<T*>(this);
         if (!ptr) {
-            throw std::runtime_error(fmt::format("Cannot cast {} to {}", to_string(), typeid(T).name()));
+            throw std::runtime_error(fmt::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
+        }
+        return ptr;
+    }
+
+    template <typename T> const T* as() const
+    {
+        auto* ptr = dynamic_cast<const T*>(this);
+        if (!ptr) {
+            throw std::runtime_error(fmt::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
         }
         return ptr;
     }
@@ -49,6 +59,7 @@ public:
 
     explicit PrimitiveType(Kind kind);
     std::string to_string() const override;
+    [[nodiscard]] bool is_primitive() const override;
     bool operator==(const KType& other) const override;
     KType* copy() const override;
 
@@ -78,8 +89,20 @@ public:
     KType* get_pointee() const;
     bool is_string() const override;
     bool is_pointer() const override;
-    size_t ptr_level() const override;
 
 private:
     KType* pointee;
+};
+
+class ClassType : public KType {
+public:
+    explicit ClassType(std::string name);
+    std::string to_string() const override;
+    [[nodiscard]] std::string get_name() const;
+    [[nodiscard]] bool is_class() const override;
+    bool operator==(const KType& other) const override;
+    KType* copy() const override;
+
+private:
+    std::string name;
 };

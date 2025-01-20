@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
@@ -48,6 +49,14 @@ public:
     void set_current_function(FunctionNode* node, llvm::Function* func);
     FunctionNode* get_current_function_node() const;
 
+    void push_class(std::string name);
+    void pop_class();
+    std::string get_current_class() const;
+    bool class_exists(const std::string& name) const;
+
+    void add_llvm_struct(const std::string& name, llvm::StructType* type);
+    llvm::StructType* get_llvm_struct(const std::string& name) const;
+
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();
     KType* get_fn_return_type() const;
@@ -71,6 +80,11 @@ private:
 
     std::string code;
     std::string name;
+
+    std::unordered_set<std::string> classes;
+    std::string current_class;
+
+    std::unordered_map<std::string, llvm::StructType*> struct_types;
 
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;

@@ -43,9 +43,9 @@
         }                                                                                                           \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                         \
     }                                                                                                               \
-    llvm::Type* name::gen_type(llvm::LLVMContext& context) const                                                    \
+    llvm::Type* name::gen_type() const                                                                              \
     {                                                                                                               \
-        return llvm::Type::getInt1Ty(context);                                                                      \
+        return llvm::Type::getInt1Ty(compiler.get_context());                                                       \
     }                                                                                                               \
     bool name::is_trivially_evaluable() const                                                                       \
     {                                                                                                               \
