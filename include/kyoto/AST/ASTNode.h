@@ -94,7 +94,6 @@ public:
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
 
-protected:
     void insert_arg(const Parameter& arg, size_t index);
 
 private:

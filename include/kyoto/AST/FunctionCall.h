@@ -24,6 +24,8 @@ public:
     [[nodiscard]] const std::string& get_name() const { return name; }
     [[nodiscard]] const std::vector<ExpressionNode*>& get_args() const { return args; }
 
+    void insert_arg(ExpressionNode* node, size_t index);
+
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { args.begin(), args.end() }; }
 
     [[nodiscard]] bool is_constructor_call() const { return is_constructor; }

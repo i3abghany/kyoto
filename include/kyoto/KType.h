@@ -41,6 +41,15 @@ public:
         return ptr;
     }
 
+    template <typename T> const T* as() const
+    {
+        auto* ptr = dynamic_cast<const T*>(this);
+        if (!ptr) {
+            throw std::runtime_error(fmt::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
+        }
+        return ptr;
+    }
+
     static KType* from_llvm_type(const llvm::Type* type);
 };
 
