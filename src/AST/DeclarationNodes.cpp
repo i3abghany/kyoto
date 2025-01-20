@@ -63,43 +63,86 @@ std::string FullDeclarationStatementNode::to_string() const
 
 llvm::Value* FullDeclarationStatementNode::gen()
 {
+    initialize_type();
+    validate_type_not_void();
+    validate_expression_not_void();
+
+    auto* alloca = create_alloca();
+    llvm::Value* expr_val = generate_expression_value(alloca);
+
+    store_val_and_register_symbol(expr_val, alloca);
+    return alloca;
+}
+
+void FullDeclarationStatementNode::initialize_type()
+{
     if (!type) {
         type = expr->get_ktype()->copy();
     }
+}
 
-    const auto expr_ktype = expr->get_ktype();
+void FullDeclarationStatementNode::validate_type_not_void() const
+{
     if (type->is_void()) {
         throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
     }
+}
 
+void FullDeclarationStatementNode::validate_expression_not_void() const
+{
+    const auto expr_ktype = expr->get_ktype();
     bool void_expr = expr_ktype->is_void() && expr->is<FunctionCall>()
         && !dynamic_cast<FunctionCall*>(expr)->is_constructor_call();
     if (void_expr) {
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
     }
+}
 
+llvm::AllocaInst* FullDeclarationStatementNode::create_alloca() const
+{
     auto* ltype = get_llvm_type(type, compiler);
-    auto* alloca = new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
+    return new llvm::AllocaInst(ltype, 0, name, compiler.get_builder().GetInsertBlock());
+}
 
-    llvm::Value* expr_val = nullptr;
+llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::AllocaInst* alloca)
+{
+    const auto expr_ktype = expr->get_ktype();
+
     if ((type->is_integer() && expr_ktype->is_integer()) || (type->is_boolean() && expr_ktype->is_boolean())) {
-        expr_val = ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
-    } else if (type->is_string() && expr_ktype->is_string()) {
-        expr_val = expr->gen();
-    } else {
-        if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
-            expr_val = expr->gen_ptr();
-            assert(expr_val && "Expression must be a pointer");
-        } else {
-            throw std::runtime_error(
-                fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                            expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
-        }
+        return ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
+    }
+    if (type->is_string() && expr_ktype->is_string()) {
+        return expr->gen();
+    }
+    if (type->is_class() && expr->is<FunctionCall>() && dynamic_cast<FunctionCall*>(expr)->is_constructor_call()) {
+        return handle_constructor_call(alloca);
+    }
+    if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
+        auto* expr_val = expr->gen_ptr();
+        assert(expr_val && "Expression must be a pointer");
+        return expr_val;
     }
 
+    throw std::runtime_error(
+        fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                    expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
+}
+
+llvm::Value* FullDeclarationStatementNode::handle_constructor_call(llvm::AllocaInst* alloca) const
+{
+    ExpressionNode* self = new IdentifierExpressionNode(name, compiler);
+    self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
+    compiler.add_symbol(name, Symbol { alloca, type });
+    auto* f = dynamic_cast<FunctionCall*>(expr);
+    f->insert_arg(self, 0);
+    auto _ = f->gen();
+    return alloca;
+}
+
+void FullDeclarationStatementNode::store_val_and_register_symbol(llvm::Value* expr_val, llvm::AllocaInst* alloca) const
+{
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, Symbol { alloca, type });
-    return alloca;
 }
 
 std::vector<ASTNode*> FullDeclarationStatementNode::get_children() const

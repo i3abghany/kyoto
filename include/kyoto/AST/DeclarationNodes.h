@@ -9,6 +9,11 @@ class ModuleCompiler;
 class KType;
 class ExpressionNode;
 
+namespace llvm {
+class AllocaInst;
+class Value;
+}
+
 class DeclarationStatementNode final : public ASTNode {
 public:
     DeclarationStatementNode(std::string name, KType* ktype, ModuleCompiler& compiler);
@@ -35,6 +40,15 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] std::vector<ASTNode*> get_children() const override;
+
+private:
+    void initialize_type();
+    void validate_type_not_void() const;
+    void validate_expression_not_void() const;
+    llvm::AllocaInst* create_alloca() const;
+    llvm::Value* generate_expression_value(llvm::AllocaInst* alloca);
+    llvm::Value* handle_constructor_call(llvm::AllocaInst* alloca) const;
+    void store_val_and_register_symbol(llvm::Value* expr_val, llvm::AllocaInst* alloca) const;
 
 private:
     std::string name;
