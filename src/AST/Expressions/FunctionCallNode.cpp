@@ -92,7 +92,12 @@ llvm::Value* FunctionCall::trivial_gen()
 
 KType* FunctionCall::get_ktype() const
 {
-    return compiler.get_function(name).value()->get_ret_type();
+    auto fn = compiler.get_function(name);
+    if (fn.has_value()) {
+        return fn.value()->get_ret_type();
+    }
+
+    throw std::runtime_error(fmt::format("Function `{}` not found", name));
 }
 
 bool FunctionCall::is_trivially_evaluable() const
