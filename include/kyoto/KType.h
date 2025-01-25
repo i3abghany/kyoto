@@ -24,6 +24,7 @@ public:
     virtual bool is_boolean() const { return false; }
     virtual bool is_numeric() const { return false; }
     virtual bool is_char() const { return false; }
+    virtual bool is_pointer_to_class(const std::string& name) const { return false; }
 
     virtual KType* copy() const = 0;
     virtual bool operator==(const KType& other) const = 0;
@@ -89,6 +90,7 @@ public:
     KType* get_pointee() const;
     bool is_string() const override;
     bool is_pointer() const override;
+    [[nodiscard]] bool is_pointer_to_class(const std::string& name) const override;
 
 private:
     KType* pointee;

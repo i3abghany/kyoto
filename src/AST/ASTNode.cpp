@@ -8,7 +8,9 @@
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
+#include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"

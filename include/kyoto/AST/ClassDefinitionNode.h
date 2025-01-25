@@ -32,4 +32,6 @@ public:
     ConstructorNode(std::string name, std::vector<FunctionNode::Parameter> args, ASTNode* body,
                     ModuleCompiler& compiler);
     ~ConstructorNode() override;
+
+    [[nodiscard]] llvm::Value* gen() override;
 };

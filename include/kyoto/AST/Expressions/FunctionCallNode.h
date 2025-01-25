@@ -7,6 +7,7 @@
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
+#include "kyoto/AST/Expressions/IdentifierNode.h"
 
 class ModuleCompiler;
 

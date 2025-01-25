@@ -38,8 +38,6 @@ llvm::Value* ClassDefinitionNode::gen()
 {
     for (const auto& component : components) {
         if (component->is<FunctionNode>()) {
-            auto* fn = dynamic_cast<FunctionNode*>(component);
-            fn->insert_arg({ "self", new PointerType(new ClassType(name)) }, 0);
             component->gen();
         }
     }
@@ -53,3 +51,23 @@ ConstructorNode::ConstructorNode(std::string name, std::vector<FunctionNode::Par
 }
 
 ConstructorNode::~ConstructorNode() = default;
+
+llvm::Value* ConstructorNode::gen()
+{
+    static constexpr auto constructor_suffix = "_constructor";
+    assert(get_name().substr(get_name().size() - strlen(constructor_suffix)) == constructor_suffix);
+    auto stripped_name = get_name().substr(0, get_name().size() - strlen(constructor_suffix));
+
+    if (get_params().empty()) {
+        throw std::runtime_error(fmt::format("Constructor for `{}` expects at least one `self: {}*` parameter",
+                                             stripped_name, stripped_name));
+    }
+
+    auto& self = get_params().front();
+    if (self.name != "self" || !self.type->is_pointer_to_class(stripped_name)) {
+        throw std::runtime_error(
+            fmt::format("First argument to constructor `{}` must be `self: {}*`", stripped_name, stripped_name));
+    }
+
+    return FunctionNode::gen();
+}

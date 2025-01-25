@@ -55,7 +55,7 @@ llvm::Value* FunctionCall::gen()
     for (auto& arg : args)
         arg_values.push_back(arg->gen());
 
-    if (fn->arg_size() != arg_values.size()) {
+    if (fn->arg_size() != arg_values.size() && (!fn->isVarArg() || fn->arg_size() > arg_values.size())) {
         throw std::runtime_error(
             fmt::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));
     }

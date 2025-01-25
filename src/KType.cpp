@@ -167,6 +167,11 @@ KType* PointerType::get_pointee() const
     return pointee;
 }
 
+[[nodiscard]] bool PointerType::is_pointer_to_class(const std::string& name) const
+{
+    return pointee->is_class() && pointee->is<ClassType>() && pointee->as<ClassType>()->get_name() == name;
+}
+
 bool PointerType::is_string() const
 {
     const auto* pt = dynamic_cast<PrimitiveType*>(pointee);
