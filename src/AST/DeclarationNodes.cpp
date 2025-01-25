@@ -91,12 +91,10 @@ void FullDeclarationStatementNode::validate_type_not_void() const
 
 void FullDeclarationStatementNode::validate_expression_not_void() const
 {
-    const auto expr_ktype = expr->get_ktype();
-    bool void_expr = expr_ktype->is_void() && expr->is<FunctionCall>()
-        && !dynamic_cast<FunctionCall*>(expr)->is_constructor_call();
-    if (void_expr) {
+    const auto* expr_ktype = expr->get_ktype();
+    bool constructor_call = expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call();
+    if (expr_ktype->is_void() && !constructor_call)
         throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
-    }
 }
 
 llvm::AllocaInst* FullDeclarationStatementNode::create_alloca() const
