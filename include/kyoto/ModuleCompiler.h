@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "kyoto/Resolution/AnalysisVisitor.h"
 #include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
 #include "llvm/IR/IRBuilder.h"
@@ -44,8 +45,11 @@ public:
     void add_function(FunctionNode* node);
     std::optional<FunctionNode*> get_function(const std::string& name);
 
+    void register_visitors();
+
     void push_scope();
     void pop_scope();
+    size_t n_scopes() const;
 
     void set_current_function(FunctionNode* node, llvm::Function* func);
     FunctionNode* get_current_function_node() const;
@@ -65,8 +69,6 @@ public:
     void insert_dummy_return(llvm::BasicBlock& bb);
     llvm::BasicBlock* create_basic_block(const std::string& name);
 
-    size_t n_scopes() const;
-
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
@@ -85,6 +87,7 @@ private:
     std::unordered_set<std::string> classes;
     std::string current_class;
 
+    std::vector<std::unique_ptr<AnalysisVisitor>> analysis_visitors;
     std::unordered_map<std::string, llvm::StructType*> struct_types;
 
     llvm::LLVMContext context {};

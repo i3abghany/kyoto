@@ -3,14 +3,14 @@
 #include "kyoto/Resolution/AnalysisVisitor.h"
 
 class ASTNode;
-class ClassDefinitionNode;
+class FunctionNode;
 class ModuleCompiler;
 
-class ClassIdentifierVisitor : public AnalysisVisitor {
+class FunctionIdentifierVisitor : public AnalysisVisitor {
 public:
-    explicit ClassIdentifierVisitor(ModuleCompiler& compiler);
+    explicit FunctionIdentifierVisitor(ModuleCompiler& compiler);
     void visit(ASTNode* node) override;
-    void visit(ClassDefinitionNode* node);
+    void visit(FunctionNode* node);
 
 private:
     ModuleCompiler& compiler;

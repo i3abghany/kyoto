@@ -47,14 +47,14 @@ std::string FunctionCall::to_string() const
 
 llvm::Value* FunctionCall::gen()
 {
-    std::vector<llvm::Value*> arg_values;
-    for (auto& arg : args) {
-        arg_values.push_back(arg->gen());
-    }
     auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
     }
+    std::vector<llvm::Value*> arg_values;
+    for (auto& arg : args)
+        arg_values.push_back(arg->gen());
+
     if (fn->arg_size() != arg_values.size()) {
         throw std::runtime_error(
             fmt::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));

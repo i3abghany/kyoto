@@ -44,6 +44,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
 {
+    register_visitors();
 }
 
 ASTNode* ModuleCompiler::parse_program()
@@ -134,14 +135,8 @@ std::optional<std::string> ModuleCompiler::gen_ir()
     try {
         auto program = std::unique_ptr<ASTNode>(parse_program());
 
-        ConstructorResolver constructor_resolver(*this);
-        constructor_resolver.visit(program.get());
-
-        ClassIdentifierVisitor class_identifier_visitor(*this);
-        class_identifier_visitor.visit(program.get());
-
-        FunctionIdentifierVisitor function_identifier_visitor(*this);
-        function_identifier_visitor.visit(program.get());
+        for (auto& visitor : analysis_visitors)
+            visitor->visit(program.get());
 
         program->gen();
         llvm_pass();
@@ -182,6 +177,13 @@ std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& nam
 {
     if (functions.contains(name)) return functions[name];
     return std::nullopt;
+}
+
+void ModuleCompiler::register_visitors()
+{
+    analysis_visitors.push_back(std::make_unique<ConstructorResolver>(*this));
+    analysis_visitors.push_back(std::make_unique<FunctionIdentifierVisitor>(*this));
+    analysis_visitors.push_back(std::make_unique<ClassIdentifierVisitor>(*this));
 }
 
 void ModuleCompiler::push_scope()

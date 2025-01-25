@@ -1,5 +1,7 @@
 #pragma once
 
+#include "kyoto/Resolution/AnalysisVisitor.h"
+
 class ASTNode;
 class FunctionCall;
 class ModuleCompiler;
@@ -8,11 +10,11 @@ class ModuleCompiler;
 // function call node, it checks if it's a constructor call, and sets the flag
 // accordingly.
 
-class ConstructorResolver {
+class ConstructorResolver : public AnalysisVisitor {
 public:
     explicit ConstructorResolver(ModuleCompiler& compiler);
 
-    void visit(ASTNode* node);
+    void visit(ASTNode* node) override;
     void visit(FunctionCall* node);
 
 private:
