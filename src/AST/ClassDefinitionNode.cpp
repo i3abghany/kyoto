@@ -1,9 +1,9 @@
 #include "kyoto/AST/ClassDefinitionNode.h"
-#include "kyoto/KType.h"
 
-#include <iostream>
 #include <sstream>
 #include <utility>
+
+#include "kyoto/KType.h"
 
 ClassDefinitionNode::ClassDefinitionNode(std::string name, std::string parent, std::vector<ASTNode*> components,
                                          ModuleCompiler& compiler)

@@ -18,27 +18,31 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${ANTLR4_INCLUDE_DIRS})
 
 set(SOURCES
-    src/Visitor.cpp
     src/AST/ASTNode.cpp
-    src/AST/StringLiteralNode.cpp
-    src/AST/DeclarationNodes.cpp
     src/AST/ClassDefinitionNode.cpp
-    src/AST/ExpressionNode.cpp
-    src/AST/FunctionCall.cpp
-    src/AST/IfStatementNode.cpp
+    src/AST/DeclarationNodes.cpp
+    src/AST/Expressions/AssignmentNode.cpp
+    src/AST/Expressions/BinaryArithNode.cpp
+    src/AST/Expressions/BinaryCmpNode.cpp
+    src/AST/Expressions/BinaryLogicalNode.cpp
+    src/AST/Expressions/ExpressionNode.cpp
+    src/AST/Expressions/FunctionCallNode.cpp
+    src/AST/Expressions/IdentifierNode.cpp
+    src/AST/Expressions/NumberNode.cpp
+    src/AST/Expressions/StringLiteralNode.cpp
+    src/AST/Expressions/UnaryNode.cpp
     src/AST/ForStatementNode.cpp
-    src/AST/ASTBinaryArithNode.cpp
-    src/AST/ASTBinaryCmpNode.cpp
-    src/AST/ASTBinaryLogicalNode.cpp
-    src/AST/NumberNode.cpp
-    src/Resolution/ConstructorResolution.cpp
-    src/Resolution/ClassIdentifierVisitor.cpp
-    src/ModuleCompiler.cpp
-    src/SymbolTable.cpp
-    src/KType.cpp
-    src/TypeResolver.cpp
-    src/utils/File.cpp
+    src/AST/IfStatementNode.cpp
+    src/AST/ReturnStatement.cpp
     src/Analysis/FunctionTermination.cpp
+    src/KType.cpp
+    src/ModuleCompiler.cpp
+    src/Resolution/ClassIdentifierVisitor.cpp
+    src/Resolution/ConstructorResolution.cpp
+    src/SymbolTable.cpp
+    src/TypeResolver.cpp
+    src/Visitor.cpp
+    src/utils/File.cpp
     ${ANTLR_SOURCES})
 
 add_executable(

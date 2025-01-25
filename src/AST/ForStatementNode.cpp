@@ -1,17 +1,14 @@
 #include "kyoto/AST/ForStatementNode.h"
 
 #include <fmt/core.h>
-#include <stddef.h>
 #include <stdexcept>
-#include <utility>
+#include <vector>
 
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
-#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Instruction.h"
 #include "llvm/Support/Casting.h"
 
 ForStatementNode::ForStatementNode(ASTNode* init, ExpressionStatementNode* condition, ExpressionNode* update,

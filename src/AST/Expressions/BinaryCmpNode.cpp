@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "kyoto/AST/ASTBinaryNode.h"
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/BinaryNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"

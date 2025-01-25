@@ -5,14 +5,12 @@
 #include <stdexcept>
 #include <utility>
 
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
-#include "llvm/Support/Casting.h"
 
 IfStatementNode::IfStatementNode(std::vector<ExpressionNode*> conditions, std::vector<ASTNode*> bodies,
                                  ModuleCompiler& compiler)

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 
 class ModuleCompiler;

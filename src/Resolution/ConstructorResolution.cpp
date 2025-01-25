@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
-#include "kyoto/AST/FunctionCall.h"
+#include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/ModuleCompiler.h"
 
 ConstructorResolver::ConstructorResolver(ModuleCompiler& compiler)

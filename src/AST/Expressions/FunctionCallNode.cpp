@@ -1,4 +1,4 @@
-#include "kyoto/AST/FunctionCall.h"
+#include "kyoto/AST/Expressions/FunctionCallNode.h"
 
 #include <assert.h>
 #include <fmt/core.h>
@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "kyoto/AST/ASTNode.h"
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"

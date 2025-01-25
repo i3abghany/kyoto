@@ -1,5 +1,11 @@
 #include "kyoto/Resolution/ClassIdentifierVisitor.h"
 
+#include <llvm/ADT/ArrayRef.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Type.h>
+#include <string>
+#include <vector>
+
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/DeclarationNodes.h"

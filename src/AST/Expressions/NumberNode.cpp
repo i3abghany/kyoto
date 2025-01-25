@@ -1,4 +1,4 @@
-#include "kyoto/AST/NumberNode.h"
+#include "kyoto/AST/Expressions/NumberNode.h"
 
 #include <assert.h>
 #include <fmt/core.h>

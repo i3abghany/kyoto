@@ -1,4 +1,4 @@
-#include "kyoto/AST/StringLiteralNode.h"
+#include "kyoto/AST/Expressions/StringLiteralNode.h"
 
 #include <fmt/core.h>
 #include <regex>

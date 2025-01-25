@@ -1,10 +1,12 @@
 #pragma once
 
+#include <format>
+#include <stddef.h>
 #include <string>
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
-#include "kyoto/AST/ExpressionNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
 
 class ModuleCompiler;
 
