@@ -8,7 +8,6 @@ fn main() i32 {
     return 1;
 }
 
-
 // NAME EmptyVoidFunctionImplicitRet
 // ERR 0
 // RET 1
@@ -205,4 +204,66 @@ fn f(x: i32) i32 {
 
 fn main() i32 {
     return f(1, 2);
+}
+
+// NAME MutualRecursion
+// ERR 0
+// RET 10
+
+fn is_even(n: i32) bool {
+    if (n == 0) { return true; }
+    return is_odd(n - 1);
+}
+
+fn is_odd(n: i32) bool {
+    if (n == 0) { return false; }
+    return is_even(n - 1);
+}
+
+fn main() i32 {
+    if (is_even(5000)) {
+        return 10;
+    }
+    return 0;
+}
+
+// NAME RecursiveFactorial
+// ERR 0
+// RET 120
+
+fn factorial(n: i32) i32 {
+    if (n == 0) { return 1; }
+    return n * factorial(n - 1);
+}
+
+fn main() i32 {
+    return factorial(5);
+}
+
+// NAME RecursiveFibonacci
+// ERR 0
+// RET 21
+
+fn fibonacci(n: i32) i32 {
+    if (n == 0) { return 0; }
+    if (n == 1) { return 1; }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+fn main() i32 {
+    return fibonacci(8);
+}
+
+// NAME RecursiveAckermann
+// ERR 0
+// RET 125
+
+fn ackermann(m: i32, n: i32) i32 {
+    if (m == 0) { return n + 1; }
+    if (n == 0) { return ackermann(m - 1, 1); }
+    return ackermann(m - 1, ackermann(m, n - 1));
+}
+
+fn main() i32 {
+    return ackermann(3, 4);
 }
