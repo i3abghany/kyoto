@@ -16,7 +16,7 @@ The Kyoto Compiler requires the following dependencies:
 To install the dependencies on Ubuntu, run the following commands:
 
 ```bash
-$ sudo apt-get install llvm-20-dev cmake default-jre libboost-all-dev gcc-11 g++-11 libfmt-dev
+$ sudo apt-get install llvm-20-dev cmake default-jre libboost-all-dev gcc-11 g++-11 libfmt-dev libzstd-dev
 ```
 
 Antlr 4.13.2 can be installed from the official website's mirror as follows:
