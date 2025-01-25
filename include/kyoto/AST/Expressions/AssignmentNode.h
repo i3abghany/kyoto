@@ -7,6 +7,8 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
 class ModuleCompiler;
+class KType;
+
 namespace llvm {
 class Value;
 }

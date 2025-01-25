@@ -13,7 +13,7 @@ class ExpressionNode;
 namespace llvm {
 class LLVMContext;
 class Value;
-
+class Function;
 }
 
 class ASTNode {
@@ -87,6 +87,7 @@ public:
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] llvm::Function* gen_prototype();
 
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
     [[nodiscard]] std::string get_name() const { return name; }

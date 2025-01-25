@@ -1,12 +1,14 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 
 class ModuleCompiler;
 class ExpressionNode;
+namespace llvm {
+class Value;
+}
 
 class ReturnStatementNode : public ASTNode {
     ExpressionNode* expr;

@@ -1,5 +1,6 @@
 #include <cassert>
 #include <fmt/core.h>
+#include <llvm/IR/Module.h>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
@@ -187,10 +188,7 @@ std::string FunctionNode::to_string() const
 
 llvm::Value* FunctionNode::gen()
 {
-    auto* return_ltype = get_llvm_type(ret_type, compiler);
-    auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
-    auto* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
-
+    auto* func = compiler.get_module()->getFunction(name);
     if (body == nullptr) return func;
 
     auto* entry = llvm::BasicBlock::Create(compiler.get_context(), "func_entry", func);
@@ -202,6 +200,13 @@ llvm::Value* FunctionNode::gen()
     compiler.pop_fn_return_type();
 
     return func;
+}
+
+llvm::Function* FunctionNode::gen_prototype()
+{
+    auto* return_ltype = get_llvm_type(ret_type, compiler);
+    auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
+    return llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, name, compiler.get_module());
 }
 
 std::vector<llvm::Type*> FunctionNode::get_arg_types() const

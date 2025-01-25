@@ -5,11 +5,16 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
 #include <stdexcept>
+#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
+
+namespace llvm {
+class Value;
+}
 
 ReturnStatementNode::ReturnStatementNode(ExpressionNode* expr, ModuleCompiler& compiler)
     : expr(expr)

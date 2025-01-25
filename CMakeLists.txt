@@ -39,6 +39,7 @@ set(SOURCES
     src/ModuleCompiler.cpp
     src/Resolution/ClassIdentifierVisitor.cpp
     src/Resolution/ConstructorResolution.cpp
+    src/Resolution/FunctionIdentifierVisitor.cpp
     src/SymbolTable.cpp
     src/TypeResolver.cpp
     src/Visitor.cpp

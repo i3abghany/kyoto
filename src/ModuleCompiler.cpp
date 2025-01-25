@@ -19,6 +19,7 @@
 #include "kyoto/KType.h"
 #include "kyoto/Resolution/ClassIdentifierVisitor.h"
 #include "kyoto/Resolution/ConstructorResolution.h"
+#include "kyoto/Resolution/FunctionIdentifierVisitor.h"
 #include "kyoto/Visitor.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Analysis/CGSCCPassManager.h"
@@ -138,6 +139,9 @@ std::optional<std::string> ModuleCompiler::gen_ir()
 
         ClassIdentifierVisitor class_identifier_visitor(*this);
         class_identifier_visitor.visit(program.get());
+
+        FunctionIdentifierVisitor function_identifier_visitor(*this);
+        function_identifier_visitor.visit(program.get());
 
         program->gen();
         llvm_pass();
