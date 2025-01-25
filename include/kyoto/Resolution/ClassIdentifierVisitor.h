@@ -1,12 +1,10 @@
 #pragma once
 
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/DeclarationNodes.h"
+#include "kyoto/ModuleCompiler.h"
 #include "kyoto/Resolution/AnalysisVisitor.h"
-
-class ASTNode;
-class ClassDefinitionNode;
-class ModuleCompiler;
 
 class ClassIdentifierVisitor : public AnalysisVisitor<ClassIdentifierVisitor, ClassDefinitionNode> {
 public:
