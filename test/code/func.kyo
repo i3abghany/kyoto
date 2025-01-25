@@ -267,3 +267,29 @@ fn ackermann(m: i32, n: i32) i32 {
 fn main() i32 {
     return ackermann(3, 4);
 }
+
+// NAME TailFactorial
+// ERR 0
+// RET 120
+
+fn factorial(n: i32, acc: i32) i32 {
+    if (n == 0) { return acc; }
+    return factorial(n - 1, acc * n);
+}
+
+fn main() i32 {
+    return factorial(5, 1);
+}
+
+// NAME TailGCD
+// ERR 0
+// RET 9
+
+fn gcd(a: i32, b: i32) i32 {
+    if (b == 0) { return a; }
+    return gcd(b, a % b);
+}
+
+fn main() i32 {
+    return gcd(987654321, 123456789);
+}
