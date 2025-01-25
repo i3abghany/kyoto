@@ -7,8 +7,6 @@ TypeResolver::TypeResolver() { }
 std::optional<PrimitiveType::Kind> TypeResolver::resolve_binary_arith(const PrimitiveType::Kind lhs,
                                                                       const PrimitiveType::Kind rhs) const
 {
-    // FIXME: figure out whether we want to do an elaborate promotion scheme
-    // like the C standard mandates
     if (lhs == rhs && lhs != PrimitiveType::Kind::Boolean) return lhs;
     return std::nullopt;
 }
