@@ -63,3 +63,8 @@ llvm::Value* ReturnStatementNode::gen()
 
     return compiler.get_builder().CreateRet(expr_val);
 }
+
+std::vector<ASTNode*> ReturnStatementNode::get_children() const
+{
+    return { expr };
+}
