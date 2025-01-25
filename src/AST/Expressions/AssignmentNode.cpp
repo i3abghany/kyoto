@@ -57,43 +57,68 @@ llvm::Value* AssignmentNode::gen_deref_assignment() const
 
 llvm::Value* AssignmentNode::gen()
 {
+    validate_lvalue();
+
+    if (assignee->is<UnaryNode>()) {
+        return gen_deref_assignment();
+    }
+
+    auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
+    std::string name = identifier->get_name();
+    auto symbol = get_symbol(name);
+    auto* type = symbol.type;
+
+    llvm::Value* expr_val = generate_expression_value(type, name);
+    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
+
+    return expr_val;
+}
+
+void AssignmentNode::validate_lvalue() const
+{
     if (assignee->is_trivially_evaluable()) {
         throw std::runtime_error(fmt::format("Cannot assign to a non-lvalue `{}`", assignee->to_string()));
     }
+}
 
-    const auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
-
-    if (dynamic_cast<UnaryNode*>(assignee)) return gen_deref_assignment();
-
-    std::string name;
-    if (identifier) name = identifier->get_name();
-
+Symbol AssignmentNode::get_symbol(const std::string& name) const
+{
     auto symbol_opt = compiler.get_symbol(name);
     if (!symbol_opt.has_value()) {
         throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
     }
+    return symbol_opt.value();
+}
 
-    auto symbol = symbol_opt.value();
-    auto type = symbol.type;
+llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const std::string& name) const
+{
 
-    llvm::Value* expr_val = nullptr;
-    auto* expr_ktype = expr->get_ktype();
-    if ((type->is_integer() && expr_ktype->is_integer()) || (type->is_boolean() && expr_ktype->is_boolean())) {
-        expr_val = handle_integer_conversion(expr, type, compiler, "assign", name);
-    } else if (type->is_string() && expr_ktype->is_string()) {
-        expr_val = expr->gen();
-    } else {
-        if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
-            expr_val = expr->gen_ptr();
-        } else {
-            throw std::runtime_error(
-                fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                            expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
-        }
+    if (are_compatible_integers_or_booleans(type)) {
+        return handle_integer_conversion(expr, type, compiler, "assign", name);
     }
 
-    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
-    return expr_val;
+    if (type->is_string() && expr->get_ktype()->is_string()) {
+        return expr->gen();
+    }
+
+    if (are_compatible_pointer_types(type)) {
+        return expr->gen_ptr();
+    }
+
+    throw std::runtime_error(
+        fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+                    expr->to_string(), expr->get_ktype()->to_string(), name, type->to_string()));
+}
+
+bool AssignmentNode::are_compatible_integers_or_booleans(const KType* type) const
+{
+    return (type->is_integer() && expr->get_ktype()->is_integer())
+        || (type->is_boolean() && expr->get_ktype()->is_boolean());
+}
+
+bool AssignmentNode::are_compatible_pointer_types(const KType* type) const
+{
+    return type->is_pointer() && expr->get_ktype()->is_pointer() && type->operator==(*expr->get_ktype());
 }
 
 llvm::Type* AssignmentNode::gen_type() const

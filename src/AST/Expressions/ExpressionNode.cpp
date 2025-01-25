@@ -16,7 +16,7 @@ namespace llvm {
 class Value;
 }
 
-void ExpressionNode::check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
+void ExpressionNode::check_boolean_promotion(const PrimitiveType* expr_ktype, const PrimitiveType* target_type,
                                              const std::string& target_name)
 {
     if (expr_ktype->is_boolean() && !target_type->is_boolean()) {
@@ -26,7 +26,7 @@ void ExpressionNode::check_boolean_promotion(PrimitiveType* expr_ktype, Primitiv
     }
 }
 
-void ExpressionNode::check_int_range_fit(int64_t val, PrimitiveType* target_type, ModuleCompiler& compiler,
+void ExpressionNode::check_int_range_fit(int64_t val, const PrimitiveType* target_type, ModuleCompiler& compiler,
                                          const std::string& expr, const std::string& target_name)
 {
     if (!compiler.get_type_resolver().fits_in(val, target_type->get_kind())) {
@@ -36,8 +36,8 @@ void ExpressionNode::check_int_range_fit(int64_t val, PrimitiveType* target_type
     }
 }
 
-llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler, KType* target_ktype,
-                                                    const std::string& target_name)
+llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler,
+                                                    const KType* target_ktype, const std::string& target_name)
 {
     if (!expr->is_trivially_evaluable()) return nullptr;
 
@@ -54,8 +54,8 @@ llvm::Value* ExpressionNode::promoted_trivially_gen(ExpressionNode* expr, Module
     return llvm::ConstantInt::get(get_llvm_type(target_type, compiler), int_val, true);
 }
 
-llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
-                                                        PrimitiveType* target_type, ModuleCompiler& compiler)
+llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, const PrimitiveType* expr_ktype,
+                                                        const PrimitiveType* target_type, ModuleCompiler& compiler)
 {
     auto* ltype = get_llvm_type(target_type, compiler);
 
@@ -69,11 +69,11 @@ llvm::Value* ExpressionNode::dynamic_integer_conversion(llvm::Value* expr_val, P
     return expr_val;
 }
 
-llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, KType* target_ktype,
+llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, const KType* target_ktype,
                                                        ModuleCompiler& compiler, const std::string& what,
                                                        const std::string& target_name)
 {
-    auto* target_type = dynamic_cast<PrimitiveType*>(target_ktype);
+    auto* target_type = dynamic_cast<const PrimitiveType*>(target_ktype);
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
     bool is_compatible = compiler.get_type_resolver().promotable_to(expr_ktype->get_kind(), target_type->get_kind());
     bool is_trivially_evaluable = expr->is_trivially_evaluable();

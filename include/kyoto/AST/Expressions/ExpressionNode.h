@@ -27,18 +27,23 @@ public:
 
     [[nodiscard]] virtual std::vector<ASTNode*> get_children() const = 0;
 
-    static void check_boolean_promotion(PrimitiveType* expr_ktype, PrimitiveType* target_type,
+    template <typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
+
+    template <typename T> T* as() { return dynamic_cast<T*>(this); }
+
+    static void check_boolean_promotion(const PrimitiveType* expr_ktype, const PrimitiveType* target_type,
                                         const std::string& target_name);
 
-    static void check_int_range_fit(int64_t val, PrimitiveType* target_type, ModuleCompiler& compiler,
+    static void check_int_range_fit(int64_t val, const PrimitiveType* target_type, ModuleCompiler& compiler,
                                     const std::string& expr, const std::string& target_name);
 
-    static llvm::Value* dynamic_integer_conversion(llvm::Value* expr_val, PrimitiveType* expr_ktype,
-                                                   PrimitiveType* target_type, ModuleCompiler& compiler);
+    static llvm::Value* dynamic_integer_conversion(llvm::Value* expr_val, const PrimitiveType* expr_ktype,
+                                                   const PrimitiveType* target_type, ModuleCompiler& compiler);
 
-    static llvm::Value* promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler, KType* target_ktype,
-                                               const std::string& target_name);
+    static llvm::Value* promoted_trivially_gen(ExpressionNode* expr, ModuleCompiler& compiler,
+                                               const KType* target_ktype, const std::string& target_name);
 
-    static llvm::Value* handle_integer_conversion(ExpressionNode* expr, KType* target_type, ModuleCompiler& compiler,
-                                                  const std::string& what, const std::string& target_name = "");
+    static llvm::Value* handle_integer_conversion(ExpressionNode* expr, const KType* target_type,
+                                                  ModuleCompiler& compiler, const std::string& what,
+                                                  const std::string& target_name = "");
 };
