@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "kyoto/Resolution/AnalysisVisitor.h"
 #include "kyoto/SymbolTable.h"
@@ -87,7 +88,7 @@ private:
     std::unordered_set<std::string> classes;
     std::string current_class;
 
-    std::vector<std::unique_ptr<AnalysisVisitor>> analysis_visitors;
+    std::vector<std::unique_ptr<IAnalysisVisitor>> analysis_visitors;
     std::unordered_map<std::string, llvm::StructType*> struct_types;
 
     llvm::LLVMContext context {};

@@ -37,9 +37,6 @@ set(SOURCES
     src/Analysis/FunctionTermination.cpp
     src/KType.cpp
     src/ModuleCompiler.cpp
-    src/Resolution/ClassIdentifierVisitor.cpp
-    src/Resolution/ConstructorIdentifierVisitor.cpp
-    src/Resolution/FunctionIdentifierVisitor.cpp
     src/SymbolTable.cpp
     src/TypeResolver.cpp
     src/Visitor.cpp

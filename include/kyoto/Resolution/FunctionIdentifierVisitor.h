@@ -1,16 +1,18 @@
 #pragma once
 
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/Resolution/AnalysisVisitor.h"
 
-class ASTNode;
-class FunctionNode;
 class ModuleCompiler;
 
-class FunctionIdentifierVisitor : public AnalysisVisitor {
+class FunctionIdentifierVisitor : public AnalysisVisitor<FunctionIdentifierVisitor, FunctionNode> {
 public:
-    explicit FunctionIdentifierVisitor(ModuleCompiler& compiler);
-    void visit(ASTNode* node) override;
-    void visit(FunctionNode* node);
+    explicit FunctionIdentifierVisitor(ModuleCompiler& compiler)
+        : compiler(compiler)
+    {
+    }
+
+    void visit(FunctionNode* node) override { auto* _ = node->gen_prototype(); }
 
 private:
     ModuleCompiler& compiler;
