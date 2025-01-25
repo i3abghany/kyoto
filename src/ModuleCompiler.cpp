@@ -18,7 +18,7 @@
 #include "kyoto/Analysis/FunctionTermination.h"
 #include "kyoto/KType.h"
 #include "kyoto/Resolution/ClassIdentifierVisitor.h"
-#include "kyoto/Resolution/ConstructorResolution.h"
+#include "kyoto/Resolution/ConstructorIdentifierVisitor.h"
 #include "kyoto/Resolution/FunctionIdentifierVisitor.h"
 #include "kyoto/Visitor.h"
 #include "llvm/ADT/APInt.h"
@@ -181,7 +181,7 @@ std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& nam
 
 void ModuleCompiler::register_visitors()
 {
-    analysis_visitors.push_back(std::make_unique<ConstructorResolver>(*this));
+    analysis_visitors.push_back(std::make_unique<ConstructorIdentifierVisitor>(*this));
     analysis_visitors.push_back(std::make_unique<FunctionIdentifierVisitor>(*this));
     analysis_visitors.push_back(std::make_unique<ClassIdentifierVisitor>(*this));
 }

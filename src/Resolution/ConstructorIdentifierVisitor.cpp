@@ -1,4 +1,4 @@
-#include "kyoto/Resolution/ConstructorResolution.h"
+#include "kyoto/Resolution/ConstructorIdentifierVisitor.h"
 
 #include <vector>
 
@@ -6,12 +6,12 @@
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/ModuleCompiler.h"
 
-ConstructorResolver::ConstructorResolver(ModuleCompiler& compiler)
+ConstructorIdentifierVisitor::ConstructorIdentifierVisitor(ModuleCompiler& compiler)
     : compiler(compiler)
 {
 }
 
-void ConstructorResolver::visit(ASTNode* node)
+void ConstructorIdentifierVisitor::visit(ASTNode* node)
 {
     // We expect `children` to come in a specific order, so they can be null.
     // (e.g. a for loop statement with no init will have a nullptr in index 0)
@@ -27,7 +27,7 @@ void ConstructorResolver::visit(ASTNode* node)
     }
 }
 
-void ConstructorResolver::visit(FunctionCall* node)
+void ConstructorIdentifierVisitor::visit(FunctionCall* node)
 {
     if (const auto& name = node->get_name(); compiler.class_exists(name)) node->set_as_constructor_call();
 

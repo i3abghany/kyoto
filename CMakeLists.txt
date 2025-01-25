@@ -38,7 +38,7 @@ set(SOURCES
     src/KType.cpp
     src/ModuleCompiler.cpp
     src/Resolution/ClassIdentifierVisitor.cpp
-    src/Resolution/ConstructorResolution.cpp
+    src/Resolution/ConstructorIdentifierVisitor.cpp
     src/Resolution/FunctionIdentifierVisitor.cpp
     src/SymbolTable.cpp
     src/TypeResolver.cpp
