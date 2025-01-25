@@ -25,7 +25,8 @@ set(SOURCES
     src/AST/ClassDefinitionNode.cpp
     src/AST/ExpressionNode.cpp
     src/AST/FunctionCall.cpp
-    src/AST/ControlFlowNodes.cpp
+    src/AST/IfStatementNode.cpp
+    src/AST/ForStatementNode.cpp
     src/AST/ASTBinaryArithNode.cpp
     src/AST/ASTBinaryCmpNode.cpp
     src/AST/ASTBinaryLogicalNode.cpp
