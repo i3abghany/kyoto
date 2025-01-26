@@ -1,6 +1,5 @@
 #include <any>
 #include <assert.h>
-#include <fmt/core.h>
 #include <initializer_list>
 #include <optional>
 #include <regex>

@@ -8,9 +8,7 @@
 #include <vector>
 
 #include "kyoto/AST/ASTNode.h"
-#include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
-#include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -28,7 +26,7 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
     }
 
     if (type->is_class()) {
-        return compiler.get_llvm_struct(type->as<const ClassType>()->get_name());
+        return compiler.get_llvm_struct(type->get_class_name());
     }
 
     if (!type->is_primitive()) {

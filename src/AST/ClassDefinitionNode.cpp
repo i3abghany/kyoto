@@ -1,6 +1,10 @@
 #include "kyoto/AST/ClassDefinitionNode.h"
 
+#include <assert.h>
+#include <fmt/core.h>
 #include <sstream>
+#include <stdexcept>
+#include <string.h>
 #include <utility>
 
 #include "kyoto/AST/DeclarationNodes.h"

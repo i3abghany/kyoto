@@ -2,15 +2,12 @@
 
 #include <assert.h>
 #include <fmt/core.h>
-#include <optional>
 #include <stdexcept>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
-#include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
-#include "kyoto/SymbolTable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 
