@@ -393,7 +393,6 @@ std::any ASTBuilderVisitor::visitClassComponent(kyoto::KyotoParser::ClassCompone
 {
     if (ctx->functionDefinition()) return visit(ctx->functionDefinition());
     if (ctx->declaration()) return visit(ctx->declaration());
-    if (ctx->fullDeclaration()) return visit(ctx->fullDeclaration());
     if (ctx->constructorDefinition()) return visit(ctx->constructorDefinition());
     return nullptr;
 }

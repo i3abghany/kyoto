@@ -16,9 +16,8 @@ classComponents: classComponent*;
 
 classComponent:
     declaration
-    | fullDeclaration
 	| constructorDefinition
-    | functionDefinition
+	| functionDefinition
     ;
 
 constructorDefinition: CONSTRUCTOR LPAREN parameterList RPAREN block;
@@ -94,7 +93,7 @@ forInit: fullDeclaration | expressionStatement | SEMICOLON;
 
 forCondition: expressionStatement | SEMICOLON;
 
-forUpdate: expression |;
+forUpdate: expression | /* empty */ ;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

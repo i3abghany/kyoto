@@ -47,9 +47,7 @@ llvm::Value* MemberAccessNode::gen()
         throw std::runtime_error("Class does not have a member with name " + member);
     }
 
-    auto* member_ktype = member_def->is<FullDeclarationStatementNode>()
-        ? member_def->as<FullDeclarationStatementNode>()->get_ktype()
-        : member_def->as<DeclarationStatementNode>()->get_ktype();
+    auto* member_ktype = member_def->as<DeclarationStatementNode>()->get_ktype();
 
     auto* llvm_type = ASTNode::get_llvm_type(member_ktype, compiler);
     auto member_index = class_metadata.member_idx(member);
@@ -80,9 +78,7 @@ llvm::Value* MemberAccessNode::gen_ptr() const
         throw std::runtime_error("Class does not have a member with name " + member);
     }
 
-    auto* member_ktype = member_def->is<FullDeclarationStatementNode>()
-        ? member_def->as<FullDeclarationStatementNode>()->get_ktype()
-        : member_def->as<DeclarationStatementNode>()->get_ktype();
+    auto* member_ktype = member_def->as<DeclarationStatementNode>()->get_ktype();
 
     auto* llvm_type = ASTNode::get_llvm_type(member_ktype, compiler);
     auto member_index = class_metadata.member_idx(member);
@@ -116,8 +112,7 @@ KType* MemberAccessNode::get_ktype() const
         throw std::runtime_error("Class does not have a member with name " + member);
     }
 
-    return member_def->is<FullDeclarationStatementNode>() ? member_def->as<FullDeclarationStatementNode>()->get_ktype()
-                                                          : member_def->as<DeclarationStatementNode>()->get_ktype();
+    return member_def->as<DeclarationStatementNode>()->get_ktype();
 }
 
 llvm::Value* MemberAccessNode::trivial_gen()
