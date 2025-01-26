@@ -48,9 +48,12 @@ llvm::Value* MemberAccessNode::gen()
     }
 
     auto* member_ktype = member_def->as<DeclarationStatementNode>()->get_ktype();
-
     auto* llvm_type = ASTNode::get_llvm_type(member_ktype, compiler);
     auto member_index = class_metadata.member_idx(member);
+
+    if (lhs_type->is_pointer_to_class()) {
+        lhs_val = compiler.get_builder().CreateLoad(lhs->gen_type(), lhs_val);
+    }
 
     auto* member_ptr = compiler.get_builder().CreateStructGEP(class_type, lhs_val, member_index);
     return compiler.get_builder().CreateLoad(llvm_type, member_ptr, member);
@@ -79,9 +82,12 @@ llvm::Value* MemberAccessNode::gen_ptr() const
     }
 
     auto* member_ktype = member_def->as<DeclarationStatementNode>()->get_ktype();
-
     auto* llvm_type = ASTNode::get_llvm_type(member_ktype, compiler);
     auto member_index = class_metadata.member_idx(member);
+
+    if (lhs_type->is_pointer_to_class()) {
+        lhs_val = compiler.get_builder().CreateLoad(lhs->gen_type(), lhs_val);
+    }
 
     auto* member_ptr = compiler.get_builder().CreateStructGEP(class_type, lhs_val, member_index);
     return member_ptr;

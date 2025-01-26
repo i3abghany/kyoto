@@ -196,8 +196,8 @@ void ModuleCompiler::push_scope()
         int i = 0;
         for (auto iter = current_fn->arg_begin(); iter != current_fn->arg_end(); iter++) {
             llvm::Value* arg = &*iter;
-            auto* arg_type = arg->getType();
             auto arg_name = current_fn_node->get_params()[i++].name;
+            auto* arg_type = arg->getType();
             auto* arg_alloc = builder.CreateAlloca(arg_type, nullptr, arg_name);
             builder.CreateStore(arg, arg_alloc);
             symbol_table.add_symbol(arg_name, Symbol { arg_alloc, current_fn_node->get_params()[i - 1].type->copy() });

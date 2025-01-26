@@ -110,12 +110,15 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
     if ((type->is_integer() && expr_ktype->is_integer()) || (type->is_boolean() && expr_ktype->is_boolean())) {
         return ExpressionNode::handle_integer_conversion(expr, type, compiler, "assign", name);
     }
+
     if (type->is_string() && expr_ktype->is_string()) {
         return expr->gen();
     }
-    if (type->is_class() && expr->is<FunctionCall>() && dynamic_cast<FunctionCall*>(expr)->is_constructor_call()) {
+
+    if (is_assigning_to_class_instance()) {
         return handle_constructor_call(alloca);
     }
+
     if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
         auto* expr_val = expr->gen_ptr();
         assert(expr_val && "Expression must be a pointer");
@@ -125,6 +128,11 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
     throw std::runtime_error(
         fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
                     expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
+}
+
+bool FullDeclarationStatementNode::is_assigning_to_class_instance() const
+{
+    return type->is_class() && expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call();
 }
 
 llvm::Value* FullDeclarationStatementNode::handle_constructor_call(llvm::AllocaInst* alloca) const
@@ -140,6 +148,7 @@ llvm::Value* FullDeclarationStatementNode::handle_constructor_call(llvm::AllocaI
 
 void FullDeclarationStatementNode::store_val_and_register_symbol(llvm::Value* expr_val, llvm::AllocaInst* alloca) const
 {
+    if (is_assigning_to_class_instance()) return;
     compiler.get_builder().CreateStore(expr_val, alloca);
     compiler.add_symbol(name, Symbol { alloca, type });
 }

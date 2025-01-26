@@ -167,10 +167,15 @@ KType* PointerType::get_pointee() const
     return pointee;
 }
 
-[[nodiscard]] bool PointerType::is_pointer_to_class(const std::string& name) const
+bool PointerType::is_pointer_to_class(const std::string& name) const
 {
     if (name.empty()) return pointee->is_class();
-    return pointee->is_class() && pointee->as<ClassType>()->get_name() == name;
+    return pointee->is_class() && pointee->get_class_name() == name;
+}
+
+std::string PointerType::get_class_name() const
+{
+    return pointee->as<ClassType>()->get_class_name();
 }
 
 bool PointerType::is_string() const
@@ -202,11 +207,6 @@ std::string ClassType::to_string() const
     return "Class " + name;
 }
 
-std::string ClassType::get_name() const
-{
-    return name;
-}
-
 bool ClassType::is_class() const
 {
     return true;
@@ -223,4 +223,9 @@ bool ClassType::operator==(const KType& other) const
 KType* ClassType::copy() const
 {
     return new ClassType(name);
+}
+
+std::string ClassType::get_class_name() const
+{
+    return name;
 }

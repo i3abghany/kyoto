@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <fmt/core.h>
 #include <stddef.h>
 #include <stdexcept>
@@ -25,6 +26,11 @@ public:
     virtual bool is_numeric() const { return false; }
     virtual bool is_char() const { return false; }
     virtual bool is_pointer_to_class(const std::string& name = "") const { return false; }
+    virtual std::string get_class_name() const
+    {
+        assert(false);
+        return "";
+    }
 
     virtual KType* copy() const = 0;
     virtual bool operator==(const KType& other) const = 0;
@@ -91,6 +97,7 @@ public:
     bool is_string() const override;
     bool is_pointer() const override;
     [[nodiscard]] bool is_pointer_to_class(const std::string& name = "") const override;
+    [[nodiscard]] std::string get_class_name() const override;
 
 private:
     KType* pointee;
@@ -100,10 +107,10 @@ class ClassType : public KType {
 public:
     explicit ClassType(std::string name);
     std::string to_string() const override;
-    [[nodiscard]] std::string get_name() const;
     [[nodiscard]] bool is_class() const override;
     bool operator==(const KType& other) const override;
     KType* copy() const override;
+    [[nodiscard]] std::string get_class_name() const override;
 
 private:
     std::string name;

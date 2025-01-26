@@ -1,16 +1,18 @@
 #pragma once
 
-#include "kyoto/AST/Expressions/ExpressionNode.h"
-
 #include <string>
 #include <vector>
 
+#include "kyoto/AST/ASTNode.h"
+#include "kyoto/AST/Expressions/ExpressionNode.h"
+
 namespace llvm {
-class Value;
 class Type;
 }
 
 class ModuleCompiler;
+class KType;
+class ClassMetadata;
 
 class MemberAccessNode : public ExpressionNode {
 public:
@@ -29,6 +31,13 @@ public:
     [[nodiscard]] ExpressionNode* get_lhs() const { return lhs; }
 
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { lhs }; }
+
+private:
+    void validate_member_access(KType* lhs_type) const;
+    std::string get_class_name(KType* lhs_type) const;
+    llvm::Type* get_class_type(KType* lhs_type) const;
+    unsigned get_member_index(KType* lhs_type) const;
+    const ASTNode* get_member_declaration(const ClassMetadata& class_metadata) const;
 
 private:
     ExpressionNode* lhs;

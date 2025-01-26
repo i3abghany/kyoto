@@ -50,6 +50,7 @@ private:
     void validate_expression_not_void() const;
     llvm::AllocaInst* create_alloca() const;
     llvm::Value* generate_expression_value(llvm::AllocaInst* alloca);
+    bool is_assigning_to_class_instance() const;
     llvm::Value* handle_constructor_call(llvm::AllocaInst* alloca) const;
     void store_val_and_register_symbol(llvm::Value* expr_val, llvm::AllocaInst* alloca) const;
 
