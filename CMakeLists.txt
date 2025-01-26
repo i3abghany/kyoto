@@ -28,6 +28,7 @@ set(SOURCES
     src/AST/Expressions/ExpressionNode.cpp
     src/AST/Expressions/FunctionCallNode.cpp
     src/AST/Expressions/IdentifierNode.cpp
+    src/AST/Expressions/MemberAccessNode.cpp
     src/AST/Expressions/NumberNode.cpp
     src/AST/Expressions/StringLiteralNode.cpp
     src/AST/Expressions/UnaryNode.cpp

@@ -41,6 +41,7 @@ expression:
 	| IDENTIFIER									# identifierExpression
 	| LPAREN expression RPAREN						# parenthesizedExpression
 	| ASTERISK expression							# dereferenceExpression
+	| expression DOT IDENTIFIER						# memberAccessExpression
 	| AMPERSAND expression							# addressOfExpression
 	| PLUS_PLUS expression							# prefixIncrementExpression
 	| MINUS_MINUS expression						# prefixDecrementExpression

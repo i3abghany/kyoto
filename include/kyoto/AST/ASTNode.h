@@ -24,6 +24,8 @@ public:
     virtual std::vector<ASTNode*> get_children() const = 0;
 
     template <typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
+    template <typename T> T* as() { return dynamic_cast<T*>(this); }
+    template <typename T> const T* as() const { return dynamic_cast<const T*>(this); }
 
     static llvm::Type* get_llvm_type(const KType* type, ModuleCompiler& compiler);
 };

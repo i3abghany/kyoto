@@ -169,7 +169,8 @@ KType* PointerType::get_pointee() const
 
 [[nodiscard]] bool PointerType::is_pointer_to_class(const std::string& name) const
 {
-    return pointee->is_class() && pointee->is<ClassType>() && pointee->as<ClassType>()->get_name() == name;
+    if (name.empty()) return pointee->is_class();
+    return pointee->is_class() && pointee->as<ClassType>()->get_name() == name;
 }
 
 bool PointerType::is_string() const

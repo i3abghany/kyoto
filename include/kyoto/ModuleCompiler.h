@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "kyoto/ClassMetadata.h"
 #include "kyoto/Resolution/AnalysisVisitor.h"
 #include "kyoto/SymbolTable.h"
 #include "kyoto/TypeResolver.h"
@@ -60,8 +61,9 @@ public:
     std::string get_current_class() const;
     bool class_exists(const std::string& name) const;
 
-    void add_llvm_struct(const std::string& name, llvm::StructType* type);
+    void add_class_metadata(const std::string& name, const ClassMetadata& data);
     llvm::StructType* get_llvm_struct(const std::string& name) const;
+    ClassMetadata& get_class_metadata(const std::string& name);
 
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();
@@ -89,7 +91,7 @@ private:
     std::string current_class;
 
     std::vector<std::unique_ptr<IAnalysisVisitor>> analysis_visitors;
-    std::unordered_map<std::string, llvm::StructType*> struct_types;
+    std::unordered_map<std::string, ClassMetadata> classes_metadata;
 
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;

@@ -19,6 +19,7 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/AST/Expressions/IdentifierNode.h"
+#include "kyoto/AST/Expressions/MemberAccessNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
@@ -123,13 +124,6 @@ std::any ASTBuilderVisitor::visitTypelessDeclaration(kyoto::KyotoParser::Typeles
 
 std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx)
 {
-    const auto* lhs_id_expr = dynamic_cast<kyoto::KyotoParser::IdentifierExpressionContext*>(ctx->expression(0));
-    const auto* lhs_deref_expr = dynamic_cast<kyoto::KyotoParser::DereferenceExpressionContext*>(ctx->expression(0));
-    if (!lhs_id_expr && !lhs_deref_expr) {
-        throw std::runtime_error(
-            fmt::format("Expected lvalue on the left side of assignment, got `{}`", ctx->expression(0)->getText()));
-    }
-
     const auto assignee = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
     return (ExpressionNode*)new AssignmentNode(assignee, expr, compiler);
@@ -188,6 +182,13 @@ std::any ASTBuilderVisitor::visitDereferenceExpression(kyoto::KyotoParser::Deref
 {
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::Dereference, compiler);
+}
+
+std::any ASTBuilderVisitor::visitMemberAccessExpression(kyoto::KyotoParser::MemberAccessExpressionContext* ctx)
+{
+    auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    const auto member = ctx->IDENTIFIER()->getText();
+    return (ExpressionNode*)new MemberAccessNode(lhs, member, compiler);
 }
 
 std::any ASTBuilderVisitor::visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx)

@@ -15,6 +15,7 @@ public:
     ~ClassDefinitionNode();
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
+    [[nodiscard]] const ASTNode* get_declaration_of(const std::string& name) const;
 
     [[nodiscard]] std::string get_name() const { return name; }
     [[nodiscard]] std::string get_parent() const { return parent; }

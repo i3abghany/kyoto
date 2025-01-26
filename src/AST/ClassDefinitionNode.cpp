@@ -3,6 +3,7 @@
 #include <sstream>
 #include <utility>
 
+#include "kyoto/AST/DeclarationNodes.h"
 #include "kyoto/KType.h"
 
 ClassDefinitionNode::ClassDefinitionNode(std::string name, std::string parent, std::vector<ASTNode*> components,
@@ -39,6 +40,16 @@ llvm::Value* ClassDefinitionNode::gen()
     for (const auto& component : components) {
         if (component->is<FunctionNode>()) {
             component->gen();
+        }
+    }
+    return nullptr;
+}
+
+const ASTNode* ClassDefinitionNode::get_declaration_of(const std::string& name) const
+{
+    for (const auto& component : components) {
+        if (component->is<FullDeclarationStatementNode>() || component->is<DeclarationStatementNode>()) {
+            return component;
         }
     }
     return nullptr;

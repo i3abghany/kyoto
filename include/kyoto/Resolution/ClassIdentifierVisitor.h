@@ -29,7 +29,7 @@ public:
         }
 
         auto* llvm_struct = llvm::StructType::create(compiler.get_context(), llvm_types, name);
-        compiler.add_llvm_struct(name, llvm_struct);
+        compiler.add_class_metadata(name, { llvm_struct, node });
     }
 
 private:

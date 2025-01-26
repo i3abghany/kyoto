@@ -63,13 +63,12 @@ llvm::Value* AssignmentNode::gen()
         return gen_deref_assignment();
     }
 
-    auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
-    std::string name = identifier->get_name();
-    auto symbol = get_symbol(name);
-    auto* type = symbol.type;
+    auto* alloc = assignee->gen_ptr();
+    auto* type = assignee->get_ktype();
+    auto name = assignee->to_string();
 
     llvm::Value* expr_val = generate_expression_value(type, name);
-    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
+    compiler.get_builder().CreateStore(expr_val, alloc);
 
     return expr_val;
 }
@@ -79,15 +78,6 @@ void AssignmentNode::validate_lvalue() const
     if (assignee->is_trivially_evaluable()) {
         throw std::runtime_error(fmt::format("Cannot assign to a non-lvalue `{}`", assignee->to_string()));
     }
-}
-
-Symbol AssignmentNode::get_symbol(const std::string& name) const
-{
-    auto symbol_opt = compiler.get_symbol(name);
-    if (!symbol_opt.has_value()) {
-        throw std::runtime_error(fmt::format("Unknown symbol `{}`", name));
-    }
-    return symbol_opt.value();
 }
 
 llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const std::string& name) const
@@ -128,23 +118,12 @@ llvm::Type* AssignmentNode::gen_type() const
 
 llvm::Value* AssignmentNode::trivial_gen()
 {
-    auto* identifier = dynamic_cast<IdentifierExpressionNode*>(assignee);
-    if (!identifier) {
-        throw std::runtime_error(
-            fmt::format("Expected lvalue on the left side of assignment, got `{}`", assignee->to_string()));
-    }
+    auto* alloc = assignee->gen_ptr();
+    auto* type = assignee->get_ktype();
+    auto name = assignee->to_string();
 
-    const auto& name = identifier->get_name();
-
-    auto symbol_opt = compiler.get_symbol(name);
-    if (!symbol_opt.has_value()) {
-        assert(false && "Unknown symbol");
-    }
-
-    const auto symbol = symbol_opt.value();
-    auto* type = symbol.type;
     auto* expr_val = handle_integer_conversion(expr, type, compiler, "assign", name);
-    compiler.get_builder().CreateStore(expr_val, symbol.alloc);
+    compiler.get_builder().CreateStore(expr_val, alloc);
 
     return expr_val;
 }

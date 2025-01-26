@@ -255,14 +255,19 @@ bool ModuleCompiler::class_exists(const std::string& name) const
     return classes.contains(name);
 }
 
-void ModuleCompiler::add_llvm_struct(const std::string& name, llvm::StructType* type)
+void ModuleCompiler::add_class_metadata(const std::string& name, const ClassMetadata& data)
 {
-    struct_types[name] = type;
+    classes_metadata[name] = data;
 }
 
 llvm::StructType* ModuleCompiler::get_llvm_struct(const std::string& name) const
 {
-    return struct_types.at(name);
+    return classes_metadata.at(name).llvm_type;
+}
+
+ClassMetadata& ModuleCompiler::get_class_metadata(const std::string& name)
+{
+    return classes_metadata.at(name);
 }
 
 void ModuleCompiler::push_fn_return_type(KType* type)

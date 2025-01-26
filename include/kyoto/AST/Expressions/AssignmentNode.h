@@ -32,7 +32,7 @@ public:
 private:
     [[nodiscard]] llvm::Value* gen_deref_assignment() const;
     void validate_lvalue() const;
-    [[nodiscard]] Symbol get_symbol(const std::string& name) const;
+    [[nodiscard]] Symbol get_lhs_lvalue() const;
     [[nodiscard]] llvm::Value* generate_expression_value(const KType* type, const std::string& name) const;
     [[nodiscard]] bool are_compatible_integers_or_booleans(const KType* type) const;
     [[nodiscard]] bool are_compatible_pointer_types(const KType* type) const;
