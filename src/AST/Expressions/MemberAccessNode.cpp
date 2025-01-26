@@ -27,7 +27,7 @@ std::string MemberAccessNode::to_string() const
 
 llvm::Value* MemberAccessNode::gen()
 {
-    auto* lhs_val = lhs->gen();
+    auto* lhs_val = lhs->gen_ptr();
     auto* lhs_type = lhs->get_ktype();
 
     if (!lhs_type->is_class() && !lhs_type->is_pointer_to_class()) {
@@ -58,7 +58,7 @@ llvm::Value* MemberAccessNode::gen()
 
 llvm::Value* MemberAccessNode::gen_ptr() const
 {
-    auto* lhs_val = lhs->gen();
+    auto* lhs_val = lhs->gen_ptr();
     auto* lhs_type = lhs->get_ktype();
 
     if (!lhs_type->is_class() && !lhs_type->is_pointer_to_class()) {

@@ -132,7 +132,7 @@ llvm::Value* FullDeclarationStatementNode::handle_constructor_call(llvm::AllocaI
     ExpressionNode* self = new IdentifierExpressionNode(name, compiler);
     self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
     compiler.add_symbol(name, Symbol { alloca, type });
-    auto* f = dynamic_cast<FunctionCall*>(expr);
+    auto* f = expr->as<FunctionCall>();
     f->insert_arg(self, 0);
     auto _ = f->gen();
     return alloca;

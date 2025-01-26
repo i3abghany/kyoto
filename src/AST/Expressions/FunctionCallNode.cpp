@@ -104,6 +104,7 @@ bool FunctionCall::is_trivially_evaluable() const
 {
     return false;
 }
+
 void FunctionCall::insert_arg(ExpressionNode* node, size_t index)
 {
     args.insert(args.begin() + index, node);
