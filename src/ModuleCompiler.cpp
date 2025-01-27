@@ -182,8 +182,8 @@ std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& nam
 void ModuleCompiler::register_visitors()
 {
     analysis_visitors.push_back(std::make_unique<ConstructorIdentifierVisitor>(*this));
-    analysis_visitors.push_back(std::make_unique<FunctionIdentifierVisitor>(*this));
     analysis_visitors.push_back(std::make_unique<ClassIdentifierVisitor>(*this));
+    analysis_visitors.push_back(std::make_unique<FunctionIdentifierVisitor>(*this));
 }
 
 void ModuleCompiler::push_scope()
