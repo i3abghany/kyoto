@@ -41,3 +41,34 @@ llvm::Value* MethodCall::gen_ptr() const
     const_cast<MethodCall*>(this)->set_name_prefix(class_name + "_");
     return FunctionCall::gen_ptr();
 }
+
+llvm::Type* MethodCall::gen_type() const
+{
+    initalize_name_prefix();
+    return FunctionCall::gen_type();
+}
+
+KType* MethodCall::get_ktype() const
+{
+    initalize_name_prefix();
+    return FunctionCall::get_ktype();
+}
+
+llvm::Value* MethodCall::trivial_gen()
+{
+    initalize_name_prefix();
+    return FunctionCall::trivial_gen();
+}
+
+bool MethodCall::is_trivially_evaluable() const
+{
+    initalize_name_prefix();
+    return FunctionCall::is_trivially_evaluable();
+}
+
+void MethodCall::initalize_name_prefix() const
+{
+    auto dummy = std::make_unique<IdentifierExpressionNode>(instance_name, compiler);
+    auto class_name = dummy->get_ktype()->get_class_name();
+    const_cast<MethodCall*>(this)->set_name_prefix(class_name + "_");
+}

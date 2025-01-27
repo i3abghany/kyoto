@@ -136,3 +136,111 @@ fn main() i32 {
     x.a = x.a + 1;
     return x.a;
 }
+
+// NAME MethodCall
+// ERR 0
+// RET 7
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+
+    fn inc(self: X*) {
+        self.a = self.a + 1;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    x.inc();
+    x.inc();
+    return x.a;
+}
+
+// NAME MethodCallWithParameter
+// ERR 0
+// RET 10
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+
+    fn add(self: X*, x: i32) {
+        self.a = self.a + x;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    x.add(2);
+    x.add(3);
+    return x.a;
+}
+
+// NAME MethodCallWithMultipleParameters
+// ERR 0
+// RET 15
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+
+    fn add(self: X*, x: i32, y: i32) {
+        self.a = self.a + x + y;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    x.add(2, 3);
+    x.add(4, 1);
+    return x.a;
+}
+
+// NAME MethodCallWithMultipleParametersAndFieldAccess
+// ERR 0
+// RET 24
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+
+    fn add(self: X*, x: i32, y: i32) {
+        self.a = self.a + x + y;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    x.add(2, 3);
+    x.add(4, x.a);
+    return x.a;
+}
+
+// NAME MethodCallWithMultipleParametersAndFieldAccessAndReturn
+// ERR 0
+// RET 7
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+
+    fn add(self: X*, x: i32) i32 {
+        return self.a = self.a + x;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    return x.add(2);
+}

@@ -36,7 +36,11 @@ public:
         name += "_constructor";
     }
 
-    void set_name_prefix(const std::string& prefix) { name = prefix + name; }
+    void set_name_prefix(const std::string& prefix)
+    {
+        if (name.find(prefix) == 0) return;
+        name = prefix + name;
+    }
 
 protected:
     bool is_constructor { false };
