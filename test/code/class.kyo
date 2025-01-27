@@ -1,0 +1,79 @@
+// NAME EmptyClass
+// ERR 0
+// RET 0
+
+class X {  }
+
+fn main() i32 {
+    return 0;
+}
+
+// NAME EmptyClassWithConstructor
+// ERR 0
+// RET 0
+
+class X {
+    constructor(self: X*) { }
+}
+
+fn main() i32 {
+    return 0;
+}
+
+// NAME ClassWithDeclaration
+// ERR 0
+// RET 0
+
+class X {
+    var x: i32;
+    constructor(self: X*) {}
+}
+
+fn main() i32 {
+    return 0;
+}
+
+// NAME ClassSetFieldInConstructor
+// ERR 0
+// RET 0
+
+class X {
+    var x: i32;
+    constructor(self: X*) {
+        self.x = 0;
+    }
+}
+
+fn main() i32 {
+    return 0;
+}
+
+// NAME ClassConstructorWithParameter
+// ERR 0
+// RET 5
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    return x.a;
+}
+
+// NAME ClassWithUndefinedFieldAccess
+// ERR 1
+// RET 0
+
+class X {
+    constructor(self: X*) {
+        self.x = 0;
+    }
+}
+
+fn main() i32 {
+    return 0;
+}

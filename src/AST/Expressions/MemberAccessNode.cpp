@@ -91,14 +91,21 @@ unsigned MemberAccessNode::get_member_index(KType* lhs_type) const
 {
     std::string class_name = lhs_type->get_class_name();
     auto& class_metadata = compiler.get_class_metadata(class_name);
-    return class_metadata.member_idx(member);
+    auto idx = class_metadata.member_idx(member);
+    if (!idx.has_value()) {
+        throw std::runtime_error(fmt::format("Class `{}` does not have a member with name `{}`", class_name, member));
+    }
+    return idx.value();
 }
 
 const ASTNode* MemberAccessNode::get_member_declaration(const ClassMetadata& class_metadata) const
 {
     const auto* member_def = class_metadata.node->get_declaration_of(member);
 
-    if (!member_def) throw std::runtime_error(fmt::format("Class does not have a member with name {}", member));
+    if (!member_def) {
+        throw std::runtime_error(
+            fmt::format("Class `{}` does not have a member with name `{}`", class_metadata.node->get_name(), member));
+    }
 
     return member_def;
 }

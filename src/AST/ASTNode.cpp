@@ -146,9 +146,13 @@ llvm::Value* BlockNode::gen()
     if (nodes.empty()) return nullptr;
 
     compiler.push_scope();
-
-    for (auto* node : nodes) {
-        node->gen();
+    try {
+        for (auto* node : nodes) {
+            node->gen();
+        }
+    } catch (...) {
+        compiler.pop_scope();
+        throw;
     }
 
     compiler.pop_scope();

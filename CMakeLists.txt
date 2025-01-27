@@ -60,6 +60,7 @@ set(TEST_SOURCES
     test/TestLogical.cpp
     test/TestScope.cpp
     test/TestFor.cpp
+    test/TestClass.cpp
     test/TestFunction.cpp
     test/TestPointers.cpp
 )
@@ -74,3 +75,7 @@ target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} 
 
 include(GoogleTest)
 gtest_discover_tests(ktest)
+
+set(CMAKE_CXX_COMPILER clang++-20)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -fno-omit-frame-pointer")
+set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fsanitize=address,undefined")

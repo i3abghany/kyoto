@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,16 +17,9 @@ struct ClassMetadata {
     llvm::StructType* llvm_type;
     ClassDefinitionNode* node;
 
-    [[nodiscard]] size_t member_idx(const std::string& name) const
+    [[nodiscard]] std::optional<size_t> member_idx(const std::string& name) const
     {
         for (size_t i = 0; i < node->get_children().size(); ++i) {
-            if (node->get_children()[i]->is<FullDeclarationStatementNode>()) {
-                auto* decl = node->get_children()[i]->as<FullDeclarationStatementNode>();
-                if (decl->get_name() == name) {
-                    return i;
-                }
-            }
-
             if (node->get_children()[i]->is<DeclarationStatementNode>()) {
                 auto* decl = node->get_children()[i]->as<DeclarationStatementNode>();
                 if (decl->get_name() == name) {
