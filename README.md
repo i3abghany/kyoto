@@ -23,6 +23,7 @@ Antlr 4.13.2 can be installed from the official website's mirror as follows:
 
 ```bash
 $ wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O /path/to/install
+$ chmod +x /path/to/install/antlr-4.13.2-complete.jar
 $ export PATH="/path/to/install:$PATH"
 ```
 
