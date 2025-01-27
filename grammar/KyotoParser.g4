@@ -6,21 +6,26 @@ options {
 
 program: topLevel* EOF;
 
-topLevel: functionDefinition | fullDeclaration | cdecl | classDefinition;
+topLevel:
+	functionDefinition
+	| fullDeclaration
+	| cdecl
+	| classDefinition;
 
 block: OPEN_BRACE statement* CLOSE_BRACE;
 
-classDefinition: CLASS IDENTIFIER (COLON IDENTIFIER)? OPEN_BRACE classComponents CLOSE_BRACE;
+classDefinition:
+	CLASS IDENTIFIER (COLON IDENTIFIER)? OPEN_BRACE classComponents CLOSE_BRACE;
 
 classComponents: classComponent*;
 
 classComponent:
-    declaration
+	declaration
 	| constructorDefinition
-	| functionDefinition
-    ;
+	| functionDefinition;
 
-constructorDefinition: CONSTRUCTOR LPAREN parameterList RPAREN block;
+constructorDefinition:
+	CONSTRUCTOR LPAREN parameterList RPAREN block;
 
 statement:
 	block
@@ -34,34 +39,35 @@ statement:
 expressionStatement: expression SEMICOLON;
 
 expression:
-	number											# numberExpression
-	| CHAR_LITERAL									# charExpression
-	| STRING_LITERAL								# stringExpression
-	| IDENTIFIER									# identifierExpression
-	| LPAREN expression RPAREN						# parenthesizedExpression
-	| ASTERISK expression							# dereferenceExpression
-	| expression DOT IDENTIFIER						# memberAccessExpression
-	| AMPERSAND expression							# addressOfExpression
-	| PLUS_PLUS expression							# prefixIncrementExpression
-	| MINUS_MINUS expression						# prefixDecrementExpression
-	| MINUS expression								# negationExpression
-	| PLUS expression								# positiveExpression
-	| IDENTIFIER LPAREN argumentList RPAREN			# functionCallExpression
-	| expression ASTERISK expression				# multiplicationExpression
-	| expression SLASH expression					# divisionExpression
-	| expression PERCENT expression					# modulusExpression
-	| expression PLUS expression					# additionExpression
-	| expression MINUS expression					# subtractionExpression
-	| expression EQUALS expression					# equalsExpression
-	| expression NOT_EQUALS expression				# notEqualsExpression
-	| expression LESS_THAN expression				# lessThanExpression
-	| expression LESS_THAN_OR_EQUAL expression		# lessThanOrEqualExpression
-	| expression GREATER_THAN expression			# greaterThanExpression
-	| expression GREATER_THAN_OR_EQUAL expression	# greaterThanOrEqualExpression
-	| expression LOGICAL_AND expression				# logicalAndExpression
-	| expression LOGICAL_OR expression				# logicalOrExpression
-	| expression logicalOp expression				# logicalExpression
-	| <assoc = right> expression EQUAL expression	# assignmentExpression;
+	number													# numberExpression
+	| CHAR_LITERAL											# charExpression
+	| STRING_LITERAL										# stringExpression
+	| IDENTIFIER											# identifierExpression
+	| LPAREN expression RPAREN								# parenthesizedExpression
+	| ASTERISK expression									# dereferenceExpression
+	| expression DOT IDENTIFIER								# memberAccessExpression
+	| expression DOT IDENTIFIER LPAREN argumentList RPAREN	# methodCallExpression
+	| AMPERSAND expression									# addressOfExpression
+	| PLUS_PLUS expression									# prefixIncrementExpression
+	| MINUS_MINUS expression								# prefixDecrementExpression
+	| MINUS expression										# negationExpression
+	| PLUS expression										# positiveExpression
+	| IDENTIFIER LPAREN argumentList RPAREN					# functionCallExpression
+	| expression ASTERISK expression						# multiplicationExpression
+	| expression SLASH expression							# divisionExpression
+	| expression PERCENT expression							# modulusExpression
+	| expression PLUS expression							# additionExpression
+	| expression MINUS expression							# subtractionExpression
+	| expression EQUALS expression							# equalsExpression
+	| expression NOT_EQUALS expression						# notEqualsExpression
+	| expression LESS_THAN expression						# lessThanExpression
+	| expression LESS_THAN_OR_EQUAL expression				# lessThanOrEqualExpression
+	| expression GREATER_THAN expression					# greaterThanExpression
+	| expression GREATER_THAN_OR_EQUAL expression			# greaterThanOrEqualExpression
+	| expression LOGICAL_AND expression						# logicalAndExpression
+	| expression LOGICAL_OR expression						# logicalOrExpression
+	| expression logicalOp expression						# logicalExpression
+	| <assoc = right> expression EQUAL expression			# assignmentExpression;
 
 argumentList: expression (COMMA expression)* | /* empty */;
 
@@ -93,7 +99,7 @@ forInit: fullDeclaration | expressionStatement | SEMICOLON;
 
 forCondition: expressionStatement | SEMICOLON;
 
-forUpdate: expression | /* empty */ ;
+forUpdate: expression | /* empty */;
 
 functionDefinition:
 	FN IDENTIFIER LPAREN parameterList RPAREN type? block;

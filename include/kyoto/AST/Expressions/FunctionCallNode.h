@@ -12,11 +12,11 @@ class ModuleCompiler;
 class FunctionCall : public ExpressionNode {
 public:
     FunctionCall(std::string name, std::vector<ExpressionNode*> args, ModuleCompiler& compiler);
-    ~FunctionCall();
+    virtual ~FunctionCall();
 
     [[nodiscard]] std::string to_string() const override;
-    [[nodiscard]] llvm::Value* gen() override;
-    [[nodiscard]] llvm::Value* gen_ptr() const override;
+    [[nodiscard]] virtual llvm::Value* gen() override;
+    [[nodiscard]] virtual llvm::Value* gen_ptr() const override;
     [[nodiscard]] llvm::Type* gen_type() const override;
     [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] llvm::Value* trivial_gen() override;
@@ -36,9 +36,11 @@ public:
         name += "_constructor";
     }
 
-private:
-    std::string name;
+    void set_name_prefix(const std::string& prefix) { name = prefix + name; }
+
+protected:
     bool is_constructor { false };
+    std::string name;
     std::vector<ExpressionNode*> args;
     ModuleCompiler& compiler;
 };

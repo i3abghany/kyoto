@@ -19,6 +19,7 @@
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/AST/Expressions/MemberAccessNode.h"
+#include "kyoto/AST/Expressions/MethodCallNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
@@ -188,6 +189,17 @@ std::any ASTBuilderVisitor::visitMemberAccessExpression(kyoto::KyotoParser::Memb
     auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     const auto member = ctx->IDENTIFIER()->getText();
     return (ExpressionNode*)new MemberAccessNode(lhs, member, compiler);
+}
+
+std::any ASTBuilderVisitor::visitMethodCallExpression(kyoto::KyotoParser::MethodCallExpressionContext* ctx)
+{
+    const auto instance_name = ctx->expression()->getText();
+    const auto name = ctx->IDENTIFIER()->getText();
+    std::vector<ExpressionNode*> args;
+    for (const auto arg : ctx->argumentList()->expression()) {
+        args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+    }
+    return (ExpressionNode*)new MethodCall(instance_name, name, args, compiler);
 }
 
 std::any ASTBuilderVisitor::visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx)

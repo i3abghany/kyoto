@@ -1,0 +1,43 @@
+#include "kyoto/AST/Expressions/MethodCallNode.h"
+
+#include <string>
+#include <vector>
+
+#include "kyoto/AST/Expressions/FunctionCallNode.h"
+#include "kyoto/AST/Expressions/IdentifierNode.h"
+#include "kyoto/AST/Expressions/UnaryNode.h"
+#include "kyoto/ModuleCompiler.h"
+
+MethodCall::MethodCall(std::string instance_name, std::string name, std::vector<ExpressionNode*> args,
+                       ModuleCompiler& compiler)
+    : FunctionCall(std::move(name), std::move(args), compiler)
+    , instance_name(std::move(instance_name))
+{
+}
+
+MethodCall::~MethodCall() = default;
+
+std::string MethodCall::to_string() const
+{
+    return instance_name + "." + FunctionCall::to_string();
+}
+
+llvm::Value* MethodCall::gen()
+{
+    ExpressionNode* self = new IdentifierExpressionNode(instance_name, compiler);
+    self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
+    insert_arg(self, 0);
+    auto class_name = self->get_ktype()->get_class_name();
+    set_name_prefix(class_name + "_");
+    return FunctionCall::gen();
+}
+
+llvm::Value* MethodCall::gen_ptr() const
+{
+    auto* ident = new IdentifierExpressionNode(instance_name, compiler);
+    auto* ptr = new UnaryNode(ident, UnaryNode::UnaryOp::AddressOf, compiler);
+    const_cast<MethodCall*>(this)->insert_arg(ident, 0);
+    auto class_name = ident->get_ktype()->get_class_name();
+    const_cast<MethodCall*>(this)->set_name_prefix(class_name + "_");
+    return FunctionCall::gen_ptr();
+}
