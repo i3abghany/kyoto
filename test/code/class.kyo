@@ -77,3 +77,62 @@ class X {
 fn main() i32 {
     return 0;
 }
+
+// NAME InstanceAsAValueParameter
+// ERR 0
+// RET 5
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn mod(x: X){
+    x.a = 12;
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    mod(x);
+    return x.a;
+}
+
+// NAME InstanceAsAPointerParameter
+// ERR 0
+// RET 12
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn mod(x: X*) {
+    x.a = 12;
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    mod(&x);
+    return x.a;
+}
+
+// NAME MemberAccessReference
+// ERR 0
+// RET 6
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X = X(5);
+    x.a = x.a + 1;
+    return x.a;
+}
