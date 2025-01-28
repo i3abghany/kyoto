@@ -151,6 +151,12 @@ std::any ASTBuilderVisitor::visitStringExpression(kyoto::KyotoParser::StringExpr
     return (ExpressionNode*)new StringLiteralNode(txt.substr(1, txt.size() - 2), compiler);
 }
 
+std::any ASTBuilderVisitor::visitCharExpression(kyoto::KyotoParser::CharExpressionContext* ctx)
+{
+    const auto txt = ctx->getText();
+    return (ExpressionNode*)new NumberNode(txt[1], new PrimitiveType(PrimitiveType::Kind::I8), compiler);
+}
+
 std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx)
 {
     const auto txt = ctx->getText();

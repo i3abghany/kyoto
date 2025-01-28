@@ -57,7 +57,7 @@ bool PrimitiveType::operator==(const KType& other) const
 
 bool PrimitiveType::is_integer() const
 {
-    return kind == Kind::I8 || kind == Kind::I16 || kind == Kind::I32 || kind == Kind::I64;
+    return kind == Kind::I8 || kind == Kind::I16 || kind == Kind::I32 || kind == Kind::I64 || is_char();
 }
 
 bool PrimitiveType::is_floating_point() const

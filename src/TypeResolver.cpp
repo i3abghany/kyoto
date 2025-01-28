@@ -40,6 +40,7 @@ bool TypeResolver::fits_in(const int64_t val, const PrimitiveType::Kind kind) co
     auto pkind = PrimitiveType(kind);
     switch (pkind.get_kind()) {
     case PrimitiveType::Kind::I8:
+    case PrimitiveType::Kind::Char:
         return std::in_range<int8_t>(val);
     case PrimitiveType::Kind::I16:
         return std::in_range<int16_t>(val);
