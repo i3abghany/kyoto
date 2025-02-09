@@ -28,6 +28,7 @@ public:
     std::any visitCharExpression(kyoto::KyotoParser::CharExpressionContext* ctx) override;
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
+    std::any visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx) override;
 
     std::any visitAddressOfExpression(kyoto::KyotoParser::AddressOfExpressionContext* ctx) override;
     std::any visitDereferenceExpression(kyoto::KyotoParser::DereferenceExpressionContext* ctx) override;
@@ -69,7 +70,19 @@ public:
     std::any visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx) override;
     std::any visitConstructorDefinition(kyoto::KyotoParser::ConstructorDefinitionContext* ctx) override;
 
-    std::any visitType(kyoto::KyotoParser::TypeContext* ctx) override;
+    std::any visitBoolType(kyoto::KyotoParser::BoolTypeContext* ctx) override;
+    std::any visitCharType(kyoto::KyotoParser::CharTypeContext* ctx) override;
+    std::any visitI8Type(kyoto::KyotoParser::I8TypeContext* ctx) override;
+    std::any visitI16Type(kyoto::KyotoParser::I16TypeContext* ctx) override;
+    std::any visitI32Type(kyoto::KyotoParser::I32TypeContext* ctx) override;
+    std::any visitI64Type(kyoto::KyotoParser::I64TypeContext* ctx) override;
+    std::any visitF32Type(kyoto::KyotoParser::F32TypeContext* ctx) override;
+    std::any visitF64Type(kyoto::KyotoParser::F64TypeContext* ctx) override;
+    std::any visitStrType(kyoto::KyotoParser::StrTypeContext* ctx) override;
+    std::any visitVoidType(kyoto::KyotoParser::VoidTypeContext* ctx) override;
+    std::any visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx) override;
+    std::any visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx) override;
+    std::any visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx) override;
 
 private:
     [[nodiscard]] std::optional<int64_t> parse_signed_integer_into(const std::string& str,

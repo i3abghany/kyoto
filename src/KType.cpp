@@ -202,6 +202,8 @@ ClassType::ClassType(std::string name)
 {
 }
 
+ClassType::~ClassType() = default;
+
 std::string ClassType::to_string() const
 {
     return "Class " + name;
@@ -228,4 +230,37 @@ KType* ClassType::copy() const
 std::string ClassType::get_class_name() const
 {
     return name;
+}
+
+ArrayType::ArrayType(KType* element_type)
+    : element_type(element_type)
+{
+}
+
+ArrayType::~ArrayType()
+{
+    delete element_type;
+}
+
+std::string ArrayType::to_string() const
+{
+    return element_type->to_string() + "[]";
+}
+
+bool ArrayType::operator==(const KType& other) const
+{
+    auto* other_array = dynamic_cast<const ArrayType*>(&other);
+    if (!other_array) return false;
+
+    return *element_type == *other_array->element_type;
+}
+
+KType* ArrayType::copy() const
+{
+    return new ArrayType(element_type->copy());
+}
+
+KType* ArrayType::get_element_type() const
+{
+    return element_type;
 }

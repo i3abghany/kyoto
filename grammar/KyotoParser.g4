@@ -39,37 +39,38 @@ statement:
 expressionStatement: expression SEMICOLON;
 
 expression:
-	number													# numberExpression
-	| CHAR_LITERAL											# charExpression
-	| STRING_LITERAL										# stringExpression
-	| IDENTIFIER											# identifierExpression
-	| LPAREN expression RPAREN								# parenthesizedExpression
-	| ASTERISK expression									# dereferenceExpression
-	| expression DOT IDENTIFIER								# memberAccessExpression
-	| expression DOT IDENTIFIER LPAREN argumentList RPAREN	# methodCallExpression
-	| AMPERSAND expression									# addressOfExpression
-	| PLUS_PLUS expression									# prefixIncrementExpression
-	| MINUS_MINUS expression								# prefixDecrementExpression
-	| MINUS expression										# negationExpression
-	| PLUS expression										# positiveExpression
-	| IDENTIFIER LPAREN argumentList RPAREN					# functionCallExpression
-	| expression ASTERISK expression						# multiplicationExpression
-	| expression SLASH expression							# divisionExpression
-	| expression PERCENT expression							# modulusExpression
-	| expression PLUS expression							# additionExpression
-	| expression MINUS expression							# subtractionExpression
-	| expression EQUALS expression							# equalsExpression
-	| expression NOT_EQUALS expression						# notEqualsExpression
-	| expression LESS_THAN expression						# lessThanExpression
-	| expression LESS_THAN_OR_EQUAL expression				# lessThanOrEqualExpression
-	| expression GREATER_THAN expression					# greaterThanExpression
-	| expression GREATER_THAN_OR_EQUAL expression			# greaterThanOrEqualExpression
-	| expression LOGICAL_AND expression						# logicalAndExpression
-	| expression LOGICAL_OR expression						# logicalOrExpression
-	| expression logicalOp expression						# logicalExpression
-	| <assoc = right> expression EQUAL expression			# assignmentExpression;
+	number														# numberExpression
+	| CHAR_LITERAL												# charExpression
+	| STRING_LITERAL											# stringExpression
+	| IDENTIFIER												# identifierExpression
+	| LPAREN expression RPAREN									# parenthesizedExpression
+	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
+	| ASTERISK expression										# dereferenceExpression
+	| expression DOT IDENTIFIER									# memberAccessExpression
+	| expression DOT IDENTIFIER LPAREN expressionList RPAREN	# methodCallExpression
+	| AMPERSAND expression										# addressOfExpression
+	| PLUS_PLUS expression										# prefixIncrementExpression
+	| MINUS_MINUS expression									# prefixDecrementExpression
+	| MINUS expression											# negationExpression
+	| PLUS expression											# positiveExpression
+	| IDENTIFIER LPAREN expressionList RPAREN					# functionCallExpression
+	| expression ASTERISK expression							# multiplicationExpression
+	| expression SLASH expression								# divisionExpression
+	| expression PERCENT expression								# modulusExpression
+	| expression PLUS expression								# additionExpression
+	| expression MINUS expression								# subtractionExpression
+	| expression EQUALS expression								# equalsExpression
+	| expression NOT_EQUALS expression							# notEqualsExpression
+	| expression LESS_THAN expression							# lessThanExpression
+	| expression LESS_THAN_OR_EQUAL expression					# lessThanOrEqualExpression
+	| expression GREATER_THAN expression						# greaterThanExpression
+	| expression GREATER_THAN_OR_EQUAL expression				# greaterThanOrEqualExpression
+	| expression LOGICAL_AND expression							# logicalAndExpression
+	| expression LOGICAL_OR expression							# logicalOrExpression
+	| expression logicalOp expression							# logicalExpression
+	| <assoc = right> expression EQUAL expression				# assignmentExpression;
 
-argumentList: expression (COMMA expression)* | /* empty */;
+expressionList: expression (COMMA expression)* | /* empty */;
 
 logicalOp: LOGICAL_AND | LOGICAL_OR;
 
@@ -117,15 +118,16 @@ parameter: IDENTIFIER COLON type;
 pointerSuffix: ASTERISK;
 
 type:
-	BOOLEAN
-	| CHAR
-	| I8
-	| I16
-	| I32
-	| I64
-	| F32
-	| F64
-	| STRING
-	| VOID
-	| IDENTIFIER
-	| type pointerSuffix+;
+	BOOLEAN								# boolType
+	| CHAR								# charType
+	| I8								# i8Type
+	| I16								# i16Type
+	| I32								# i32Type
+	| I64								# i64Type
+	| F32								# f32Type
+	| F64								# f64Type
+	| STRING							# strType
+	| VOID								# voidType
+	| IDENTIFIER						# classType
+	| type OPEN_BRACKET CLOSE_BRACKET	# arrayType
+	| type pointerSuffix+				# pointerType;

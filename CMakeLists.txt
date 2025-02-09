@@ -21,6 +21,7 @@ set(SOURCES
     src/AST/ASTNode.cpp
     src/AST/ClassDefinitionNode.cpp
     src/AST/DeclarationNodes.cpp
+    src/AST/Expressions/ArrayNode.cpp
     src/AST/Expressions/AssignmentNode.cpp
     src/AST/Expressions/BinaryArithNode.cpp
     src/AST/Expressions/BinaryCmpNode.cpp

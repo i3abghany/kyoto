@@ -13,6 +13,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/DeclarationNodes.h"
+#include "kyoto/AST/Expressions/ArrayNode.h"
 #include "kyoto/AST/Expressions/AssignmentNode.h"
 #include "kyoto/AST/Expressions/BinaryNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
@@ -139,7 +140,7 @@ std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::Func
 {
     const auto name = ctx->IDENTIFIER()->getText();
     std::vector<ExpressionNode*> args;
-    for (const auto arg : ctx->argumentList()->expression()) {
+    for (const auto arg : ctx->expressionList()->expression()) {
         args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
     return (ExpressionNode*)new FunctionCall(name, args, compiler);
@@ -202,7 +203,7 @@ std::any ASTBuilderVisitor::visitMethodCallExpression(kyoto::KyotoParser::Method
     const auto instance_name = ctx->expression()->getText();
     const auto name = ctx->IDENTIFIER()->getText();
     std::vector<ExpressionNode*> args;
-    for (const auto arg : ctx->argumentList()->expression()) {
+    for (const auto arg : ctx->expressionList()->expression()) {
         args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
     return (ExpressionNode*)new MethodCall(instance_name, name, args, compiler);
@@ -329,6 +330,16 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
     return visit(ctx->expression());
 }
 
+std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx)
+{
+    auto type = std::any_cast<KType*>(visit(ctx->type()));
+    std::vector<ExpressionNode*> elems;
+    for (const auto arg : ctx->expressionList()->expression()) {
+        elems.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+    }
+    return (ExpressionNode*)new ArrayNode(elems, type, compiler);
+}
+
 std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)
 {
     std::vector<ExpressionNode*> conditions;
@@ -427,20 +438,73 @@ std::any ASTBuilderVisitor::visitConstructorDefinition(kyoto::KyotoParser::Const
     return (ASTNode*)new ConstructorNode(name, args, body, compiler);
 }
 
-std::any ASTBuilderVisitor::visitType(kyoto::KyotoParser::TypeContext* ctx)
+std::any ASTBuilderVisitor::visitBoolType(kyoto::KyotoParser::BoolTypeContext* ctx)
 {
-    // String is a special case. It does not use pointer type syntax. `str` is a synonym for `char*`.
-    if (ctx->STRING()) return (KType*)new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
-    if (ctx->IDENTIFIER()) return (KType*)new ClassType(ctx->IDENTIFIER()->getText());
-    if (ctx->type()) {
-        auto* type = std::any_cast<KType*>(visit(ctx->type()));
-        for (size_t i = 0; i < ctx->pointerSuffix().size(); i++)
-            type = new PointerType(type);
-        return type;
-    }
-    auto pt = parse_primitive_type(ctx->getText());
-    if (pt == PrimitiveType::Kind::Void) return (KType*)KType::get_void();
-    return (KType*)new PrimitiveType(pt);
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::Boolean);
+}
+
+std::any ASTBuilderVisitor::visitCharType(kyoto::KyotoParser::CharTypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::Char);
+}
+
+std::any ASTBuilderVisitor::visitI8Type(kyoto::KyotoParser::I8TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::I8);
+}
+
+std::any ASTBuilderVisitor::visitI16Type(kyoto::KyotoParser::I16TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::I16);
+}
+
+std::any ASTBuilderVisitor::visitI32Type(kyoto::KyotoParser::I32TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::I32);
+}
+
+std::any ASTBuilderVisitor::visitI64Type(kyoto::KyotoParser::I64TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::I64);
+}
+
+std::any ASTBuilderVisitor::visitF32Type(kyoto::KyotoParser::F32TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::F32);
+}
+
+std::any ASTBuilderVisitor::visitF64Type(kyoto::KyotoParser::F64TypeContext* ctx)
+{
+    return (KType*)new PrimitiveType(PrimitiveType::Kind::F64);
+}
+
+std::any ASTBuilderVisitor::visitVoidType(kyoto::KyotoParser::VoidTypeContext* ctx)
+{
+    return (KType*)KType::get_void();
+}
+
+std::any ASTBuilderVisitor::visitStrType(kyoto::KyotoParser::StrTypeContext* ctx)
+{
+    return (KType*)new PointerType(new PrimitiveType(PrimitiveType::Kind::Char));
+}
+
+std::any ASTBuilderVisitor::visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    return (KType*)new ArrayType(type);
+}
+
+std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    for (size_t i = 0; i < ctx->pointerSuffix().size(); i++)
+        type = new PointerType(type);
+    return type;
+}
+
+std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx)
+{
+    return (KType*)new ClassType(ctx->IDENTIFIER()->getText());
 }
 
 PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type)

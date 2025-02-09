@@ -104,6 +104,7 @@ private:
 class ClassType : public KType {
 public:
     explicit ClassType(std::string name);
+    ~ClassType() override;
     std::string to_string() const override;
     [[nodiscard]] bool is_class() const override;
     bool operator==(const KType& other) const override;
@@ -112,4 +113,18 @@ public:
 
 private:
     std::string name;
+};
+
+class ArrayType : public KType {
+public:
+    explicit ArrayType(KType* element_type);
+    ~ArrayType() override;
+    std::string to_string() const override;
+    bool operator==(const KType& other) const override;
+    KType* copy() const override;
+
+    KType* get_element_type() const;
+
+private:
+    KType* element_type;
 };
