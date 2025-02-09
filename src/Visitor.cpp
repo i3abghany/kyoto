@@ -510,20 +510,6 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
     return (KType*)new ClassType(ctx->IDENTIFIER()->getText());
 }
 
-PrimitiveType::Kind ASTBuilderVisitor::parse_primitive_type(const std::string& type)
-{
-    if (type == "bool") return PrimitiveType::Kind::Boolean;
-    if (type == "char") return PrimitiveType::Kind::Char;
-    if (type == "i8") return PrimitiveType::Kind::I8;
-    if (type == "i16") return PrimitiveType::Kind::I16;
-    if (type == "i32") return PrimitiveType::Kind::I32;
-    if (type == "i64") return PrimitiveType::Kind::I64;
-    if (type == "f32") return PrimitiveType::Kind::F32;
-    if (type == "f64") return PrimitiveType::Kind::F64;
-    if (type == "void") return PrimitiveType::Kind::Void;
-    return PrimitiveType::Kind::Unknown;
-}
-
 std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,
                                                                     const PrimitiveType::Kind kind) const
 {
@@ -537,11 +523,8 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
             if (compiler.get_type_resolver().fits_in(num, kind)) return num;
             return std::nullopt;
         }
-        case PrimitiveType::Kind::Boolean: {
-            if (str == "true") return 1;
-            if (str == "false") return 0;
-            return std::nullopt;
-        }
+        case PrimitiveType::Kind::Boolean:
+            return parse_bool(str);
         default:
             return std::nullopt;
         }
@@ -550,27 +533,9 @@ std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::s
     }
 }
 
-std::optional<double> ASTBuilderVisitor::parse_double(const std::string& str)
+std::optional<int64_t> ASTBuilderVisitor::parse_bool(const std::string& str) const
 {
-    try {
-        return std::stod(str);
-    } catch (std::invalid_argument&) {
-        return std::nullopt;
-    }
-}
-
-std::optional<float> ASTBuilderVisitor::parse_float(const std::string& str)
-{
-    try {
-        return std::stof(str);
-    } catch (std::invalid_argument&) {
-        return std::nullopt;
-    }
-}
-
-std::optional<bool> ASTBuilderVisitor::parse_bool(const std::string& str)
-{
-    if (str == "true") return true;
-    if (str == "false") return false;
+    if (str == "true") return 1;
+    if (str == "false") return 0;
     return std::nullopt;
 }

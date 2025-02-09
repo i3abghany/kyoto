@@ -87,10 +87,7 @@ public:
 private:
     [[nodiscard]] std::optional<int64_t> parse_signed_integer_into(const std::string& str,
                                                                    PrimitiveType::Kind kind) const;
-    static PrimitiveType::Kind parse_primitive_type(const std::string& type);
-    static std::optional<double> parse_double(const std::string& str);
-    static std::optional<float> parse_float(const std::string& str);
-    static std::optional<bool> parse_bool(const std::string& str);
+    [[nodiscard]] std::optional<int64_t> parse_bool(const std::string& str) const;
 
 private:
     ModuleCompiler& compiler;

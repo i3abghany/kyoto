@@ -1,6 +1,7 @@
 #pragma once
 
-#include <kyoto/AST/Expressions/FunctionCallNode.h>
+#include "kyoto/AST/Expressions/FunctionCallNode.h"
+
 #include <string>
 #include <vector>
 
