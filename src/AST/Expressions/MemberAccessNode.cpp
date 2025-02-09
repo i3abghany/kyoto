@@ -2,6 +2,7 @@
 
 #include <fmt/core.h>
 #include <llvm/IR/DerivedTypes.h>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 

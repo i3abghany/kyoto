@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assert.h>
 #include <fmt/core.h>
 #include <stddef.h>
 #include <stdexcept>
@@ -28,8 +27,7 @@ public:
     virtual bool is_pointer_to_class(const std::string& name = "") const { return false; }
     virtual std::string get_class_name() const
     {
-        assert(false);
-        return "";
+        throw std::runtime_error(fmt::format("KType::get_class_name: {} is not a class type", to_string()));
     }
 
     virtual KType* copy() const = 0;

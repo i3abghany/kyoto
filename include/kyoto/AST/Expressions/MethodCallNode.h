@@ -1,8 +1,12 @@
 #pragma once
 
+#include <format>
 #include <kyoto/AST/Expressions/FunctionCallNode.h>
+#include <string>
+#include <vector>
 
 class ModuleCompiler;
+class ExpressionNode;
 
 class MethodCall : public FunctionCall {
 public:
