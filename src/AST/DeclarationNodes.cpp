@@ -125,6 +125,10 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
         return expr_val;
     }
 
+    if (type->is_array() && expr_ktype->is_array() && type->operator==(*expr_ktype)) {
+        return expr->gen();
+    }
+
     throw std::runtime_error(
         fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
                     expr->to_string(), expr_ktype->to_string(), name, type->to_string()));

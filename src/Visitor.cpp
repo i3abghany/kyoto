@@ -113,6 +113,8 @@ std::any ASTBuilderVisitor::visitRegularDeclaration(kyoto::KyotoParser::RegularD
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    if (type->is_array() && expr->get_ktype()->is_array())
+        type->as<ArrayType>()->set_size(expr->get_ktype()->as<ArrayType>()->get_size());
     return (ASTNode*)new FullDeclarationStatementNode(name, type, expr, compiler);
 }
 
@@ -332,7 +334,8 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
 
 std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx)
 {
-    auto type = std::any_cast<KType*>(visit(ctx->type()));
+    auto elem_type = std::any_cast<KType*>(visit(ctx->type()));
+    auto* type = new ArrayType(elem_type, ctx->expressionList()->expression().size());
     std::vector<ExpressionNode*> elems;
     for (const auto arg : ctx->expressionList()->expression()) {
         elems.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
@@ -491,7 +494,7 @@ std::any ASTBuilderVisitor::visitStrType(kyoto::KyotoParser::StrTypeContext* ctx
 std::any ASTBuilderVisitor::visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
-    return (KType*)new ArrayType(type);
+    return (KType*)new ArrayType(type, 0);
 }
 
 std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx)

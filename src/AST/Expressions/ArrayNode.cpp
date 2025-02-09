@@ -4,6 +4,12 @@
 
 #include "kyoto/AST/ASTNode.h"
 
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/IR/Constant.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/Support/Casting.h"
+
 std::string ArrayNode::to_string() const
 {
     std::string str = "[";
@@ -17,19 +23,24 @@ std::string ArrayNode::to_string() const
 
 llvm::Value* ArrayNode::gen()
 {
-    return nullptr;
+    auto* type = gen_type();
+    std::vector<llvm::Constant*> eval(elements.size());
+    for (size_t i = 0; i < elements.size(); i++) {
+        eval[i] = llvm::dyn_cast<llvm::Constant>(elements[i]->gen());
+    }
+    return llvm::ConstantArray::get(static_cast<llvm::ArrayType*>(type), eval);
 }
 
 llvm::Type* ArrayNode::gen_type() const
 {
-    return nullptr;
+    return llvm::ArrayType::get(elements[0]->gen_type(), elements.size());
 }
 
 std::vector<ASTNode*> ArrayNode::get_children() const
 {
-    std::vector<ASTNode*> children;
-    for (const auto element : elements) {
-        children.push_back(element);
+    std::vector<ASTNode*> children(elements.size());
+    for (size_t i = 0; i < elements.size(); i++) {
+        children[i] = elements[i];
     }
     return children;
 }

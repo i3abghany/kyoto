@@ -232,8 +232,9 @@ std::string ClassType::get_class_name() const
     return name;
 }
 
-ArrayType::ArrayType(KType* element_type)
+ArrayType::ArrayType(KType* element_type, size_t n)
     : element_type(element_type)
+    , size(n)
 {
 }
 
@@ -244,7 +245,7 @@ ArrayType::~ArrayType()
 
 std::string ArrayType::to_string() const
 {
-    return element_type->to_string() + "[]";
+    return fmt::format("{}[{}]", element_type->to_string(), size);
 }
 
 bool ArrayType::operator==(const KType& other) const
@@ -263,4 +264,19 @@ KType* ArrayType::copy() const
 KType* ArrayType::get_element_type() const
 {
     return element_type;
+}
+
+bool ArrayType::is_array() const
+{
+    return true;
+}
+
+size_t ArrayType::get_size() const
+{
+    return size;
+}
+
+void ArrayType::set_size(size_t n)
+{
+    size = n;
 }

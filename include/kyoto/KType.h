@@ -16,6 +16,7 @@ public:
     virtual std::string to_string() const = 0;
     virtual bool is_primitive() const { return false; }
     virtual bool is_pointer() const { return false; }
+    virtual bool is_array() const { return false; }
     virtual bool is_class() const { return false; }
     virtual bool is_void() const { return false; }
     virtual bool is_string() const { return false; }
@@ -117,14 +118,18 @@ private:
 
 class ArrayType : public KType {
 public:
-    explicit ArrayType(KType* element_type);
+    explicit ArrayType(KType* element_type, size_t n = 0);
     ~ArrayType() override;
     std::string to_string() const override;
     bool operator==(const KType& other) const override;
     KType* copy() const override;
+    [[nodiscard]] bool is_array() const override;
+    [[nodiscard]] size_t get_size() const;
+    void set_size(size_t n);
 
     KType* get_element_type() const;
 
 private:
     KType* element_type;
+    size_t size;
 };
