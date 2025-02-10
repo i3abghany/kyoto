@@ -1,3 +1,5 @@
+<div align="center"><img width="256" src="kyoto.svg" alt="Kyoto Logo"></div>
+
 # Kyoto
 
 This is the repository for the Kyoto Compiler for the Kyoto Programming Language. Kyoto is a statically typed, compiled language that is still in early design stages. The compiler is written in C++ and utilizes LLVM for analysis and code generation.
