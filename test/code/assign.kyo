@@ -314,7 +314,6 @@ fn main() i32 {
 // NAME TestChainedAssignmentNegativeVariable
 // ERR 0
 // RET -8
-// SKIP
 
 fn main() i32 {
     var x: i32;
@@ -341,7 +340,6 @@ fn main() i32 {
 // NAME TestChainedAssignmentNegativeVariable3
 // ERR 0
 // RET -6
-// SKIP
 
 fn main() i32 {
     var x: i32;
