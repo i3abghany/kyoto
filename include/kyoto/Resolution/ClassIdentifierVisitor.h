@@ -23,7 +23,7 @@ public:
         // Conservative estimate. children.size() is methods + fields
         llvm_types.reserve(children.size());
         for (const auto* child : children) {
-            if (auto* c = dynamic_cast<const DeclarationStatementNode*>(child); c) {
+            if (const auto* c = dynamic_cast<const DeclarationStatementNode*>(child); c) {
                 llvm_types.push_back(ASTNode::get_llvm_type(c->get_ktype(), compiler));
             }
         }
