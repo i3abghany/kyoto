@@ -1,12 +1,12 @@
-<div align="center"><img width="500" style="margin-top: -50px; margin-bottom: -50px;" src="kyoto.svg" alt="Kyoto Logo"></div>
-
 # Kyoto
 
-This is the repository for the Kyoto Compiler for the Kyoto Programming Language. Kyoto is a statically typed, compiled language that is still in early design stages. The compiler is written in C++ and utilizes LLVM for analysis and code generation.
+<div align="center"><img width="500" style="margin-top: -50px; margin-bottom: -50px;" src="kyoto.svg" alt="Kyoto Logo"></div>
+
+This is the repository for the Kyoto Programming Language and its compiler, Cyoto. Kyoto is a statically typed, compiled language that is still in early design stages. The compiler is written in C++ and utilizes LLVM for analysis and code generation.
 
 ## Building
 
-The Kyoto Compiler requires the following dependencies:
+Cyoto requires the following dependencies:
 
 - LLVM >= 20
 - CMake >= 3.20
@@ -43,7 +43,7 @@ To build the compiler, run the following commands:
 $ mkdir build
 $ cd build
 $ cmake ..
-$ make kyoto -j$(nproc)
+$ make cyoto -j$(nproc)
 ```
 
 ## Usage
@@ -51,9 +51,9 @@ $ make kyoto -j$(nproc)
 To compile a Kyoto source file, run the following command:
 
 ```bash
-$ ./kyoto --help
+$ ./cyoto --help
 
-Usage: ./kyoto [OPTIONS] INPUT_FILE
+Usage: ./cyoto [OPTIONS] INPUT_FILE
 The Kyoto Programming Language Compiler:
   -h [ --help ]                 Print this help message
   -r [ --run ]                  Run the program in `lli` after compilation

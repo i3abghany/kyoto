@@ -47,11 +47,11 @@ set(SOURCES
     ${ANTLR_SOURCES})
 
 add_executable(
-    kyoto
+    cyoto
     main.cpp
     ${SOURCES})
 
-target_link_libraries(kyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
+target_link_libraries(cyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
 
 set(TEST_SOURCES
     test/TestDriver.cpp
