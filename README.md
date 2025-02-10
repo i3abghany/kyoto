@@ -1,4 +1,4 @@
-<div align="center"><img width="256" src="kyoto.svg" alt="Kyoto Logo"></div>
+<div align="center"><img width="500" style="margin-top: -50px; margin-bottom: -50px;" src="kyoto.svg" alt="Kyoto Logo"></div>
 
 # Kyoto
 
