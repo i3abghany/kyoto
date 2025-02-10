@@ -85,6 +85,11 @@ void MemberAccessNode::validate_member_access(KType* lhs_type) const
 llvm::Type* MemberAccessNode::get_class_type(KType* lhs_type) const
 {
     std::string class_name = lhs_type->get_class_name();
+
+    if (!compiler.class_exists(class_name)) {
+        throw std::runtime_error(fmt::format("Class `{}` does not exist", class_name));
+    }
+
     return compiler.get_class_metadata(class_name).llvm_type;
 }
 
