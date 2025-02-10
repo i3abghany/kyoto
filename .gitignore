@@ -4,3 +4,7 @@ build
 .idea
 cmake-build-debug
 gen/
+*.ll
+*.bc
+*.o
+*.out
