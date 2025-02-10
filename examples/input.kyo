@@ -1,0 +1,20 @@
+cdecl fn scanf(fmt: str, ...) i32;
+cdecl fn printf(fmt: str, ...) i32;
+
+fn factorial(n: i32) i32 {
+    var x = 1;
+    for (var i = 1; i < n; ++i) {
+        x = x * i;
+    }
+    return x;
+}
+
+fn main() i32 {
+    var n: i32;
+    
+    printf("input: ");
+    scanf("%d", &n);
+
+    printf("factorial(%d) = %d\n", n, factorial(n));
+    return 0;
+}
