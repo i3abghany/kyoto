@@ -59,3 +59,7 @@ The Kyoto Programming Language Compiler:
   -r [ --run ]                  Run the program in `lli` after compilation
   -o [ --output ] arg (=out.ll) Output file for the LLVM IR
 ```
+
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
