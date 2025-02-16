@@ -60,7 +60,9 @@ std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
 
     auto* ret_type = std::any_cast<KType*>(visit(ctx->type()));
     const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
-    return (ASTNode*)new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+    compiler.add_function(proto);
+    return (ASTNode*)proto;
 }
 
 std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx)
