@@ -7,9 +7,10 @@
 
 class KType;
 class ModuleCompiler;
+
 namespace llvm {
 class Value;
-} // namespace llvm
+}
 
 class MatchNode : public ExpressionNode {
 public:
@@ -24,7 +25,7 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
     [[nodiscard]] llvm::Type* gen_type() const override;
-    [[nodiscard]] KType* get_ktype() const override { return type; }
+    [[nodiscard]] KType* get_ktype() const override;
     [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
     [[nodiscard]] llvm::Value* gen_default_only();
@@ -32,12 +33,12 @@ public:
 private:
     void check_types() const;
     void validate_default();
-    void init_ktype();
+    void init_ktype() const;
     [[nodiscard]] llvm::Value* gen_cmp(ExpressionNode* lhs, ExpressionNode* rhs);
 
 private:
-    std::vector<Case> cases;
     ExpressionNode* expr;
+    std::vector<Case> cases;
     KType* type;
     ModuleCompiler& compiler;
 };

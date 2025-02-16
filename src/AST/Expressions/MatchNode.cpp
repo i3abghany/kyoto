@@ -12,18 +12,13 @@
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 
-namespace llvm {
-class Value;
-}
-
 MatchNode::MatchNode(ExpressionNode* expr, std::vector<Case> cases, ModuleCompiler& compiler)
     : expr(expr)
     , cases(std::move(cases))
+    , type(nullptr)
     , compiler(compiler)
 {
     validate_default();
-    check_types();
-    init_ktype();
 }
 
 std::string MatchNode::to_string() const
@@ -46,6 +41,9 @@ llvm::Value* MatchNode::gen_cmp(ExpressionNode* lhs, ExpressionNode* rhs)
 
 llvm::Value* MatchNode::gen()
 {
+    check_types();
+    init_ktype();
+
     if (cases.size() == 1) return gen_default_only();
 
     auto* match_expr_val = expr->gen();
@@ -90,6 +88,16 @@ llvm::Value* MatchNode::gen()
     compiler.get_builder().SetInsertPoint(merge_bb);
 
     return phi;
+}
+
+KType* MatchNode::get_ktype() const
+{
+    if (!type) {
+        check_types();
+        init_ktype();
+    }
+
+    return type;
 }
 
 llvm::Value* MatchNode::gen_default_only()
@@ -140,7 +148,8 @@ void MatchNode::validate_default()
     std::swap(cases[default_case], cases.back());
 }
 
-void MatchNode::init_ktype()
+// FIXME: this is a const function because for now it has to be called from get_ktype() which is const
+void MatchNode::init_ktype() const
 {
-    type = cases.back().ret->get_ktype();
+    const_cast<MatchNode*>(this)->type = cases.back().ret->get_ktype();
 }
