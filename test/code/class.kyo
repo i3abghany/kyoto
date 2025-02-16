@@ -244,3 +244,27 @@ fn main() i32 {
     var x: X = X(5);
     return x.add(2);
 }
+
+// NAME MethodWithReturnMatch
+// ERR 0
+// RET 13
+
+cdecl fn printf(fmt: char*, ...) i32;
+
+class Fibonacci {
+    constructor(self: Fibonacci*) {
+    }
+
+    fn get(self: Fibonacci*, n: i32) i32 {
+        return match n {
+            0 => 0,
+            1 => 1,
+            default => self.get(n - 1) + self.get(n - 2),
+        };
+    }
+}
+
+fn main() i32 {
+    var fib: Fibonacci = Fibonacci();
+    return fib.get(7);
+}
