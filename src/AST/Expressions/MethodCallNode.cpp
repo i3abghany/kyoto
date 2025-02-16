@@ -10,6 +10,7 @@
 #include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/KType.h"
+#include "kyoto/ModuleCompiler.h"
 
 MethodCall::MethodCall(std::string instance_name, std::string name, std::vector<ExpressionNode*> args,
                        ModuleCompiler& compiler)
@@ -27,8 +28,16 @@ std::string MethodCall::to_string() const
 
 llvm::Value* MethodCall::gen()
 {
+    auto instance_symbol = compiler.get_symbol(instance_name);
+    if (!instance_symbol.has_value()) {
+        throw std::runtime_error(fmt::format("MethodCall::gen: Symbol {} not found", instance_name));
+    }
+
     ExpressionNode* self = new IdentifierExpressionNode(instance_name, compiler);
-    self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
+    if (!instance_symbol.value().type->is_pointer_to_class()) {
+        self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
+    }
+
     insert_arg(self, 0);
     auto class_name = self->get_ktype()->get_class_name();
     set_name_prefix(class_name + "_");
