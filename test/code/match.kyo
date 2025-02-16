@@ -1,0 +1,62 @@
+// NAME EmptyMatch
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = match 1 {};
+    return 0;
+}
+
+// NAME DefaultOnlyMatch
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    var x: i32 = match 1 {
+        default => 2,
+    };
+    return x;
+}
+
+// NAME CorrectMatchTwoCases
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var c: i32 = 1;
+    var x: i32 = match c {
+        1 => 1,
+        default => 2,
+    };
+    return x;
+}
+
+// NAME CorrectMatchWithRecursiveCall
+// ERR 0
+// RET 13
+
+fn fib(n: i32) i32 {
+    return match n {
+        0 => 0,
+        1 => 1,
+        default => fib(n - 1) + fib(n - 2),
+    };
+}
+
+fn main() i32 {
+    return fib(7);
+}
+
+// NAME MatchBool
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var b: bool = true;
+    var x: i32 = match b {
+        true => 1,
+        false => 2,
+        default => 3,
+    };
+    return x;
+}

@@ -66,6 +66,7 @@ set(TEST_SOURCES
     test/TestClass.cpp
     test/TestFunction.cpp
     test/TestPointers.cpp
+    test/TestMatch.cpp
 )
 
 add_executable(
