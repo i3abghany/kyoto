@@ -44,6 +44,7 @@ expression:
 	| STRING_LITERAL											# stringExpression
 	| IDENTIFIER												# identifierExpression
 	| LPAREN expression RPAREN									# parenthesizedExpression
+	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
 	| ASTERISK expression										# dereferenceExpression
 	| expression DOT IDENTIFIER									# memberAccessExpression
@@ -67,14 +68,13 @@ expression:
 	| expression GREATER_THAN_OR_EQUAL expression				# greaterThanOrEqualExpression
 	| expression LOGICAL_AND expression							# logicalAndExpression
 	| expression LOGICAL_OR expression							# logicalOrExpression
-	| expression logicalOp expression							# logicalExpression
 	| <assoc = right> expression EQUAL expression				# assignmentExpression;
 
-expressionList: expression (COMMA expression)* | /* empty */;
-
-logicalOp: LOGICAL_AND | LOGICAL_OR;
-
 number: INTEGER | FLOAT | TRUE | FALSE;
+
+matchCase: (expression | DEFAULT) ARROW expression COMMA;
+
+expressionList: expression (COMMA expression)* | /* empty */;
 
 fullDeclaration:
 	VAR IDENTIFIER COLON type EQUAL expression SEMICOLON	# regularDeclaration

@@ -19,6 +19,7 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/AST/Expressions/IdentifierNode.h"
+#include "kyoto/AST/Expressions/MatchNode.h"
 #include "kyoto/AST/Expressions/MemberAccessNode.h"
 #include "kyoto/AST/Expressions/MethodCallNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
@@ -75,6 +76,10 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
     }
 
     auto* ret_type = ctx->type() ? std::any_cast<KType*>(visit(ctx->type())) : KType::get_void();
+    const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
+    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+    compiler.add_function(proto);
+
     ASTNode* body = nullptr;
     try {
         body = std::any_cast<ASTNode*>(visit(ctx->block()));
@@ -82,8 +87,9 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
         delete ret_type;
         throw;
     }
-    const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
-    return (ASTNode*)new FunctionNode(name, args, varargs, ret_type, body, compiler);
+
+    proto->set_body(body);
+    return (ASTNode*)proto;
 }
 
 std::any ASTBuilderVisitor::visitBlock(kyoto::KyotoParser::BlockContext* ctx)
@@ -330,6 +336,21 @@ std::any ASTBuilderVisitor::visitLogicalOrExpression(kyoto::KyotoParser::Logical
 std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx)
 {
     return visit(ctx->expression());
+}
+
+std::any ASTBuilderVisitor::visitMatchExpression(kyoto::KyotoParser::MatchExpressionContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    std::vector<MatchNode::Case> cases;
+    for (const auto& case_ctx : ctx->matchCase()) {
+        if (case_ctx->DEFAULT()) {
+            cases.push_back({ nullptr, std::any_cast<ExpressionNode*>(visit(case_ctx->expression(0))) });
+        } else {
+            cases.push_back({ std::any_cast<ExpressionNode*>(visit(case_ctx->expression(0))),
+                              std::any_cast<ExpressionNode*>(visit(case_ctx->expression(1))) });
+        }
+    }
+    return (ExpressionNode*)new MatchNode(expr, cases, compiler);
 }
 
 std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx)

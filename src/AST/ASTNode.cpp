@@ -173,7 +173,6 @@ FunctionNode::FunctionNode(std::string name, std::vector<Parameter> args, bool v
     , body(body)
     , compiler(compiler)
 {
-    compiler.add_function(this);
 }
 
 FunctionNode::~FunctionNode()

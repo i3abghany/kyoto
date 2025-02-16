@@ -99,6 +99,8 @@ public:
 
     void insert_arg(const Parameter& arg, size_t index);
 
+    void set_body(ASTNode* body) { this->body = body; }
+
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;
 

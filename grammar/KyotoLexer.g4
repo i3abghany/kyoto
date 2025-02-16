@@ -72,6 +72,10 @@ ELSE: 'else';
 
 FOR: 'for';
 
+MATCH: 'match';
+ARROW: '=>';
+DEFAULT: 'default';
+
 CLASS: 'class';
 CONSTRUCTOR: 'constructor';
 

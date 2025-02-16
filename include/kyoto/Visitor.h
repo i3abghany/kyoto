@@ -28,6 +28,7 @@ public:
     std::any visitCharExpression(kyoto::KyotoParser::CharExpressionContext* ctx) override;
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
+    std::any visitMatchExpression(kyoto::KyotoParser::MatchExpressionContext* ctx) override;
     std::any visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx) override;
 
     std::any visitAddressOfExpression(kyoto::KyotoParser::AddressOfExpressionContext* ctx) override;

@@ -9,6 +9,7 @@
 
 #include "kyoto/AST/DeclarationNodes.h"
 #include "kyoto/KType.h"
+#include "kyoto/ModuleCompiler.h"
 
 ClassDefinitionNode::ClassDefinitionNode(std::string name, std::string parent, std::vector<ASTNode*> components,
                                          ModuleCompiler& compiler)
@@ -63,6 +64,7 @@ ConstructorNode::ConstructorNode(std::string name, std::vector<FunctionNode::Par
                                  ModuleCompiler& compiler)
     : FunctionNode(std::move(name), std::move(args), false, KType::get_void(), body, compiler)
 {
+    compiler.add_function(this);
 }
 
 ConstructorNode::~ConstructorNode() = default;

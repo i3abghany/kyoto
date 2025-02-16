@@ -27,9 +27,8 @@ FunctionCall::FunctionCall(std::string name, std::vector<ExpressionNode*> args, 
 
 FunctionCall::~FunctionCall()
 {
-    for (const auto arg : args) {
+    for (const auto arg : args)
         delete arg;
-    }
 }
 
 std::string FunctionCall::to_string() const
@@ -93,10 +92,7 @@ llvm::Value* FunctionCall::trivial_gen()
 KType* FunctionCall::get_ktype() const
 {
     auto fn = compiler.get_function(name);
-    if (fn.has_value()) {
-        return fn.value()->get_ret_type();
-    }
-
+    if (fn.has_value()) return fn.value()->get_ret_type();
     throw std::runtime_error(fmt::format("Function `{}` not found", name));
 }
 
