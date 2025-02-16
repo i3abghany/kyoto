@@ -334,9 +334,10 @@ std::any ASTBuilderVisitor::visitParenthesizedExpression(kyoto::KyotoParser::Par
 
 std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx)
 {
-    auto elem_type = std::any_cast<KType*>(visit(ctx->type()));
-    auto* type = new ArrayType(elem_type, ctx->expressionList()->expression().size());
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    type->as<ArrayType>()->set_size(ctx->expressionList()->expression().size());
     std::vector<ExpressionNode*> elems;
+    elems.reserve(ctx->expressionList()->expression().size());
     for (const auto arg : ctx->expressionList()->expression()) {
         elems.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }

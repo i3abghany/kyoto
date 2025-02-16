@@ -253,7 +253,7 @@ bool ArrayType::operator==(const KType& other) const
     auto* other_array = dynamic_cast<const ArrayType*>(&other);
     if (!other_array) return false;
 
-    return *element_type == *other_array->element_type;
+    return *element_type == *other_array->element_type && size == other_array->size;
 }
 
 KType* ArrayType::copy() const

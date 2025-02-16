@@ -11,12 +11,7 @@ class KType;
 
 class ArrayNode : public ExpressionNode {
 public:
-    ArrayNode(std::vector<ExpressionNode*> elements, KType* type, ModuleCompiler& compiler)
-        : elements(std::move(elements))
-        , type(type)
-        , compiler(compiler)
-    {
-    }
+    ArrayNode(std::vector<ExpressionNode*> elements, KType* type, ModuleCompiler& compiler);
 
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] llvm::Value* gen() override;
@@ -25,6 +20,9 @@ public:
     [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
     [[nodiscard]] const std::vector<ExpressionNode*>& get_elements() const { return elements; }
+
+private:
+    void check_types() const;
 
 private:
     std::vector<ExpressionNode*> elements;

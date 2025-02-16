@@ -33,6 +33,7 @@ public:
 
     virtual KType* copy() const = 0;
     virtual bool operator==(const KType& other) const = 0;
+    virtual bool operator!=(const KType& other) const { return !(*this == other); }
 
     static KType* get_void();
 
