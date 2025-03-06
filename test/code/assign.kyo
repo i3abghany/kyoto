@@ -762,3 +762,23 @@ fn main() i32 {
     var y = +++x;
     return y;
 }
+
+// NAME ParenthesizedPrecedence
+// ERR 0
+// RET 16
+
+fn main() i32 {
+    var x = 5;
+    var y = (x + 3) * 2;
+    return y;
+}
+
+// NAME NonParenthesizedPrecedence
+// ERR 0
+// RET 11
+
+fn main() i32 {
+    var x = 5;
+    var y = x + 3 * 2;
+    return y;
+}
