@@ -1,13 +1,16 @@
 cdecl fn printf(fmt: str, ...) i32;
 
 fn fibo(n: i32) i32 {
-    if (n <= 1) { return n; }
-    return fibo(n - 1) + fibo(n - 2);
+    return match n {
+        0 => 0,
+        1 => 1,
+        default => fibo(n - 1) + fibo(n - 2),
+    };
 }
 
 fn main() i32 {
-    for (var i = 0; i <= 10; ++i) {
-        printf("fibo(%d) = %d!\n", i, fibo(i));
+    for (var i = 0; i <= 12; ++i) {
+        printf("fibo(%d) = %d\n", i, fibo(i));
     }
     return 0;
 }
