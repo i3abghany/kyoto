@@ -49,7 +49,7 @@ llvm::Value* MemberAccessNode::gen_ptr() const
     auto* class_type = get_class_type(lhs_type);
     auto member_index = get_member_index(lhs_type);
 
-    if (lhs_type->is_pointer_to_class()) {
+    if (lhs_type->is_pointer_to_class("")) {
         lhs_val = compiler.get_builder().CreateLoad(lhs->gen_type(), lhs_val);
     }
 
@@ -76,7 +76,7 @@ KType* MemberAccessNode::get_ktype() const
 
 void MemberAccessNode::validate_member_access(KType* lhs_type) const
 {
-    if (!lhs_type->is_class() && !lhs_type->is_pointer_to_class()) {
+    if (!lhs_type->is_class() && !lhs_type->is_pointer_to_class("")) {
         throw std::runtime_error(
             fmt::format("Member access is only allowed on class instances, got {}", lhs->to_string()));
     }

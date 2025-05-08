@@ -34,7 +34,7 @@ llvm::Value* MethodCall::gen()
     }
 
     ExpressionNode* self = new IdentifierExpressionNode(instance_name, compiler);
-    if (!instance_symbol.value().type->is_pointer_to_class()) {
+    if (!instance_symbol.value().type->is_pointer_to_class("")) {
         self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
     }
 
