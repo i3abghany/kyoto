@@ -48,6 +48,7 @@ public:
     std::optional<FunctionNode*> get_function(const std::string& name);
 
     void register_visitors();
+    void register_malloc();
 
     void push_scope();
     void pop_scope();

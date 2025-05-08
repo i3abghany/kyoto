@@ -45,6 +45,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , module(std::make_unique<llvm::Module>(name, context))
 {
     register_visitors();
+    register_malloc();
 }
 
 ASTNode* ModuleCompiler::parse_program()
@@ -177,6 +178,18 @@ std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& nam
 {
     if (functions.contains(name)) return functions[name];
     return std::nullopt;
+}
+
+void ModuleCompiler::register_malloc()
+{
+    auto* ret_type = new PointerType(new PrimitiveType(PrimitiveType::Kind::I8));
+    FunctionNode::Parameter param;
+    param.name = "size";
+    param.type = new PrimitiveType(PrimitiveType::Kind::I32);
+    std::vector<FunctionNode::Parameter> args = { param };
+    auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this);
+    add_function(malloc);
+    (void)malloc->gen_prototype();
 }
 
 void ModuleCompiler::register_visitors()
