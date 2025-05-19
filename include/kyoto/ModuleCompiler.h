@@ -1,5 +1,6 @@
 #pragma once
 
+#include <llvm/IR/DataLayout.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -49,6 +50,7 @@ public:
 
     void register_visitors();
     void register_malloc();
+    void register_free();
 
     void push_scope();
     void pop_scope();
@@ -65,6 +67,7 @@ public:
     void add_class_metadata(const std::string& name, const ClassMetadata& data);
     llvm::StructType* get_llvm_struct(const std::string& name) const;
     ClassMetadata& get_class_metadata(const std::string& name);
+    size_t get_class_size(const std::string& name) const;
 
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();
@@ -97,6 +100,7 @@ private:
     llvm::LLVMContext context {};
     llvm::IRBuilder<> builder;
     std::unique_ptr<llvm::Module> module;
+    llvm::DataLayout data_layout;
 
     SymbolTable symbol_table;
     TypeResolver type_resolver {};

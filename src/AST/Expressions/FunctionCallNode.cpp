@@ -51,6 +51,8 @@ llvm::Value* FunctionCall::gen()
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
     }
     std::vector<llvm::Value*> arg_values;
+    if (destination && is_constructor_call()) arg_values.push_back(destination);
+
     for (auto& arg : args)
         arg_values.push_back(arg->gen());
 
@@ -65,9 +67,11 @@ llvm::Value* FunctionCall::gen_ptr() const
 {
     assert(get_ktype()->is_pointer() && "Function does not return a pointer");
     std::vector<llvm::Value*> arg_values;
-    for (auto& arg : args) {
+    if (destination && is_constructor_call()) arg_values.push_back(destination);
+
+    for (auto& arg : args)
         arg_values.push_back(arg->gen());
-    }
+
     auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
         throw std::runtime_error(fmt::format("Function `{}` not found", name));
@@ -101,7 +105,15 @@ bool FunctionCall::is_trivially_evaluable() const
     return false;
 }
 
+void FunctionCall::set_destination(llvm::Value* dest)
+{
+    if (destination) throw std::runtime_error("Destination already set");
+    destination = dest;
+}
+
 void FunctionCall::insert_arg(ExpressionNode* node, size_t index)
 {
+    if (index == 0 && destination)
+        throw std::runtime_error("Cannot insert argument at index 0 when destination is set");
     args.insert(args.begin() + index, node);
 }

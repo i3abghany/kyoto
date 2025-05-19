@@ -4,6 +4,7 @@
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
+#include "kyoto/AST/Expressions/NewNode.h"
 #include "kyoto/ModuleCompiler.h"
 
 class ConstructorIdentifierVisitor : public AnalysisVisitor<ConstructorIdentifierVisitor, FunctionCall> {

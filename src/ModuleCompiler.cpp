@@ -1,11 +1,12 @@
 #include "kyoto/ModuleCompiler.h"
 
-#include <any>
 #include <assert.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/Support/TypeSize.h>
+#include <any>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
-#include <llvm/IR/IRBuilder.h>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -46,6 +47,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
 {
     register_visitors();
     register_malloc();
+    register_free();
 }
 
 ASTNode* ModuleCompiler::parse_program()
@@ -185,11 +187,23 @@ void ModuleCompiler::register_malloc()
     auto* ret_type = new PointerType(new PrimitiveType(PrimitiveType::Kind::I8));
     FunctionNode::Parameter param;
     param.name = "size";
-    param.type = new PrimitiveType(PrimitiveType::Kind::I32);
+    param.type = new PrimitiveType(PrimitiveType::Kind::I64);
     std::vector<FunctionNode::Parameter> args = { param };
     auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this);
     add_function(malloc);
     (void)malloc->gen_prototype();
+}
+
+void ModuleCompiler::register_free()
+{
+    auto* ret_type = KType::get_void();
+    FunctionNode::Parameter param;
+    param.name = "ptr";
+    param.type = new PointerType(new PrimitiveType(PrimitiveType::Kind::I8));
+    std::vector<FunctionNode::Parameter> args = { param };
+    auto* free = new FunctionNode("free", args, false, ret_type, nullptr, *this);
+    add_function(free);
+    (void)free->gen_prototype();
 }
 
 void ModuleCompiler::register_visitors()
@@ -266,6 +280,12 @@ std::string ModuleCompiler::get_current_class() const
 bool ModuleCompiler::class_exists(const std::string& name) const
 {
     return classes.contains(name);
+}
+
+size_t ModuleCompiler::get_class_size(const std::string& name) const
+{
+    llvm::StructType* struct_type = classes_metadata.at(name).llvm_type;
+    return data_layout.getStructLayout(struct_type)->getSizeInBytes();
 }
 
 void ModuleCompiler::add_class_metadata(const std::string& name, const ClassMetadata& data)

@@ -1,9 +1,12 @@
 #include "kyoto/AST/Expressions/MethodCallNode.h"
 
+#include <fmt/core.h>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
+#include <stdexcept>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
@@ -11,6 +14,7 @@
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
+#include "kyoto/SymbolTable.h"
 
 MethodCall::MethodCall(std::string instance_name, std::string name, std::vector<ExpressionNode*> args,
                        ModuleCompiler& compiler)

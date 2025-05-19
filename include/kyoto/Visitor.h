@@ -21,6 +21,7 @@ public:
     std::any visitTypelessDeclaration(kyoto::KyotoParser::TypelessDeclarationContext* ctx) override;
     std::any visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
+    std::any visitFreeStatement(kyoto::KyotoParser::FreeStatementContext* ctx) override;
 
     std::any visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx) override;
     std::any visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx) override;
@@ -30,6 +31,7 @@ public:
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
     std::any visitMatchExpression(kyoto::KyotoParser::MatchExpressionContext* ctx) override;
     std::any visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx) override;
+    std::any visitNewExpression(kyoto::KyotoParser::NewExpressionContext* ctx) override;
 
     std::any visitAddressOfExpression(kyoto::KyotoParser::AddressOfExpressionContext* ctx) override;
     std::any visitDereferenceExpression(kyoto::KyotoParser::DereferenceExpressionContext* ctx) override;

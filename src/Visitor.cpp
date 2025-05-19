@@ -22,10 +22,12 @@
 #include "kyoto/AST/Expressions/MatchNode.h"
 #include "kyoto/AST/Expressions/MemberAccessNode.h"
 #include "kyoto/AST/Expressions/MethodCallNode.h"
+#include "kyoto/AST/Expressions/NewNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/AST/ForStatementNode.h"
+#include "kyoto/AST/FreeStatementNode.h"
 #include "kyoto/AST/IfStatementNode.h"
 #include "kyoto/AST/ReturnStatement.h"
 #include "kyoto/KType.h"
@@ -144,6 +146,12 @@ std::any ASTBuilderVisitor::visitReturnStatement(kyoto::KyotoParser::ReturnState
 {
     auto* expr = ctx->expression() ? std::any_cast<ExpressionNode*>(visit(ctx->expression())) : nullptr;
     return (ASTNode*)new ReturnStatementNode(expr, compiler);
+}
+
+std::any ASTBuilderVisitor::visitFreeStatement(kyoto::KyotoParser::FreeStatementContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ASTNode*)new FreeStatementNode(expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx)
@@ -365,6 +373,18 @@ std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpres
         elems.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
     return (ExpressionNode*)new ArrayNode(elems, type, compiler);
+}
+
+std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpressionContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    if (!type->is_class()) throw std::runtime_error("New expression must be a class type");
+
+    std::vector<ExpressionNode*> args;
+    for (const auto arg : ctx->expressionList()->expression()) {
+        args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+    }
+    return (ExpressionNode*)new NewNode(type, new FunctionCall(type->get_class_name(), args, compiler), compiler);
 }
 
 std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)

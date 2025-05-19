@@ -1,6 +1,5 @@
 #pragma once
 
-#include <format>
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -9,6 +8,9 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
 class ModuleCompiler;
+namespace llvm {
+class Value;
+}  // namespace llvm
 
 class FunctionCall : public ExpressionNode {
 public:
@@ -27,6 +29,7 @@ public:
     [[nodiscard]] const std::vector<ExpressionNode*>& get_args() const { return args; }
 
     void insert_arg(ExpressionNode* node, size_t index);
+    void set_destination(llvm::Value* dest);
 
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { args.begin(), args.end() }; }
 
@@ -48,4 +51,7 @@ protected:
     std::string name;
     std::vector<ExpressionNode*> args;
     ModuleCompiler& compiler;
+
+private:
+    llvm::Value* destination = nullptr;
 };

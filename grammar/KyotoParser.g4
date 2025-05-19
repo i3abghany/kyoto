@@ -34,7 +34,8 @@ statement:
 	| fullDeclaration
 	| ifStatement
 	| forStatement
-	| returnStatement;
+	| returnStatement
+	| freeStatement;
 
 expressionStatement: expression SEMICOLON;
 
@@ -44,6 +45,7 @@ expression:
 	| STRING_LITERAL											# stringExpression
 	| IDENTIFIER												# identifierExpression
 	| LPAREN expression RPAREN									# parenthesizedExpression
+	| NEW type LPAREN expressionList RPAREN						# newExpression
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
 	| ASTERISK expression										# dereferenceExpression
@@ -83,6 +85,8 @@ fullDeclaration:
 declaration: VAR IDENTIFIER COLON type SEMICOLON;
 
 returnStatement: RETURN expression? SEMICOLON;
+
+freeStatement: FREE expression SEMICOLON;
 
 ifStatement:
 	IF LPAREN expression RPAREN block elseIfElseStatement;

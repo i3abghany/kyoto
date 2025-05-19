@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fmt/core.h>
+#include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>

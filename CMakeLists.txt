@@ -32,10 +32,12 @@ set(SOURCES
     src/AST/Expressions/MatchNode.cpp
     src/AST/Expressions/MemberAccessNode.cpp
     src/AST/Expressions/MethodCallNode.cpp
+    src/AST/Expressions/NewNode.cpp
     src/AST/Expressions/NumberNode.cpp
     src/AST/Expressions/StringLiteralNode.cpp
     src/AST/Expressions/UnaryNode.cpp
     src/AST/ForStatementNode.cpp
+    src/AST/FreeStatementNode.cpp
     src/AST/IfStatementNode.cpp
     src/AST/ReturnStatement.cpp
     src/Analysis/FunctionTermination.cpp
