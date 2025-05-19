@@ -129,9 +129,14 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
         return expr->gen();
     }
 
+    std::string expr_ktype_str = expr_ktype->to_string();
+    if (expr_ktype->is_void() && expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call()) {
+        expr_ktype_str = fmt::format("class {}", expr->to_string().substr(0, expr->to_string().find('_')));
+    }
+
     throw std::runtime_error(
         fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
-                    expr->to_string(), expr_ktype->to_string(), name, type->to_string()));
+                    expr->to_string(), expr_ktype_str, name, type->to_string()));
 }
 
 bool FullDeclarationStatementNode::is_assigning_to_class_instance() const
