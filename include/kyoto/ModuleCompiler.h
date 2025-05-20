@@ -1,7 +1,7 @@
 #pragma once
 
-#include <llvm/IR/DataLayout.h>
 #include <cstddef>
+#include <llvm/IR/DataLayout.h>
 #include <memory>
 #include <optional>
 #include <string>

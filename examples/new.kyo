@@ -1,0 +1,36 @@
+cdecl fn printf(fmt: char*, ...) i32;
+
+class Point {
+    var x: i32;
+    var y: i32;
+
+    constructor(self: Point*, x: i32, y: i32) {
+        printf("Point constructor called with x: %d, y: %d\n", x, y);
+        self.x = x;
+        self.y = y;
+    }
+}
+
+class Rect {
+    var pp: Point*;
+    var w: i32;
+    var h: i32;
+
+    constructor(self: Rect*, w: i32, h: i32, p: Point*) {
+        printf("Rect constructor called with w: %d, h: %d\n", w, h);
+        self.pp = new Point(p.x, p.y);
+        self.w = w;
+        self.h = h;
+    }
+}
+
+fn main() i32 {
+    var p: Point* = new Point(1, 2);
+    var r: Rect* = new Rect(10, 20, p);
+
+    free p;
+    free r.pp;
+    free r;
+
+    return 0;
+}

@@ -10,7 +10,7 @@
 class ModuleCompiler;
 namespace llvm {
 class Value;
-}  // namespace llvm
+} // namespace llvm
 
 class FunctionCall : public ExpressionNode {
 public:

@@ -27,6 +27,6 @@ struct ClassMetadata {
                 }
             }
         }
-        return -1;
+        return {};
     }
 };

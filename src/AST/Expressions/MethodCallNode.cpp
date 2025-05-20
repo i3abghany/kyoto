@@ -2,11 +2,11 @@
 
 #include <fmt/core.h>
 #include <memory>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
-#include <optional>
-#include <stdexcept>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"

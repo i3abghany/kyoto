@@ -1,12 +1,12 @@
 #include "kyoto/ModuleCompiler.h"
 
-#include <assert.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/Support/TypeSize.h>
 #include <any>
+#include <assert.h>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/Support/TypeSize.h>
 #include <stdexcept>
 #include <utility>
 #include <vector>

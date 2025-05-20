@@ -53,7 +53,8 @@ llvm::Value* ClassDefinitionNode::gen()
 const ASTNode* ClassDefinitionNode::get_declaration_of(const std::string& name) const
 {
     for (const auto& component : components) {
-        if (component->is<DeclarationStatementNode>()) {
+        if (component->is<DeclarationStatementNode>()
+            && component->as<DeclarationStatementNode>()->get_name() == name) {
             return component;
         }
     }
