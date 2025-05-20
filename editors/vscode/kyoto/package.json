@@ -1,0 +1,25 @@
+{
+  "name": "kyoto",
+  "displayName": "kyoto",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "kyoto",
+      "aliases": ["Kyoto", "kyoto"],
+      "extensions": [".kyo"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "kyoto",
+      "scopeName": "source.kyo",
+      "path": "./syntaxes/kyoto.tmLanguage.json"
+    }]
+  }
+}

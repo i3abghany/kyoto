@@ -1,0 +1,37 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Kyoto",
+    "patterns": [
+        {
+            "name": "keyword.control.kyoto",
+            "match": "\\b(if|else|for|while|return|match|var|fn|class|constructor|self|new|free)\\b"
+        },
+        {
+            "name": "storage.type.kyo",
+            "match": "\\b(i8|i16|i32|i64|bool|void|str)\\b"
+        },
+        {
+            "name": "keyword.other.calling-convention.kyo",
+            "match": "\\bcdecl\\b"
+        },
+
+        {
+            "name": "string.quoted.double.kyoto",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.kyoto",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        {
+            "name": "comment.line.double-slash.kyoto",
+            "begin": "//",
+            "end": "$"
+        }
+    ],
+    "repository": {},
+	"scopeName": "source.kyo"
+}
