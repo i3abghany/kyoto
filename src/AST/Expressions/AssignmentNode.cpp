@@ -89,7 +89,7 @@ llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const 
     }
 
     if (are_compatible_pointer_types(type)) {
-        return expr->gen_ptr();
+        return expr->gen();
     }
 
     throw std::runtime_error(

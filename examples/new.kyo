@@ -18,7 +18,7 @@ class Rect {
 
     constructor(self: Rect*, w: i32, h: i32, p: Point*) {
         printf("Rect constructor called with w: %d, h: %d\n", w, h);
-        self.pp = new Point(p.x, p.y);
+        self.pp = p;
         self.w = w;
         self.h = h;
     }
@@ -29,7 +29,6 @@ fn main() i32 {
     var r: Rect* = new Rect(10, 20, p);
 
     free p;
-    free r.pp;
     free r;
 
     return 0;
