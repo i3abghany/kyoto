@@ -1,6 +1,5 @@
 #include "kyoto/AST/Expressions/NumberNode.h"
 
-#include <assert.h>
 #include <fmt/core.h>
 #include <stddef.h>
 
@@ -28,8 +27,8 @@ std::string NumberNode::to_string() const
 
 llvm::Value* NumberNode::gen()
 {
+    if (!type->is_primitive()) throw std::runtime_error("NumberNode type must be a primitive type");
     const auto primitive_type = dynamic_cast<PrimitiveType*>(type);
-    assert(primitive_type && "NumberNode type must be a primitive type");
     size_t width = primitive_type->width();
     auto b = primitive_type->is_boolean();
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(b ? 1 : width * 8, value, b ? false : true));
@@ -47,9 +46,8 @@ bool NumberNode::is_trivially_evaluable() const
 
 llvm::Value* NumberNode::trivial_gen()
 {
+    if (!type->is_primitive()) throw std::runtime_error("NumberNode type must be a primitive type");
     auto primitive_type = dynamic_cast<PrimitiveType*>(type);
-    assert(primitive_type && "NumberNode type must be a primitive type");
-    // return the maximum-width integer constant
     return llvm::ConstantInt::get(compiler.get_context(), llvm::APInt(64, value, true));
 }
 
