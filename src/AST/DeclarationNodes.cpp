@@ -120,7 +120,7 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
     }
 
     if (type->is_pointer() && expr_ktype->is_pointer() && type->operator==(*expr_ktype)) {
-        auto* expr_val = expr->gen_ptr();
+        auto* expr_val = expr->gen();
         assert(expr_val && "Expression must be a pointer");
         return expr_val;
     }
