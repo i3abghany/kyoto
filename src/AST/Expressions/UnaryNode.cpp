@@ -65,7 +65,8 @@ llvm::Value* UnaryNode::gen()
         return compiler.get_builder().CreateLoad(get_llvm_type(pointee_type, compiler), addr, "deref");
     }
 
-    assert(false && "Unknown unary operator");
+    throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
+    return nullptr;
 }
 
 llvm::Value* UnaryNode::gen_ptr() const
@@ -141,17 +142,23 @@ llvm::Value* UnaryNode::gen_prefix_decrement() const
 
 llvm::Value* UnaryNode::trivial_gen()
 {
-    assert(is_trivially_evaluable() && "Expression is not trivially evaluable");
+    if (!is_trivially_evaluable()) {
+        throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}` as it's not trivially evaluable",
+                                             op_to_string(), expr->to_string()));
+    }
     auto* expr_val = expr->trivial_gen();
     auto expr_ltype = expr->gen_type();
 
     if (op == UnaryOp::Negate) {
         const auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
-        assert(constant_int && "Trivial value must be a constant int");
+        if (!constant_int) {
+            throw std::runtime_error(fmt::format("Expression `{}` is not a constant integer", expr->to_string()));
+        }
         return llvm::ConstantInt::get(expr_ltype, -constant_int->getSExtValue(), true);
     }
     if (op == UnaryOp::Positive) return expr_val;
-    assert(false && "Unknown unary operator");
+
+    throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
 }
 
 bool UnaryNode::is_trivially_evaluable() const
