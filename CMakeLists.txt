@@ -33,6 +33,7 @@ set(SOURCES
     src/AST/Expressions/MemberAccessNode.cpp
     src/AST/Expressions/MethodCallNode.cpp
     src/AST/Expressions/NewNode.cpp
+    src/AST/Expressions/NewArrayNode.cpp
     src/AST/Expressions/NumberNode.cpp
     src/AST/Expressions/StringLiteralNode.cpp
     src/AST/Expressions/UnaryNode.cpp

@@ -282,10 +282,28 @@ bool ModuleCompiler::class_exists(const std::string& name) const
     return classes.contains(name);
 }
 
-size_t ModuleCompiler::get_class_size(const std::string& name) const
+size_t ModuleCompiler::get_primitive_size(const std::string& name) const
 {
-    llvm::StructType* struct_type = classes_metadata.at(name).llvm_type;
-    return data_layout.getStructLayout(struct_type)->getSizeInBytes();
+    if (name == "I8") return 1;
+    if (name == "Char") return 1;
+    if (name == "Boolean") return 1;
+    if (name == "I16") return 2;
+    if (name == "I32") return 4;
+    if (name == "I64") return 8;
+    if (name == "F32") return 4;
+    if (name == "F64") return 8;
+
+    throw std::runtime_error(fmt::format("Unknown size for type: {}", name));
+}
+
+size_t ModuleCompiler::get_type_size(const std::string& name) const
+{
+    if (classes_metadata.contains(name)) {
+        llvm::StructType* struct_type = classes_metadata.at(name).llvm_type;
+        return data_layout.getStructLayout(struct_type)->getSizeInBytes();
+    }
+
+    return get_primitive_size(name);
 }
 
 void ModuleCompiler::add_class_metadata(const std::string& name, const ClassMetadata& data)

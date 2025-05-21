@@ -35,7 +35,7 @@ std::string NewNode::to_string() const
 llvm::Value* NewNode::gen()
 {
     const auto& class_name = type->get_class_name();
-    const auto& class_size = compiler.get_class_size(class_name);
+    const auto& class_size = compiler.get_type_size(class_name);
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
 
     llvm::ArrayRef<llvm::Value*> args = {
@@ -52,7 +52,7 @@ llvm::Value* NewNode::gen()
 llvm::Value* NewNode::gen_ptr() const
 {
     const auto& class_name = type->get_class_name();
-    const auto& class_size = compiler.get_class_size(class_name);
+    const auto& class_size = compiler.get_type_size(class_name);
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
 
     llvm::ArrayRef<llvm::Value*> args = {

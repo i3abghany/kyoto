@@ -22,6 +22,7 @@
 #include "kyoto/AST/Expressions/MatchNode.h"
 #include "kyoto/AST/Expressions/MemberAccessNode.h"
 #include "kyoto/AST/Expressions/MethodCallNode.h"
+#include "kyoto/AST/Expressions/NewArrayNode.h"
 #include "kyoto/AST/Expressions/NewNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
@@ -189,7 +190,7 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
             return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(kind), compiler);
     }
 
-    assert(false && "Unknown Integer type");
+    throw std::runtime_error(fmt::format("Failed to parse number literal: `{}`", txt));
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
@@ -385,6 +386,16 @@ std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpression
         args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
     return (ExpressionNode*)new NewNode(type, new FunctionCall(type->get_class_name(), args, compiler), compiler);
+}
+
+std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArrayExpressionContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    if (!type->is_primitive())
+        throw std::runtime_error(
+            fmt::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
+    const auto size = std::stoul(ctx->INTEGER()->getText());
+    return (ExpressionNode*)new NewArrayNode(type, size, compiler);
 }
 
 std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)

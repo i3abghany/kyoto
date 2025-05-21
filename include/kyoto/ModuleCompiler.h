@@ -67,7 +67,8 @@ public:
     void add_class_metadata(const std::string& name, const ClassMetadata& data);
     llvm::StructType* get_llvm_struct(const std::string& name) const;
     ClassMetadata& get_class_metadata(const std::string& name);
-    size_t get_class_size(const std::string& name) const;
+    size_t get_type_size(const std::string& name) const;
+    size_t get_primitive_size(const std::string& name) const;
 
     void push_fn_return_type(KType* type);
     void pop_fn_return_type();

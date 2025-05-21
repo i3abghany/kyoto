@@ -46,6 +46,7 @@ expression:
 	| IDENTIFIER												# identifierExpression
 	| LPAREN expression RPAREN									# parenthesizedExpression
 	| NEW type LPAREN expressionList RPAREN						# newExpression
+	| NEW type OPEN_BRACKET INTEGER CLOSE_BRACKET				# newArrayExpression
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
 	| ASTERISK expression										# dereferenceExpression
@@ -122,16 +123,16 @@ parameter: IDENTIFIER COLON type;
 pointerSuffix: ASTERISK;
 
 type:
-	BOOLEAN								# boolType
-	| CHAR								# charType
-	| I8								# i8Type
-	| I16								# i16Type
-	| I32								# i32Type
-	| I64								# i64Type
-	| F32								# f32Type
-	| F64								# f64Type
-	| STRING							# strType
-	| VOID								# voidType
-	| IDENTIFIER						# classType
-	| type OPEN_BRACKET CLOSE_BRACKET	# arrayType
-	| type pointerSuffix+				# pointerType;
+	BOOLEAN										# boolType
+	| CHAR										# charType
+	| I8										# i8Type
+	| I16										# i16Type
+	| I32										# i32Type
+	| I64										# i64Type
+	| F32										# f32Type
+	| F64										# f64Type
+	| STRING									# strType
+	| VOID										# voidType
+	| IDENTIFIER								# classType
+	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
+	| type pointerSuffix+						# pointerType;
