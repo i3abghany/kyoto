@@ -1,0 +1,119 @@
+// NAME NewEmptyClass
+// ERR 0
+// RET 0
+
+class X {
+    constructor(self: X*) { }
+}
+
+fn main() i32 {
+    var x: X* = new X();
+    return 0;
+}
+
+// NAME NewClassWithParameters
+// ERR 0
+// RET 5
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    return x.a;
+}
+
+// NAME NewClassAssignment
+// ERR 0
+// RET 5
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    var y: X* = x;
+    return y.a;
+}
+
+// NAME NewClassAssignment2
+// ERR 0
+// RET 5
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    var y: X* = x;
+    var z: X* = y;
+    return z.a;
+}
+
+// NAME NewClassCopyDeclarationModify
+// ERR 0
+// RET 10
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    var y: X* = x;
+    y.a = 10;
+    return x.a;
+}
+
+// NAME NewClassCopyDeclarationModify2
+// ERR 0
+// RET 10
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    var y: X* = x;
+    var z: X* = y;
+    z.a = 10;
+    return x.a;
+}
+
+// NAME NewClassCopyAssignmentModify
+// ERR 0
+// RET 10
+
+class X {
+    var a: i32;
+    constructor(self: X*, x: i32) {
+        self.a = x;
+    }
+}
+
+fn main() i32 {
+    var x: X* = new X(5);
+    var y: X*;
+    y = x;
+    y.a = 10;
+    return x.a;
+}
