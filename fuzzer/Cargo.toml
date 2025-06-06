@@ -1,0 +1,13 @@
+[package]
+name = "fuzzer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.9.1"
+rstest = "0.25.0"
+regex = "1.11.1"
+
+[[bin]]
+name = "fuzzer"
+path = "src/main.rs"
