@@ -5,6 +5,8 @@ pub enum TokenType {
     Identifier,
     Fragment,
     Skip,
+    Lexer,
+    Grammar,
     Colon,
     Plus,
     Star,
@@ -32,7 +34,10 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(src: String) -> Self {
-        Lexer { src, pos: 0 }
+        Lexer {
+            src: Lexer::strip_content(&src),
+            pos: 0,
+        }
     }
 
     pub fn lex(&mut self) -> Vec<Token> {
@@ -69,84 +74,84 @@ impl Lexer {
             'a'..='z' | 'A'..='Z' | '_' => {
                 while let Some(next_char) = self.peek(1) {
                     if next_char.is_alphanumeric() || next_char == '_' {
-                        self.pos += 1;
+                        self.advance();
                     } else {
                         break;
                     }
                 }
-                self.pos += 1;
+                self.advance();
                 TokenType::Identifier
             }
             ':' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Colon
             }
             '+' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Plus
             }
             '*' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Star
             }
             '|' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Or
             }
             '~' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Tilde
             }
             '(' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::OpenParen
             }
             ')' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::CloseParen
             }
             '[' => {
-                self.pos += 1;
+                self.advance();
                 while let Some(next_char) = self.curr() {
                     if next_char == ']' {
                         break;
                     } else if next_char == '\\' {
-                        self.pos += 2; // Skip escaped character
+                        self.advance_n(2);
                     } else {
-                        self.pos += 1;
+                        self.advance();
                     }
                 }
                 if self.curr() == Some(']') {
-                    self.pos += 1;
+                    self.advance();
                 }
                 TokenType::Set
             }
             '.' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::Dot
             }
             ';' => {
-                self.pos += 1;
+                self.advance();
                 TokenType::SemiColon
             }
             '\'' => {
-                self.pos += 1;
+                self.advance();
                 while let Some(next_char) = self.curr() {
                     if next_char == '\\' {
-                        self.pos += 2;
+                        self.advance_n(2);
                     } else if next_char == '\'' {
                         break;
                     } else {
-                        self.pos += 1;
+                        self.advance();
                     }
                 }
                 if self.curr() == Some('\'') {
-                    self.pos += 1;
+                    self.advance();
                 }
                 TokenType::String
             }
             '-' if self.peek(1) == Some('>') => {
-                self.pos += 2;
+                self.advance_n(2);
                 TokenType::Arrow
             }
             _ => return None,
@@ -159,21 +164,49 @@ impl Lexer {
         };
         let val = self.src[start..end].to_string();
         Some(Token {
-            token_type: if val == "fragment" {
-                TokenType::Fragment
-            } else if val == "skip" {
-                TokenType::Skip
-            } else {
-                token_type
-            },
+            token_type: self.token_from_val_or_else(&val, token_type),
             value: val,
         })
     }
 
+    fn advance_n(&mut self, n: usize) {
+        self.pos = (self.pos + n).min(self.src.len());
+    }
+
+    fn advance(&mut self) {
+        self.advance_n(1);
+    }
+
+    fn token_from_val_or_else(&self, val: &str, default: TokenType) -> TokenType {
+        match val {
+            "fragment" => TokenType::Fragment,
+            "skip" => TokenType::Skip,
+            "lexer" => TokenType::Lexer,
+            "grammar" => TokenType::Grammar,
+            _ => default,
+        }
+    }
+
+    fn strip_content(content: &str) -> String {
+        let rp = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
+        let re = regex::Regex::new(rp).unwrap();
+        let content = content
+            .lines()
+            .map(|line| re.replace_all(&line, "").to_string());
+
+        let rp = "(#|//).*";
+        let re = regex::Regex::new(rp).unwrap();
+        let content = content.map(|line| re.replace_all(&line, "").to_string());
+
+        content
+            .map(|line| line.trim_end().to_string())
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+
     fn skip_whitespace(&mut self) {
-        while self.pos < self.src.len() && self.src[self.pos..].starts_with([' ', '\n', '\r', '\t'])
-        {
-            self.pos += 1;
+        while self.pos < self.src.len() && self.curr().map_or(false, |c| c.is_whitespace()) {
+            self.advance();
         }
     }
 }
@@ -183,6 +216,11 @@ impl Lexer {
     Token { token_type: TokenType::Identifier, value: "X".to_string() }])]
 #[case("X;", vec![
     Token { token_type: TokenType::Identifier, value: "X".to_string() }, 
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+#[case("lexer grammar kyoto;", vec![
+    Token { token_type: TokenType::Lexer, value: "lexer".to_string() },
+    Token { token_type: TokenType::Grammar, value: "grammar".to_string() },
+    Token { token_type: TokenType::Identifier, value: "kyoto".to_string() },
     Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
 #[case("X: Y;", vec![
     Token { token_type: TokenType::Identifier, value: "X".to_string() },
@@ -194,13 +232,13 @@ impl Lexer {
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::String, value: "XYZ".to_string() },
     Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
-#[case("STRING_LITERAL: '\"' (~[\"\\\\\r\n] | '\\\\' .)* '\"';", vec![
+#[case("STRING_LITERAL: '\"' (~[\"\\\\\\r\\n] | '\\\\' .)* '\"';", vec![
     Token { token_type: TokenType::Identifier, value: "STRING_LITERAL".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::String, value: "\"".to_string() },
     Token { token_type: TokenType::OpenParen, value: "(".to_string() },
     Token { token_type: TokenType::Tilde, value: "~".to_string() },
-    Token { token_type: TokenType::Set, value: "[\"\\\\\r\n]".to_string() },
+    Token { token_type: TokenType::Set, value: "[\"\\\\\\r\\n]".to_string() },
     Token { token_type: TokenType::Or, value: "|".to_string() },
     Token { token_type: TokenType::String, value: "\\\\".to_string() },
     Token { token_type: TokenType::Dot, value: ".".to_string() },
@@ -225,4 +263,17 @@ fn test_lexer(#[case] input: &str, #[case] expected: Vec<Token>) {
     let mut lexer = Lexer::new(input.to_string());
     let tokens = lexer.lex();
     assert_eq!(tokens, expected);
+}
+
+#[rstest]
+#[case("test;", "test;")]
+#[case("test; # comment", "test;")]
+#[case("test; /* comment */", "test;")]
+#[case("test; /* comment */ # comment", "test;")]
+#[case("test;/* nested # comment */test2;", "test;test2;")]
+#[case("slash comment // comment", "slash comment")]
+#[case("empty slash comment //", "empty slash comment")]
+fn test_strip_content(#[case] input: &str, #[case] expected: &str) {
+    let result = Lexer::strip_content(input);
+    assert_eq!(result, expected);
 }
