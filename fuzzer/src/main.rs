@@ -1,4 +1,4 @@
-use fuzzer::parser::Lexer;
+use fuzzer::lexer::Lexer;
 
 fn main() {
     let src = std::fs::read_to_string("inp.txt").expect("Failed to read file");
