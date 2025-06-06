@@ -66,6 +66,7 @@ set(TEST_SOURCES
     test/TestLogical.cpp
     test/TestScope.cpp
     test/TestFor.cpp
+    test/TestNew.cpp
     test/TestClass.cpp
     test/TestFunction.cpp
     test/TestPointers.cpp
