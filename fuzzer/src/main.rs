@@ -1,10 +1,19 @@
+use std::vec;
+
 use fuzzer::lexer::Lexer;
 
 fn main() {
-    let src = std::fs::read_to_string("inp.txt").expect("Failed to read file");
+    let files = vec![
+        "../grammar/KyotoLexer.g4".to_string(),
+        "../grammar/KyotoParser.g4".to_string(),
+    ];
 
-    println!("Source:\n{}\n", src);
-    let mut lexer = Lexer::new(src.to_string());
-    let tkns = lexer.lex();
-    println!("{:#?}", tkns);
+    let contents = files
+        .iter()
+        .map(|file| std::fs::read_to_string(file).expect("Failed to read file"))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let tkns = Lexer::new(contents).lex();
+    print!("{:#?}", tkns);
 }

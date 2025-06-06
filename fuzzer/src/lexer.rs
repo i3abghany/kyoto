@@ -7,16 +7,24 @@ pub enum TokenType {
     Skip,
     Lexer,
     Grammar,
+    EOF,
+    Options,
     Colon,
     Plus,
     Star,
     Dot,
+    QuestionMark,
     Or,
     Tilde,
     OpenParen,
     CloseParen,
+    OpenCurly,
+    CloseCurly,
+    OpenAngle,
+    CloseAngle,
     Set,
     SemiColon,
+    Equal,
     String,
     Arrow,
 }
@@ -34,10 +42,7 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(src: String) -> Self {
-        Lexer {
-            src: Lexer::strip_content(&src),
-            pos: 0,
-        }
+        Lexer { src: src, pos: 0 }
     }
 
     pub fn lex(&mut self) -> Vec<Token> {
@@ -81,6 +86,37 @@ impl Lexer {
                 }
                 self.advance();
                 TokenType::Identifier
+            }
+            '#' => {
+                while let Some(next_char) = self.curr() {
+                    if next_char == '\n' || next_char == ';' {
+                        break;
+                    }
+                    self.advance();
+                }
+                return self.next_token();
+            }
+            '/' if self.peek(1) == Some('/') => {
+                self.advance_n(2);
+                while let Some(next_char) = self.curr() {
+                    if next_char == '\n' {
+                        break;
+                    }
+                    self.advance();
+                }
+                return self.next_token();
+            }
+            '/' if self.peek(1) == Some('*') => {
+                self.advance_n(2);
+                while let Some(next_char) = self.curr() {
+                    if next_char == '*' && self.peek(1) == Some('/') {
+                        self.advance_n(2);
+                        break;
+                    } else {
+                        self.advance();
+                    }
+                }
+                return self.next_token();
             }
             ':' => {
                 self.advance();
@@ -126,6 +162,26 @@ impl Lexer {
                 }
                 TokenType::Set
             }
+            '{' => {
+                self.advance();
+                TokenType::OpenCurly
+            }
+            '}' => {
+                self.advance();
+                TokenType::CloseCurly
+            }
+            '=' => {
+                self.advance();
+                TokenType::Equal
+            }
+            '<' => {
+                self.advance();
+                TokenType::OpenAngle
+            }
+            '>' => {
+                self.advance();
+                TokenType::CloseAngle
+            }
             '.' => {
                 self.advance();
                 TokenType::Dot
@@ -133,6 +189,10 @@ impl Lexer {
             ';' => {
                 self.advance();
                 TokenType::SemiColon
+            }
+            '?' => {
+                self.advance();
+                TokenType::QuestionMark
             }
             '\'' => {
                 self.advance();
@@ -162,6 +222,7 @@ impl Lexer {
         } else {
             (start_pos, self.pos)
         };
+
         let val = self.src[start..end].to_string();
         Some(Token {
             token_type: self.token_from_val_or_else(&val, token_type),
@@ -183,29 +244,14 @@ impl Lexer {
             "skip" => TokenType::Skip,
             "lexer" => TokenType::Lexer,
             "grammar" => TokenType::Grammar,
+            "EOF" => TokenType::EOF,
+            "options" => TokenType::Options,
             _ => default,
         }
     }
 
-    fn strip_content(content: &str) -> String {
-        let rp = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
-        let re = regex::Regex::new(rp).unwrap();
-        let content = content
-            .lines()
-            .map(|line| re.replace_all(&line, "").to_string());
-
-        let rp = "(#|//).*";
-        let re = regex::Regex::new(rp).unwrap();
-        let content = content.map(|line| re.replace_all(&line, "").to_string());
-
-        content
-            .map(|line| line.trim_end().to_string())
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
-
     fn skip_whitespace(&mut self) {
-        while self.pos < self.src.len() && self.curr().map_or(false, |c| c.is_whitespace()) {
+        while self.curr().map_or(false, |c| c.is_whitespace()) {
             self.advance();
         }
     }
@@ -259,21 +305,33 @@ impl Lexer {
     Token { token_type: TokenType::CloseParen, value: ")".to_string() },
     Token { token_type: TokenType::String, value: "\\'".to_string() },
     Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+#[case("ruleName: X EOF;", vec![
+    Token { token_type: TokenType::Identifier, value: "ruleName".to_string() },
+    Token { token_type: TokenType::Colon, value: ":".to_string() },
+    Token { token_type: TokenType::Identifier, value: "X".to_string() },
+    Token { token_type: TokenType::EOF, value: "EOF".to_string() },
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+#[case("ruleName: X+;", vec![
+    Token { token_type: TokenType::Identifier, value: "ruleName".to_string() },
+    Token { token_type: TokenType::Colon, value: ":".to_string() },
+    Token { token_type: TokenType::Identifier, value: "X".to_string() },
+    Token { token_type: TokenType::Plus, value: "+".to_string() },
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+#[case("NAME: [a-z] -> skip;", vec![
+    Token { token_type: TokenType::Identifier, value: "NAME".to_string() },
+    Token { token_type: TokenType::Colon, value: ":".to_string() },
+    Token { token_type: TokenType::Set, value: "[a-z]".to_string() },
+    Token { token_type: TokenType::Arrow, value: "->".to_string() },
+    Token { token_type: TokenType::Skip, value: "skip".to_string() },
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+#[case("X: Y | /* empty */;", vec![
+    Token { token_type: TokenType::Identifier, value: "X".to_string() },
+    Token { token_type: TokenType::Colon, value: ":".to_string() },
+    Token { token_type: TokenType::Identifier, value: "Y".to_string() },
+    Token { token_type: TokenType::Or, value: "|".to_string() },
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
 fn test_lexer(#[case] input: &str, #[case] expected: Vec<Token>) {
     let mut lexer = Lexer::new(input.to_string());
     let tokens = lexer.lex();
     assert_eq!(tokens, expected);
-}
-
-#[rstest]
-#[case("test;", "test;")]
-#[case("test; # comment", "test;")]
-#[case("test; /* comment */", "test;")]
-#[case("test; /* comment */ # comment", "test;")]
-#[case("test;/* nested # comment */test2;", "test;test2;")]
-#[case("slash comment // comment", "slash comment")]
-#[case("empty slash comment //", "empty slash comment")]
-fn test_strip_content(#[case] input: &str, #[case] expected: &str) {
-    let result = Lexer::strip_content(input);
-    assert_eq!(result, expected);
 }
