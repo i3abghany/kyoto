@@ -7,6 +7,10 @@ edition = "2024"
 rand = "0.9.1"
 rstest = "0.25.0"
 regex = "1.11.1"
+num_cpus = "1.17.0"
+tempfile = "3.20.0"
+clap = { version = "4.5.39", features = ["derive"] }
+uuid = { version = "1.17.0", features = ["v4"] }
 
 [[bin]]
 name = "fuzzer"

@@ -266,7 +266,6 @@ impl Lexer {
     }
 }
 
-// define a macro for an EOF token with type TokenType::EndOfFile
 macro_rules! eof_token {
     () => {
         Token {

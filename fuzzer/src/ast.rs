@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Read};
+use std::collections::HashMap;
 
 use crate::parser::Parser;
 
@@ -47,7 +47,6 @@ pub struct Rule {
 
 impl Grammar {
     pub fn new(lexer_file: &str, parser_file: &str) -> Result<Grammar, std::io::Error> {
-
         let lexer_src = std::fs::read_to_string(lexer_file)?;
         let parser_src = std::fs::read_to_string(parser_file)?;
 
@@ -63,7 +62,7 @@ impl Grammar {
         rules.extend(lexer_rules.rules);
         rules.extend(parser_rules.rules);
 
-        let entry_points = vec!["topLevel".to_string()];
+        let entry_points = vec!["program".to_string()];
         Ok(Grammar {
             rules,
             entry_points,
