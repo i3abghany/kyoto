@@ -6,8 +6,12 @@ pub enum TokenType {
     Fragment,
     Skip,
     Lexer,
+    Parser,
     Grammar,
+    /// EOF keyword
     EOF,
+    /// Implicit EOF
+    EndOfFile,
     Options,
     Colon,
     Plus,
@@ -50,6 +54,10 @@ impl Lexer {
         while let Some(token) = self.next_token() {
             tokens.push(token);
         }
+        tokens.push(Token {
+            token_type: TokenType::EndOfFile,
+            value: String::new(),
+        });
         tokens
     }
 
@@ -243,6 +251,7 @@ impl Lexer {
             "fragment" => TokenType::Fragment,
             "skip" => TokenType::Skip,
             "lexer" => TokenType::Lexer,
+            "parser" => TokenType::Parser,
             "grammar" => TokenType::Grammar,
             "EOF" => TokenType::EOF,
             "options" => TokenType::Options,
@@ -257,27 +266,37 @@ impl Lexer {
     }
 }
 
+// define a macro for an EOF token with type TokenType::EndOfFile
+macro_rules! eof_token {
+    () => {
+        Token {
+            token_type: TokenType::EndOfFile,
+            value: String::new(),
+        }
+    };
+}
+
 #[rstest]
 #[case("X", vec![
-    Token { token_type: TokenType::Identifier, value: "X".to_string() }])]
+    Token { token_type: TokenType::Identifier, value: "X".to_string() }, eof_token!()])]
 #[case("X;", vec![
     Token { token_type: TokenType::Identifier, value: "X".to_string() }, 
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("lexer grammar kyoto;", vec![
     Token { token_type: TokenType::Lexer, value: "lexer".to_string() },
     Token { token_type: TokenType::Grammar, value: "grammar".to_string() },
     Token { token_type: TokenType::Identifier, value: "kyoto".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("X: Y;", vec![
     Token { token_type: TokenType::Identifier, value: "X".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::Identifier, value: "Y".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("IDENT: 'XYZ';", vec![
     Token { token_type: TokenType::Identifier, value: "IDENT".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::String, value: "XYZ".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("STRING_LITERAL: '\"' (~[\"\\\\\\r\\n] | '\\\\' .)* '\"';", vec![
     Token { token_type: TokenType::Identifier, value: "STRING_LITERAL".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
@@ -291,7 +310,7 @@ impl Lexer {
     Token { token_type: TokenType::CloseParen, value: ")".to_string() },
     Token { token_type: TokenType::Star, value: "*".to_string() },
     Token { token_type: TokenType::String, value: "\"".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("CHAR_LITERAL: '\\'' (~['\\\\\\r\\n] | '\\\\' .) '\\'';", vec![
     Token { token_type: TokenType::Identifier, value: "CHAR_LITERAL".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
@@ -304,32 +323,32 @@ impl Lexer {
     Token { token_type: TokenType::Dot, value: ".".to_string() },
     Token { token_type: TokenType::CloseParen, value: ")".to_string() },
     Token { token_type: TokenType::String, value: "\\'".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("ruleName: X EOF;", vec![
     Token { token_type: TokenType::Identifier, value: "ruleName".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::Identifier, value: "X".to_string() },
     Token { token_type: TokenType::EOF, value: "EOF".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("ruleName: X+;", vec![
     Token { token_type: TokenType::Identifier, value: "ruleName".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::Identifier, value: "X".to_string() },
     Token { token_type: TokenType::Plus, value: "+".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("NAME: [a-z] -> skip;", vec![
     Token { token_type: TokenType::Identifier, value: "NAME".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::Set, value: "[a-z]".to_string() },
     Token { token_type: TokenType::Arrow, value: "->".to_string() },
     Token { token_type: TokenType::Skip, value: "skip".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 #[case("X: Y | /* empty */;", vec![
     Token { token_type: TokenType::Identifier, value: "X".to_string() },
     Token { token_type: TokenType::Colon, value: ":".to_string() },
     Token { token_type: TokenType::Identifier, value: "Y".to_string() },
     Token { token_type: TokenType::Or, value: "|".to_string() },
-    Token { token_type: TokenType::SemiColon, value: ";".to_string() }])]
+    Token { token_type: TokenType::SemiColon, value: ";".to_string() }, eof_token!()])]
 fn test_lexer(#[case] input: &str, #[case] expected: Vec<Token>) {
     let mut lexer = Lexer::new(input.to_string());
     let tokens = lexer.lex();
