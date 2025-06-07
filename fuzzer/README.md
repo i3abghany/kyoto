@@ -7,7 +7,12 @@ This is a grammar-based fuzzer for the Cyoto compiler. It's based on the antlr4 
 To use the fuzzer, the compiler has to be built and stored in `kyoto/build` as described in `kyoto/README.md`. The fuzzer can then be run with the following command:
 
 ```bash
-cargo run --release -- --lexer ../grammar/KyotoLexer.p4 --parser ../grammar/KyotoParser.p4 --iters 100 --output crashes --threads 0
+cargo run --release -- \
+    --lexer ../grammar/KyotoLexer.g4 \
+    --parser ../grammar/KyotoParser.g4 \
+    --iters 100 \
+    --output crashes \
+    --threads 0
 ```
 
 # Options
