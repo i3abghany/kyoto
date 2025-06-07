@@ -84,4 +84,5 @@ FREE: 'free';
 
 // This has to be defined after all the keywords because it will match all of them if defined first.
 IDENTIFIER: LETTER (LETTER | [0-9])*;
-fragment LETTER: [a-zA-Z\u0080-\u{10FFFF}_];
+// fragment LETTER: [a-zA-Z\u0080-\u{10FFFF}_];
+fragment LETTER: [a-zA-Z\u0080-\uFFFF_];
