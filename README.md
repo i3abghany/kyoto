@@ -58,6 +58,11 @@ The Kyoto Programming Language Compiler:
   -o [ --output ] arg (=out.ll) Output file for the LLVM IR
 ```
 
+## Fuzzing the Compiler
+
+This repository includes a grammar-based fuzzer for the Cyoto compiler, which is based on the ANTLR4 grammar for Kyoto defined in `kyoto/grammar/`.
+The fuzzer is written in Rust. For more information on how to use it, refer to the [README](fuzzer/README.md) in the `fuzzer` directory.
+
 # License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
