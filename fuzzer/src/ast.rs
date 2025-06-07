@@ -47,9 +47,26 @@ pub struct Rule {
 
 impl Grammar {
     pub fn new(lexer_file: &str, parser_file: &str) -> Result<Grammar, std::io::Error> {
+
+        let lexer_src = std::fs::read_to_string(lexer_file)?;
+        let parser_src = std::fs::read_to_string(parser_file)?;
+
+        let lexer_rules = Parser::new()
+            .parse_lexer_rules(lexer_src)
+            .expect("Failed to parse lexer rules");
+
+        let parser_rules = Parser::new()
+            .parse_parser_rules(parser_src)
+            .expect("Failed to parse parser rules");
+
+        let mut rules = HashMap::new();
+        rules.extend(lexer_rules.rules);
+        rules.extend(parser_rules.rules);
+
+        let entry_points = vec!["topLevel".to_string()];
         Ok(Grammar {
-            rules: HashMap::new(),
-            entry_points: vec![],
+            rules,
+            entry_points,
         })
     }
 }
