@@ -3,18 +3,16 @@ use crate::generator::Generator;
 use rand::rng;
 use std::io::Write;
 use std::sync::{
-    Arc,
     atomic::{AtomicUsize, Ordering},
+    Arc,
 };
-use std::thread;
-use std::time::Duration;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
 #[derive(Debug, Default)]
 pub struct FuzzStats {
-    pub total_runs: AtomicUsize,
-    pub total_crashes: AtomicUsize,
+    total_runs: AtomicUsize,
+    total_crashes: AtomicUsize,
 }
 
 impl FuzzStats {
@@ -68,6 +66,16 @@ fn run_cyoto_compiler(program_str: &str, cyoto_path: &str) -> Result<(), String>
 
     if output.status.code() == Some(139) {
         return Err("Segmentation fault detected".to_string());
+    }
+
+    if let Some(code) = output.status.code() {
+        if code > 1 {
+            return Err(format!(
+                "Compiler exited with code {}: {}",
+                code,
+                String::from_utf8_lossy(&output.stderr)
+            ));
+        }
     }
 
     let mut last_line = String::new();
@@ -130,7 +138,5 @@ pub fn fuzz_worker(
                 continue;
             }
         }
-
-        thread::sleep(Duration::from_millis(10));
     }
 }
