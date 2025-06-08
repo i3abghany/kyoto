@@ -37,6 +37,20 @@ pub enum Op {
     EofDefinition,
 }
 
+impl Op {
+    pub fn is_trivial_rule(&self) -> bool {
+        matches!(self, Op::Set(_) | Op::CharRange(_, _))
+            || matches!(self, Op::Terminal(_) | Op::AnyChar)
+            || matches!(self, Op::RuleRef(name) if name.chars().all(|c| c.is_uppercase() || c == '_'))
+            || matches!(self, Op::RuleRef(name) if ["CHAR", "VOID", "STRING", "I8", "I16", "I32", "I64", "U8", "U16", "U32", "U64", "F32", "F64", "type"].contains(&name.as_str()))
+            || matches!(self, Op::RuleRef(name) if name == "IDENTIFIER")
+            || matches!(self, Op::Sequence(ops) if ops.iter().all(|op| op.is_trivial_rule()))
+            || matches!(self, Op::ZeroOrMore(op) if op.is_trivial_rule())
+            || matches!(self, Op::OneOrMore(op) if op.is_trivial_rule())
+            || matches!(self, Op::Optional(op) if op.is_trivial_rule())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rule {
     pub name: String,
