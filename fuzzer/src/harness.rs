@@ -9,10 +9,11 @@ use std::sync::{
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct FuzzStats {
     total_runs: AtomicUsize,
     total_crashes: AtomicUsize,
+    start_time: std::time::Instant,
 }
 
 impl FuzzStats {
@@ -20,6 +21,7 @@ impl FuzzStats {
         FuzzStats {
             total_runs: AtomicUsize::new(0),
             total_crashes: AtomicUsize::new(0),
+            start_time: std::time::Instant::now(),
         }
     }
 
@@ -46,9 +48,10 @@ impl FuzzStats {
 
     pub fn get_stats(&self) -> String {
         format!(
-            "Total runs: {}\n Total crashes: {}",
+            "Total runs: {} | Total crashes: {} | Runs/sec: {:.2}",
             self.get_total_runs(),
-            self.get_total_crashes()
+            self.get_total_crashes(),
+            self.get_total_runs() as f64 / self.start_time.elapsed().as_secs_f64()
         )
     }
 }
