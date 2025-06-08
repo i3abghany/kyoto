@@ -120,8 +120,6 @@ parameterList:
 
 parameter: IDENTIFIER COLON type;
 
-pointerSuffix: ASTERISK;
-
 type:
 	BOOLEAN										# boolType
 	| CHAR										# charType
@@ -135,4 +133,4 @@ type:
 	| VOID										# voidType
 	| IDENTIFIER								# classType
 	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
-	| type pointerSuffix+						# pointerType;
+	| type ASTERISK+						# pointerType;
