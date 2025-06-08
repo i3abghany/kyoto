@@ -47,7 +47,10 @@ std::any ASTBuilderVisitor::visitProgram(kyoto::KyotoParser::ProgramContext* ctx
     std::vector<ASTNode*> nodes;
     for (const auto node : ctx->topLevel()) {
         std::any result = visit(node);
-        nodes.push_back(std::any_cast<ASTNode*>(result));
+        if (result.has_value()) {
+            // throw std::runtime_error("ASTBuilderVisitor: visit returned no value");
+            nodes.push_back(std::any_cast<ASTNode*>(result));
+        }
     }
     return (ASTNode*)new ProgramNode(nodes, compiler);
 }

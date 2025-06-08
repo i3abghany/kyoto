@@ -39,6 +39,24 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/raw_ostream.h"
 
+class LexerErrorListener : public antlr4::BaseErrorListener {
+public:
+    void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
+                     size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override
+    {
+        throw std::runtime_error(fmt::format("Lexer error at line {}, char {}: {}", line, charPositionInLine, msg));
+    }
+};
+
+class ParserErrorListener : public antlr4::BaseErrorListener {
+public:
+    void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
+                     size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override
+    {
+        throw std::runtime_error(fmt::format("Parser error at line {}, char {}: {}", line, charPositionInLine, msg));
+    }
+};
+
 ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     : code(code)
     , name(name)
@@ -54,10 +72,16 @@ ASTNode* ModuleCompiler::parse_program()
 {
     antlr4::ANTLRInputStream input(code);
     kyoto::KyotoLexer lexer(&input);
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(new LexerErrorListener());
     antlr4::CommonTokenStream tokens(&lexer);
     tokens.fill();
 
     kyoto::KyotoParser parser(&tokens);
+    parser.removeErrorListeners();
+    parser.addErrorListener(new ParserErrorListener());
+    parser.setBuildParseTree(true);
+    parser.setErrorHandler(std::make_unique<antlr4::BailErrorStrategy>());
     auto* tree = parser.program();
 
     ASTBuilderVisitor visitor(*this);
