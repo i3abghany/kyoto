@@ -127,6 +127,11 @@ pub fn fuzz_worker(
 
         let st = generator.stringify_op(&gen_op.unwrap().definition);
 
+        if st.is_empty() {
+            curr_iters -= 1;
+            continue;
+        }
+
         match run_cyoto_compiler(&st, "../build/cyoto") {
             Ok(_) => {}
             Err(e) => {
