@@ -558,7 +558,7 @@ std::any ASTBuilderVisitor::visitArrayType(kyoto::KyotoParser::ArrayTypeContext*
 std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
-    for (size_t i = 0; i < ctx->pointerSuffix().size(); i++)
+    for (size_t i = 0; i < ctx->ASTERISK().size(); ++i)
         type = new PointerType(type);
     return type;
 }

@@ -133,4 +133,4 @@ type:
 	| VOID										# voidType
 	| IDENTIFIER								# classType
 	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
-	| type ASTERISK+						# pointerType;
+	| type ASTERISK+							# pointerType;
