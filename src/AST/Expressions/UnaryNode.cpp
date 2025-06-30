@@ -1,7 +1,7 @@
 #include "kyoto/AST/Expressions/UnaryNode.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <stdexcept>
 
 #include "kyoto/KType.h"
@@ -34,7 +34,7 @@ UnaryNode::~UnaryNode()
 
 std::string UnaryNode::to_string() const
 {
-    return fmt::format("Unary({}, {})", op_to_string(), expr->to_string());
+    return std::format("Unary({}, {})", op_to_string(), expr->to_string());
 }
 
 llvm::Value* UnaryNode::gen()
@@ -48,7 +48,7 @@ llvm::Value* UnaryNode::gen()
     if (op == UnaryOp::AddressOf) {
         auto* ptr = expr->gen_ptr();
         if (!ptr) {
-            throw std::runtime_error(fmt::format("Cannot take the address of expression `{}` (type `{}`)",
+            throw std::runtime_error(std::format("Cannot take the address of expression `{}` (type `{}`)",
                                                  expr->to_string(), expr->get_ktype()->to_string()));
         }
         return ptr;
@@ -58,14 +58,14 @@ llvm::Value* UnaryNode::gen()
         auto* expr_ktype = expr->get_ktype();
         if (!expr_ktype->is_pointer()) {
             throw std::runtime_error(
-                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+                std::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
         }
         const auto* pointee_type = expr_ktype->as<PointerType>()->get_pointee();
         auto* addr = expr->gen();
         return compiler.get_builder().CreateLoad(get_llvm_type(pointee_type, compiler), addr, "deref");
     }
 
-    throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
+    throw std::runtime_error(std::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
     return nullptr;
 }
 
@@ -76,7 +76,7 @@ llvm::Value* UnaryNode::gen_ptr() const
         auto* expr_ktype = expr->get_ktype();
         if (!expr_ktype->is_pointer()) {
             throw std::runtime_error(
-                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+                std::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
         }
         auto* addr = expr->gen();
         return addr;
@@ -94,7 +94,7 @@ KType* UnaryNode::get_ktype() const
         auto* expr_ktype = expr->get_ktype();
         if (!expr_ktype->is_pointer()) {
             throw std::runtime_error(
-                fmt::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
+                std::format("Cannot dereference non-pointer type `{}`", expr->get_ktype()->to_string()));
         }
         return expr_ktype->as<PointerType>()->get_pointee();
     }
@@ -108,7 +108,7 @@ llvm::Value* UnaryNode::gen_prefix_increment() const
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
     auto* expr_ltype = expr->gen_type();
     if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
-        throw std::runtime_error(fmt::format("Cannot apply op `++` to {}expression `{}`",
+        throw std::runtime_error(std::format("Cannot apply op `++` to {}expression `{}`",
                                              expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
@@ -128,7 +128,7 @@ llvm::Value* UnaryNode::gen_prefix_decrement() const
     auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
     auto* expr_ltype = expr->gen_type();
     if (expr->is_trivially_evaluable() || !expr->gen_ptr() || !expr_ktype->is_integer()) {
-        throw std::runtime_error(fmt::format("Cannot apply op `--` to {}expression `{}`",
+        throw std::runtime_error(std::format("Cannot apply op `--` to {}expression `{}`",
                                              expr_ktype->is_integer() ? "" : "lvalue", expr->to_string()));
     }
 
@@ -143,7 +143,7 @@ llvm::Value* UnaryNode::gen_prefix_decrement() const
 llvm::Value* UnaryNode::trivial_gen()
 {
     if (!is_trivially_evaluable()) {
-        throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}` as it's not trivially evaluable",
+        throw std::runtime_error(std::format("Cannot apply op `{}` to expression `{}` as it's not trivially evaluable",
                                              op_to_string(), expr->to_string()));
     }
     auto* expr_val = expr->trivial_gen();
@@ -152,13 +152,13 @@ llvm::Value* UnaryNode::trivial_gen()
     if (op == UnaryOp::Negate) {
         const auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
         if (!constant_int) {
-            throw std::runtime_error(fmt::format("Expression `{}` is not a constant integer", expr->to_string()));
+            throw std::runtime_error(std::format("Expression `{}` is not a constant integer", expr->to_string()));
         }
         return llvm::ConstantInt::get(expr_ltype, -constant_int->getSExtValue(), true);
     }
     if (op == UnaryOp::Positive) return expr_val;
 
-    throw std::runtime_error(fmt::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
+    throw std::runtime_error(std::format("Cannot apply op `{}` to expression `{}`", op_to_string(), expr->to_string()));
 }
 
 bool UnaryNode::is_trivially_evaluable() const

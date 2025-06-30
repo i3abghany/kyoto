@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fmt/core.h>
+#include <format>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
@@ -28,7 +28,7 @@ public:
     [[nodiscard]] virtual bool is_pointer_to_class(const std::string& name) const { return false; }
     [[nodiscard]] virtual std::string get_class_name() const
     {
-        throw std::runtime_error(fmt::format("KType::get_class_name: {} is not a class type", to_string()));
+        throw std::runtime_error(std::format("KType::get_class_name: {} is not a class type", to_string()));
     }
 
     [[nodiscard]] virtual KType* copy() const = 0;
@@ -43,7 +43,7 @@ public:
     {
         auto* ptr = dynamic_cast<T*>(this);
         if (!ptr) {
-            throw std::runtime_error(fmt::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
+            throw std::runtime_error(std::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
         }
         return ptr;
     }
@@ -52,7 +52,7 @@ public:
     {
         auto* ptr = dynamic_cast<const T*>(this);
         if (!ptr) {
-            throw std::runtime_error(fmt::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
+            throw std::runtime_error(std::format("KType::as: Cannot cast {} to {}", to_string(), typeid(T).name()));
         }
         return ptr;
     }

@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/MatchNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
@@ -36,7 +36,7 @@ llvm::Value* MatchNode::gen_cmp(ExpressionNode* lhs, ExpressionNode* rhs)
     if (lhs->get_ktype()->is_integer() || lhs->get_ktype()->is_pointer())
         return compiler.get_builder().CreateICmpEQ(lhs->gen(), rhs->gen(), "cmp_match");
 
-    throw std::runtime_error(fmt::format("Unsupported type in match expression: `{}`", lhs->get_ktype()->to_string()));
+    throw std::runtime_error(std::format("Unsupported type in match expression: `{}`", lhs->get_ktype()->to_string()));
 }
 
 llvm::Value* MatchNode::gen()
@@ -50,7 +50,7 @@ llvm::Value* MatchNode::gen()
 
     std::vector<llvm::BasicBlock*> case_bbs(cases.size() - 1);
     for (size_t i = 0; i < cases.size() - 1; ++i) {
-        case_bbs[i] = compiler.create_basic_block(fmt::format("case_{}", i));
+        case_bbs[i] = compiler.create_basic_block(std::format("case_{}", i));
     }
 
     auto* default_bb = compiler.create_basic_block("default");
@@ -67,7 +67,7 @@ llvm::Value* MatchNode::gen()
 
         llvm::Value* cmp = gen_cmp(cases[i].cond, expr);
         llvm::BasicBlock* next_cmp_start_bb
-            = (i < cases.size() - 2) ? compiler.create_basic_block(fmt::format("case_cmp_next_{}", i + 1)) : default_bb;
+            = (i < cases.size() - 2) ? compiler.create_basic_block(std::format("case_cmp_next_{}", i + 1)) : default_bb;
 
         compiler.get_builder().CreateCondBr(cmp, case_block, next_cmp_start_bb);
 
@@ -127,7 +127,7 @@ void MatchNode::check_types() const
     for (size_t i = 0; i < cases.size() - 1; i++) {
         auto* case_type = cases[i].ret->get_ktype();
         if (*def_type != *case_type) {
-            throw std::runtime_error(fmt::format(
+            throw std::runtime_error(std::format(
                 "Type mismatch in match case expression: `{}` (type `{}`), `{}` (type `{}`)", cases[i].ret->to_string(),
                 case_type->to_string(), cases.back().ret->to_string(), def_type->to_string()));
         }

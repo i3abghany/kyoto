@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/MethodCallNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -34,7 +34,7 @@ llvm::Value* MethodCall::gen()
 {
     auto instance_symbol = compiler.get_symbol(instance_name);
     if (!instance_symbol.has_value()) {
-        throw std::runtime_error(fmt::format("MethodCall::gen: Symbol {} not found", instance_name));
+        throw std::runtime_error(std::format("MethodCall::gen: Symbol {} not found", instance_name));
     }
 
     ExpressionNode* self = new IdentifierExpressionNode(instance_name, compiler);

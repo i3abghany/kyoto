@@ -44,7 +44,7 @@ public:
     void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
                      size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override
     {
-        throw std::runtime_error(fmt::format("Lexer error at line {}, char {}: {}", line, charPositionInLine, msg));
+        throw std::runtime_error(std::format("Lexer error at line {}, char {}: {}", line, charPositionInLine, msg));
     }
 };
 
@@ -53,7 +53,7 @@ public:
     void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
                      size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override
     {
-        throw std::runtime_error(fmt::format("Parser error at line {}, char {}: {}", line, charPositionInLine, msg));
+        throw std::runtime_error(std::format("Parser error at line {}, char {}: {}", line, charPositionInLine, msg));
     }
 };
 
@@ -317,7 +317,7 @@ size_t ModuleCompiler::get_primitive_size(const std::string& name) const
     if (name == "F32") return 4;
     if (name == "F64") return 8;
 
-    throw std::runtime_error(fmt::format("Unknown size for type: {}", name));
+    throw std::runtime_error(std::format("Unknown size for type: {}", name));
 }
 
 size_t ModuleCompiler::get_type_size(const std::string& name) const

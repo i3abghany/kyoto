@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/MemberAccessNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/IR/DerivedTypes.h>
 #include <optional>
 #include <stdexcept>
@@ -78,7 +78,7 @@ void MemberAccessNode::validate_member_access(KType* lhs_type) const
 {
     if (!lhs_type->is_class() && !lhs_type->is_pointer_to_class("")) {
         throw std::runtime_error(
-            fmt::format("Member access is only allowed on class instances, got {}", lhs->to_string()));
+            std::format("Member access is only allowed on class instances, got {}", lhs->to_string()));
     }
 }
 
@@ -87,7 +87,7 @@ llvm::Type* MemberAccessNode::get_class_type(KType* lhs_type) const
     std::string class_name = lhs_type->get_class_name();
 
     if (!compiler.class_exists(class_name)) {
-        throw std::runtime_error(fmt::format("Class `{}` does not exist", class_name));
+        throw std::runtime_error(std::format("Class `{}` does not exist", class_name));
     }
 
     return compiler.get_class_metadata(class_name).llvm_type;
@@ -99,7 +99,7 @@ unsigned MemberAccessNode::get_member_index(KType* lhs_type) const
     auto& class_metadata = compiler.get_class_metadata(class_name);
     auto idx = class_metadata.member_idx(member);
     if (!idx.has_value()) {
-        throw std::runtime_error(fmt::format("Class `{}` does not have a member with name `{}`", class_name, member));
+        throw std::runtime_error(std::format("Class `{}` does not have a member with name `{}`", class_name, member));
     }
     return idx.value();
 }
@@ -110,7 +110,7 @@ const ASTNode* MemberAccessNode::get_member_declaration(const ClassMetadata& cla
 
     if (!member_def) {
         throw std::runtime_error(
-            fmt::format("Class `{}` does not have a member with name `{}`", class_metadata.node->get_name(), member));
+            std::format("Class `{}` does not have a member with name `{}`", class_metadata.node->get_name(), member));
     }
 
     return member_def;

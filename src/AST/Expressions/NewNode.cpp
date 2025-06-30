@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/NewNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -29,7 +29,7 @@ NewNode::~NewNode()
 
 std::string NewNode::to_string() const
 {
-    return fmt::format("New({})", constructor_call->to_string());
+    return std::format("New({})", constructor_call->to_string());
 }
 
 llvm::Value* NewNode::gen()

@@ -1,6 +1,6 @@
 #include "kyoto/AST/ForStatementNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <stdexcept>
 #include <vector>
 
@@ -31,7 +31,7 @@ ForStatementNode::~ForStatementNode()
 
 std::string ForStatementNode::to_string() const
 {
-    return fmt::format("ForStatement({}, {}, {}, {})", init->to_string(), condition->to_string(), update->to_string(),
+    return std::format("ForStatement({}, {}, {}, {})", init->to_string(), condition->to_string(), update->to_string(),
                        body->to_string());
 }
 
@@ -83,7 +83,7 @@ void ForStatementNode::verify_bool_condition() const
     if (!condition) return;
     if (!condition->get_expr()->get_ktype()->is_boolean()) {
         throw std::runtime_error(
-            fmt::format("For condition must be of type bool, got {}", condition->get_expr()->get_ktype()->to_string()));
+            std::format("For condition must be of type bool, got {}", condition->get_expr()->get_ktype()->to_string()));
     }
 }
 

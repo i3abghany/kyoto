@@ -245,7 +245,7 @@ ArrayType::~ArrayType()
 
 std::string ArrayType::to_string() const
 {
-    return fmt::format("{}[{}]", element_type->to_string(), size);
+    return std::format("{}[{}]", element_type->to_string(), size);
 }
 
 bool ArrayType::operator==(const KType& other) const

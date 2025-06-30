@@ -1,7 +1,7 @@
 #include "kyoto/AST/DeclarationNodes.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <stdexcept>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
@@ -30,7 +30,7 @@ DeclarationStatementNode::~DeclarationStatementNode()
 
 std::string DeclarationStatementNode::to_string() const
 {
-    return fmt::format("DeclarationNode({}, {})", name, type->to_string());
+    return std::format("DeclarationNode({}, {})", name, type->to_string());
 }
 
 llvm::Value* DeclarationStatementNode::gen()
@@ -59,7 +59,7 @@ FullDeclarationStatementNode::~FullDeclarationStatementNode()
 
 std::string FullDeclarationStatementNode::to_string() const
 {
-    return fmt::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
+    return std::format("FullDeclarationNode({}, {}, {})", name, type->to_string(), expr->to_string());
 }
 
 llvm::Value* FullDeclarationStatementNode::gen()
@@ -85,7 +85,7 @@ void FullDeclarationStatementNode::initialize_type()
 void FullDeclarationStatementNode::validate_type_not_void() const
 {
     if (type->is_void()) {
-        throw std::runtime_error(fmt::format("Cannot declare variable `{}` of type `void`", name));
+        throw std::runtime_error(std::format("Cannot declare variable `{}` of type `void`", name));
     }
 }
 
@@ -94,7 +94,7 @@ void FullDeclarationStatementNode::validate_expression_not_void() const
     const auto* expr_ktype = expr->get_ktype();
     bool constructor_call = expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call();
     if (expr_ktype->is_void() && !constructor_call)
-        throw std::runtime_error(fmt::format("Cannot assign value of type `void` to variable `{}`", name));
+        throw std::runtime_error(std::format("Cannot assign value of type `void` to variable `{}`", name));
 }
 
 llvm::AllocaInst* FullDeclarationStatementNode::create_alloca() const
@@ -131,11 +131,11 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
 
     std::string expr_ktype_str = expr_ktype->to_string();
     if (expr_ktype->is_void() && expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call()) {
-        expr_ktype_str = fmt::format("class {}", expr->to_string().substr(0, expr->to_string().find('_')));
+        expr_ktype_str = std::format("class {}", expr->to_string().substr(0, expr->to_string().find('_')));
     }
 
     throw std::runtime_error(
-        fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+        std::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
                     expr->to_string(), expr_ktype_str, name, type->to_string()));
 }
 

@@ -1,6 +1,6 @@
 #include "kyoto/AST/IfStatementNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <stddef.h>
 #include <stdexcept>
 #include <utility>
@@ -33,14 +33,14 @@ std::string IfStatementNode::to_string() const
     std::string str;
 
     for (size_t i = 0; i < conditions.size(); ++i) {
-        str += fmt::format("IfStatement({}, {})", conditions[i]->to_string(), bodies[i]->to_string());
+        str += std::format("IfStatement({}, {})", conditions[i]->to_string(), bodies[i]->to_string());
     }
 
     if (bodies.size() > conditions.size()) {
-        str += fmt::format("ElseStatement({})", bodies.back()->to_string());
+        str += std::format("ElseStatement({})", bodies.back()->to_string());
     }
 
-    return fmt::format("IfStatement([{}])", str);
+    return std::format("IfStatement([{}])", str);
 }
 
 llvm::Value* IfStatementNode::gen()
@@ -76,7 +76,7 @@ llvm::Value* IfStatementNode::gen()
     for (size_t i = 0; i < body_bbs.size(); i++) {
 
         if (const auto* cond_ktype = conditions[i]->get_ktype(); !cond_ktype->is_boolean()) {
-            throw std::runtime_error(fmt::format("If condition must be of type bool, got {}", cond_ktype->to_string()));
+            throw std::runtime_error(std::format("If condition must be of type bool, got {}", cond_ktype->to_string()));
         }
 
         compiler.get_builder().SetInsertPoint(jumps_bbs[i]);

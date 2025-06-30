@@ -1,6 +1,6 @@
 #include "kyoto/AST/FreeStatementNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
@@ -24,7 +24,7 @@ FreeStatementNode::~FreeStatementNode()
 
 std::string FreeStatementNode::to_string() const
 {
-    return fmt::format("Free({})", expr->to_string());
+    return std::format("Free({})", expr->to_string());
 }
 
 llvm::Value* FreeStatementNode::gen()

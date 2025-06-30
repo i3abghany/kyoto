@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fmt/core.h>
+#include <format>
 #include <iostream>
 
 #include "llvm/IR/Type.h"

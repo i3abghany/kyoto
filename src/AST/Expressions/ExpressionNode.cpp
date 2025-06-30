@@ -1,7 +1,7 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <stdexcept>
 
 #include "kyoto/KType.h"
@@ -20,9 +20,9 @@ void ExpressionNode::check_boolean_promotion(const PrimitiveType* expr_ktype, co
                                              const std::string& target_name)
 {
     if (expr_ktype->is_boolean() && !target_type->is_boolean()) {
-        throw std::runtime_error(fmt::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype->to_string(),
+        throw std::runtime_error(std::format("Cannot convert value of type `{}` to `{}`{}", expr_ktype->to_string(),
                                              target_type->to_string(),
-                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+                                             target_name.empty() ? "" : std::format(" for `{}`", target_name)));
     }
 }
 
@@ -30,9 +30,9 @@ void ExpressionNode::check_int_range_fit(int64_t val, const PrimitiveType* targe
                                          const std::string& expr, const std::string& target_name)
 {
     if (!compiler.get_type_resolver().fits_in(val, target_type->get_kind())) {
-        throw std::runtime_error(fmt::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr, val,
+        throw std::runtime_error(std::format("Value of RHS `{}` = `{}` does not fit in type `{}`{}", expr, val,
                                              target_type->to_string(),
-                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+                                             target_name.empty() ? "" : std::format(" for `{}`", target_name)));
     }
 }
 
@@ -79,9 +79,9 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, con
     bool is_trivially_evaluable = expr->is_trivially_evaluable();
 
     if (!is_compatible && !is_trivially_evaluable) {
-        throw std::runtime_error(fmt::format("Cannot {} value of type `{}`. Expected `{}`{}", what,
+        throw std::runtime_error(std::format("Cannot {} value of type `{}`. Expected `{}`{}", what,
                                              expr_ktype->to_string(), target_type->to_string(),
-                                             target_name.empty() ? "" : fmt::format(" for `{}`", target_name)));
+                                             target_name.empty() ? "" : std::format(" for `{}`", target_name)));
     }
 
     if (auto* trivial = promoted_trivially_gen(expr, compiler, target_ktype, target_name); trivial) {

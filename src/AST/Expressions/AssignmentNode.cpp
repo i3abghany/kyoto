@@ -1,7 +1,7 @@
 #include "kyoto/AST/Expressions/AssignmentNode.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <stdexcept>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
@@ -30,7 +30,7 @@ AssignmentNode::~AssignmentNode()
 
 std::string AssignmentNode::to_string() const
 {
-    return fmt::format("Assignment({}, {})", assignee->to_string(), expr->to_string());
+    return std::format("Assignment({}, {})", assignee->to_string(), expr->to_string());
 }
 
 llvm::Value* AssignmentNode::gen_deref_assignment() const
@@ -42,7 +42,7 @@ llvm::Value* AssignmentNode::gen_deref_assignment() const
     const auto* expr_ktype = expr->get_ktype();
 
     if (!expr_ktype->operator==(*pktype)) {
-        throw std::runtime_error(fmt::format("Cannot assign expression {} (type {}) to lvalue {} (type {})",
+        throw std::runtime_error(std::format("Cannot assign expression {} (type {}) to lvalue {} (type {})",
                                              expr->to_string(), expr_ktype->to_string(), assignee->to_string(),
                                              pktype->to_string()));
     }
@@ -73,7 +73,7 @@ llvm::Value* AssignmentNode::gen()
 void AssignmentNode::validate_lvalue() const
 {
     if (assignee->is_trivially_evaluable()) {
-        throw std::runtime_error(fmt::format("Cannot assign to a non-lvalue `{}`", assignee->to_string()));
+        throw std::runtime_error(std::format("Cannot assign to a non-lvalue `{}`", assignee->to_string()));
     }
 }
 
@@ -93,7 +93,7 @@ llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const 
     }
 
     throw std::runtime_error(
-        fmt::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
+        std::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
                     expr->to_string(), expr->get_ktype()->to_string(), name, type->to_string()));
 }
 

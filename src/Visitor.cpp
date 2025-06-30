@@ -193,7 +193,7 @@ std::any ASTBuilderVisitor::visitNumberExpression(kyoto::KyotoParser::NumberExpr
             return (ExpressionNode*)new NumberNode(num.value(), new PrimitiveType(kind), compiler);
     }
 
-    throw std::runtime_error(fmt::format("Failed to parse number literal: `{}`", txt));
+    throw std::runtime_error(std::format("Failed to parse number literal: `{}`", txt));
 }
 
 std::any ASTBuilderVisitor::visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx)
@@ -396,7 +396,7 @@ std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArray
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
     if (!type->is_primitive())
         throw std::runtime_error(
-            fmt::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
+            std::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
     const auto size = std::stoul(ctx->INTEGER()->getText());
     return (ExpressionNode*)new NewArrayNode(type, size, compiler);
 }

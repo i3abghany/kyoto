@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -28,7 +28,7 @@
     }                                                                                                               \
     std::string name::to_string() const                                                                             \
     {                                                                                                               \
-        return fmt::format("{}({}, {})", #name, lhs->to_string(), rhs->to_string());                                \
+        return std::format("{}({}, {})", #name, lhs->to_string(), rhs->to_string());                                \
     }                                                                                                               \
     llvm::Value* name::gen()                                                                                        \
     {                                                                                                               \
@@ -38,7 +38,7 @@
         auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
         auto t = compiler.get_type_resolver().resolve_binary_logical(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
         if (!t.has_value()) {                                                                                       \
-            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
+            throw std::runtime_error(std::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
                                                  lhs_ktype->to_string(), rhs_ktype->to_string()));                  \
         }                                                                                                           \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                         \
@@ -60,7 +60,7 @@
         auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
         auto t = compiler.get_type_resolver().resolve_binary_logical(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
         if (!t.has_value()) {                                                                                       \
-            throw std::runtime_error(fmt::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
+            throw std::runtime_error(std::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,     \
                                                  lhs_ktype->to_string(), rhs_ktype->to_string()));                  \
         }                                                                                                           \
         return compiler.get_builder().llvm_op(lhs_val, rhs_val, #op "val");                                         \

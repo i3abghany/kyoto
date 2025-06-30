@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/NumberNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <stddef.h>
 
 #include "kyoto/KType.h"
@@ -22,7 +22,7 @@ NumberNode::~NumberNode()
 
 std::string NumberNode::to_string() const
 {
-    return fmt::format("{}({})", type->to_string(), value);
+    return std::format("{}({})", type->to_string(), value);
 }
 
 llvm::Value* NumberNode::gen()

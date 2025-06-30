@@ -1,7 +1,7 @@
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <optional>
 #include <stddef.h>
 #include <stdexcept>
@@ -48,7 +48,7 @@ llvm::Value* FunctionCall::gen()
 {
     auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
-        throw std::runtime_error(fmt::format("Function `{}` not found", name));
+        throw std::runtime_error(std::format("Function `{}` not found", name));
     }
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) arg_values.push_back(destination);
@@ -58,7 +58,7 @@ llvm::Value* FunctionCall::gen()
 
     if (fn->arg_size() != arg_values.size() && (!fn->isVarArg() || fn->arg_size() > arg_values.size())) {
         throw std::runtime_error(
-            fmt::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));
+            std::format("Function `{}` expects {} arguments, got {}", name, fn->arg_size(), arg_values.size()));
     }
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
@@ -74,7 +74,7 @@ llvm::Value* FunctionCall::gen_ptr() const
 
     auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
-        throw std::runtime_error(fmt::format("Function `{}` not found", name));
+        throw std::runtime_error(std::format("Function `{}` not found", name));
     }
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
@@ -83,7 +83,7 @@ llvm::Type* FunctionCall::gen_type() const
 {
     const auto* fn = compiler.get_module()->getFunction(name);
     if (!fn) {
-        throw std::runtime_error(fmt::format("Function `{}` not found", name));
+        throw std::runtime_error(std::format("Function `{}` not found", name));
     }
     return fn->getReturnType();
 }
@@ -97,7 +97,7 @@ KType* FunctionCall::get_ktype() const
 {
     auto fn = compiler.get_function(name);
     if (fn.has_value()) return fn.value()->get_ret_type();
-    throw std::runtime_error(fmt::format("Function `{}` not found", name));
+    throw std::runtime_error(std::format("Function `{}` not found", name));
 }
 
 bool FunctionCall::is_trivially_evaluable() const

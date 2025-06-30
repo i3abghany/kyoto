@@ -1,7 +1,7 @@
 #include "kyoto/AST/ClassDefinitionNode.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <sstream>
 #include <stdexcept>
 #include <string.h>
@@ -77,14 +77,14 @@ llvm::Value* ConstructorNode::gen()
     auto stripped_name = get_name().substr(0, get_name().size() - strlen(constructor_suffix));
 
     if (get_params().empty()) {
-        throw std::runtime_error(fmt::format("Constructor for `{}` expects at least one `self: {}*` parameter",
+        throw std::runtime_error(std::format("Constructor for `{}` expects at least one `self: {}*` parameter",
                                              stripped_name, stripped_name));
     }
 
     auto& self = get_params().front();
     if (self.name != "self" || !self.type->is_pointer_to_class(stripped_name)) {
         throw std::runtime_error(
-            fmt::format("First argument to constructor `{}` must be `self: {}*`", stripped_name, stripped_name));
+            std::format("First argument to constructor `{}` must be `self: {}*`", stripped_name, stripped_name));
     }
 
     return FunctionNode::gen();

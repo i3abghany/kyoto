@@ -1,7 +1,7 @@
 #include "kyoto/AST/ReturnStatement.h"
 
 #include <assert.h>
-#include <fmt/core.h>
+#include <format>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
 #include <stdexcept>
@@ -29,7 +29,7 @@ ReturnStatementNode::~ReturnStatementNode()
 
 std::string ReturnStatementNode::to_string() const
 {
-    return fmt::format("ReturnNode({})", expr->to_string());
+    return std::format("ReturnNode({})", expr->to_string());
 }
 
 llvm::Value* ReturnStatementNode::gen()
@@ -42,7 +42,7 @@ llvm::Value* ReturnStatementNode::gen()
     }
 
     if (!expr) {
-        throw std::runtime_error(fmt::format("Expected return type `{}`", fn_ret_type->to_string()));
+        throw std::runtime_error(std::format("Expected return type `{}`", fn_ret_type->to_string()));
     }
 
     llvm::Value* expr_val = generate_return_value();
@@ -52,7 +52,7 @@ llvm::Value* ReturnStatementNode::gen()
 void ReturnStatementNode::validate_void_return() const
 {
     if (expr) {
-        throw std::runtime_error(fmt::format("Expected return type void, got expression `{}` (type `{}`)",
+        throw std::runtime_error(std::format("Expected return type void, got expression `{}` (type `{}`)",
                                              expr->to_string(), expr->get_ktype()->to_string()));
     }
 }
@@ -75,7 +75,7 @@ llvm::Value* ReturnStatementNode::generate_return_value() const
     }
 
     throw std::runtime_error(
-        fmt::format("Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
+        std::format("Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
                     expr->to_string(), expr->get_ktype()->to_string(), fn_name, fn_ret_type->to_string()));
 }
 

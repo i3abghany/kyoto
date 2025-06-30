@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/ArrayNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/IR/Type.h>
 #include <stddef.h>
 #include <stdexcept>
@@ -47,7 +47,7 @@ void ArrayNode::check_types() const
         const auto* expected_type = elem_ktype->is_array() ? first_elem_type : elem_ktype;
 
         if (!elem_type->operator==(*expected_type)) {
-            throw std::runtime_error(fmt::format("Array element type mismatch: expected {}, got {}",
+            throw std::runtime_error(std::format("Array element type mismatch: expected {}, got {}",
                                                  expected_type->to_string(), elem_type->to_string()));
         }
     }

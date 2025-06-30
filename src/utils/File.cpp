@@ -11,7 +11,7 @@
 #include <boost/process/io.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/process/search_path.hpp>
-#include <fmt/core.h>
+#include <format>
 #include <fstream>
 #include <iterator>
 #include <memory>
@@ -28,7 +28,7 @@ std::string File::get_source(const std::string_view filename)
 {
     std::ifstream ifs(filename.data());
     if (!ifs.is_open()) {
-        throw std::runtime_error(fmt::format("Failed to open file: {}", filename));
+        throw std::runtime_error(std::format("Failed to open file: {}", filename));
     }
     return std::string { std::istreambuf_iterator(ifs), {} };
 }

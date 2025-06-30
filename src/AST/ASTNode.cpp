@@ -1,5 +1,5 @@
 #include <cassert>
-#include <fmt/core.h>
+#include <format>
 #include <llvm/IR/Module.h>
 #include <stddef.h>
 #include <stdexcept>
@@ -36,7 +36,7 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
 
     if (!type->is_primitive()) {
         if (!dynamic_cast<const PointerType*>(type)) {
-            throw std::runtime_error(fmt::format("Unsupported type `{}`", type->to_string()));
+            throw std::runtime_error(std::format("Unsupported type `{}`", type->to_string()));
         }
     }
 
@@ -85,7 +85,7 @@ std::string ProgramNode::to_string() const
     for (const auto* node : nodes) {
         str += node->to_string() + "\n";
     }
-    return fmt::format("ProgramNode([{}])", str);
+    return std::format("ProgramNode([{}])", str);
 }
 
 llvm::Value* ProgramNode::gen()
@@ -112,7 +112,7 @@ ExpressionStatementNode::~ExpressionStatementNode()
 
 std::string ExpressionStatementNode::to_string() const
 {
-    return fmt::format("ExpressionStatementNode({})", expr->to_string());
+    return std::format("ExpressionStatementNode({})", expr->to_string());
 }
 
 llvm::Value* ExpressionStatementNode::gen()
@@ -143,7 +143,7 @@ std::string BlockNode::to_string() const
     for (const auto* node : nodes) {
         str += node->to_string() + ", ";
     }
-    return fmt::format("BlockNode([{}])", str);
+    return std::format("BlockNode([{}])", str);
 }
 
 llvm::Value* BlockNode::gen()
@@ -191,7 +191,7 @@ std::string FunctionNode::to_string() const
         args_str += name + ": " + type->to_string() + ", ";
     }
     if (varargs) args_str += "...";
-    return fmt::format("FunctionNode({}, {}, [{}], [{}])", ret_type->to_string(), name, args_str, body->to_string());
+    return std::format("FunctionNode({}, {}, [{}], [{}])", ret_type->to_string(), name, args_str, body->to_string());
 }
 
 llvm::Value* FunctionNode::gen()

@@ -1,6 +1,6 @@
 #include "kyoto/AST/Expressions/NewArrayNode.h"
 
-#include <fmt/core.h>
+#include <format>
 #include <llvm/ADT/ArrayRef.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -28,7 +28,7 @@ NewArrayNode::~NewArrayNode()
 
 std::string NewArrayNode::to_string() const
 {
-    return fmt::format("new {}[{}]", type->get_class_name(), n);
+    return std::format("new {}[{}]", type->get_class_name(), n);
 }
 
 llvm::Value* NewArrayNode::gen()
