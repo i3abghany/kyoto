@@ -6,7 +6,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fno-threadsafe-statics -fno-strict-aliasing -fno-math-errno -ffunction-sections -fdata-sections")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/SetupLLVM.cmake)

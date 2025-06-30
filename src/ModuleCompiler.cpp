@@ -62,6 +62,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , name(name)
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
+    , data_layout(module->getDataLayout())
 {
     register_visitors();
     register_malloc();
