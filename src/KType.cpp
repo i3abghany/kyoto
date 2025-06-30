@@ -108,7 +108,7 @@ size_t PrimitiveType::width() const
         break;
     }
 
-    assert(false && "Unknown type");
+    throw std::runtime_error("Unknown primitive type width");
 }
 
 KType* PrimitiveType::copy() const
