@@ -22,7 +22,7 @@ int run(int argc, const char* argv[])
 {
     po::options_description desc("The Kyoto Programming Language Compiler");
     desc.add_options()("help,h", "Print this help message")("run,r", "Run the program in `lli` after compilation")(
-        "output,o", po::value<std::string>()->default_value("out.ll"), "Output file for the LLVM IR");
+        "output,o", po::value<std::string>()->default_value("a.out"), "Output file for the executable binary");
 
     po::positional_options_description pos;
     pos.add("files", -1);
@@ -64,11 +64,13 @@ int run(int argc, const char* argv[])
 
     if (!ir) return 1;
 
-    std::ofstream ofs(output);
-    ofs << *ir;
-
     if (vm.contains("run")) {
         return utils::File::execute_ir(*ir);
+    }
+
+    if (!utils::File::compile_ir_to_binary(*ir, output)) {
+        std::cerr << "Error: Failed to compile to binary" << std::endl;
+        return 1;
     }
 
     return 0;

@@ -17,6 +17,7 @@ public:
     static std::string get_source(std::string_view filename);
     static std::vector<TestCase> get_test_cases(std::string_view filename);
     static int32_t execute_ir(const std::string& ir);
+    static bool compile_ir_to_binary(const std::string& ir, const std::string& output_path);
     static bool is_executable(const std::string& filename);
 
 private:

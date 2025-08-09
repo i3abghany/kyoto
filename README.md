@@ -44,6 +44,14 @@ $ cmake ..
 $ make cyoto -j$(nproc)
 ```
 
+### Running Tests
+
+To run the tests, you can use the following command:
+
+```bash
+$ make ktest -j$(nproc) && ./ktest
+```
+
 ## Usage
 
 To compile a Kyoto source file, run the following command:
@@ -55,7 +63,7 @@ Usage: ./cyoto [OPTIONS] INPUT_FILE
 The Kyoto Programming Language Compiler:
   -h [ --help ]                 Print this help message
   -r [ --run ]                  Run the program in `lli` after compilation
-  -o [ --output ] arg (=out.ll) Output file for the LLVM IR
+  -o [ --output ] arg (=a.out) Output file for the executable binary
 ```
 
 ## Fuzzing the Compiler

@@ -61,6 +61,51 @@ int32_t File::execute_ir(const std::string& ir)
     return ((exit_code & 0xFF) << 24) >> 24;
 }
 
+bool File::compile_ir_to_binary(const std::string& ir, const std::string& output_path)
+{
+    auto temp_ir_file = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("temp-%%%%-%%%%.ll");
+    std::ofstream ofs(temp_ir_file.string());
+    if (!ofs.is_open()) {
+        std::cerr << "Error: Failed to create temporary IR file" << std::endl;
+        return false;
+    }
+    ofs << ir;
+    ofs.close();
+
+    if (is_executable("clang")) {
+        std::string cmd = "clang -O2 " + temp_ir_file.string() + " -o " + output_path;
+        boost::process::child proc { cmd };
+        proc.wait();
+        boost::filesystem::remove(temp_ir_file);
+        return proc.exit_code() == 0;
+    }
+
+    if (is_executable("llc") && is_executable("gcc")) {
+        auto temp_asm_file
+            = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("temp-%%%%-%%%%.s");
+        std::string llc_cmd = "llc -O2 " + temp_ir_file.string() + " -o " + temp_asm_file.string();
+        boost::process::child llc_proc { llc_cmd };
+        llc_proc.wait();
+
+        if (llc_proc.exit_code() != 0) {
+            boost::filesystem::remove(temp_ir_file);
+            return false;
+        }
+
+        std::string gcc_cmd = "gcc " + temp_asm_file.string() + " -o " + output_path;
+        boost::process::child gcc_proc { gcc_cmd };
+        gcc_proc.wait();
+
+        boost::filesystem::remove(temp_ir_file);
+        boost::filesystem::remove(temp_asm_file);
+        return gcc_proc.exit_code() == 0;
+    }
+
+    boost::filesystem::remove(temp_ir_file);
+    std::cerr << "Error: No suitable compiler found (`clang` or `llc`+`gcc` required)" << std::endl;
+    return false;
+}
+
 bool File::is_executable(const std::string& name)
 {
     const auto path = boost::process::search_path(name);
