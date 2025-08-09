@@ -452,7 +452,6 @@ std::any ASTBuilderVisitor::visitForUpdate(kyoto::KyotoParser::ForUpdateContext*
 
 std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementContext* ctx)
 {
-
     auto init_any = visit(ctx->forInit());
     auto* init = init_any.has_value() ? std::any_cast<ASTNode*>(init_any) : nullptr;
 

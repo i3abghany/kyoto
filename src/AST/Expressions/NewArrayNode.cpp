@@ -39,11 +39,8 @@ llvm::Value* NewArrayNode::gen()
 
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
 
-    llvm::ArrayRef<llvm::Value*> args = {
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size),
-    };
-
-    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, args);
+    llvm::Value* size_arg = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size);
+    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, size_arg);
     return ptr;
 }
 
@@ -55,11 +52,8 @@ llvm::Value* NewArrayNode::gen_ptr() const
 
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
 
-    llvm::ArrayRef<llvm::Value*> args = {
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size),
-    };
-
-    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, args);
+    llvm::Value* size_arg = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size);
+    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, size_arg);
     return ptr;
 }
 

@@ -55,6 +55,7 @@ add_executable(
     main.cpp
     ${SOURCES})
 
+target_compile_options(cyoto PRIVATE -O3)
 target_link_libraries(cyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
 
 set(TEST_SOURCES
@@ -79,6 +80,7 @@ add_executable(
     ${TEST_SOURCES}
 )
 
+target_compile_options(ktest PRIVATE -O3)
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
 
 include(GoogleTest)

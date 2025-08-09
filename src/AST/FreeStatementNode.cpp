@@ -31,8 +31,7 @@ llvm::Value* FreeStatementNode::gen()
 {
     auto* ptr = expr->gen();
     auto* free_fn = compiler.get_module()->getFunction("free");
-    llvm::ArrayRef<llvm::Value*> args = { ptr };
-    return compiler.get_builder().CreateCall(free_fn, args);
+    return compiler.get_builder().CreateCall(free_fn, ptr);
 }
 
 std::vector<ASTNode*> FreeStatementNode::get_children() const
