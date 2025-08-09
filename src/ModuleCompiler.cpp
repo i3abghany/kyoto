@@ -338,11 +338,17 @@ void ModuleCompiler::add_class_metadata(const std::string& name, const ClassMeta
 
 llvm::StructType* ModuleCompiler::get_llvm_struct(const std::string& name) const
 {
+    if (!classes_metadata.contains(name)) {
+        throw std::runtime_error(std::format("Class metadata for '{}' not found", name));
+    }
     return classes_metadata.at(name).llvm_type;
 }
 
 ClassMetadata& ModuleCompiler::get_class_metadata(const std::string& name)
 {
+    if (!classes_metadata.contains(name)) {
+        throw std::runtime_error(std::format("Class '{}' not found", name));
+    }
     return classes_metadata.at(name);
 }
 
