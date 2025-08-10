@@ -1,0 +1,160 @@
+// NAME BasicStackArrayIndexing
+// ERR 0
+// RET 44
+
+fn main() i32 {
+    var arr: i32[] = i32{100, 200, 300, 400, 500};
+    return arr[2];  // 300 % 256 = 44
+}
+
+// NAME FirstElementAccess
+// ERR 0
+// RET 42
+
+fn main() i32 {
+    var numbers: i32[] = i32{42, 84, 126};
+    return numbers[0];
+}
+
+// NAME LastElementAccess
+// ERR 0
+// RET 126
+
+fn main() i32 {
+    var numbers: i32[] = i32{42, 84, 126};
+    return numbers[2];
+}
+
+// NAME HeapArrayAllocation
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var heap_arr: i32* = new i32[10];
+    free heap_arr;
+    return 0;
+}
+
+// NAME CorrectCalculation
+// ERR 0 
+// RET 60
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 20, 30, 40};
+    return arr[1] + arr[3];
+}
+
+// NAME VariableIndexing
+// ERR 0
+// RET 20
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 20, 30, 40};
+    var index: i32 = 1;
+    return arr[index];
+}
+
+// NAME BinaryExpressionIndexing
+// ERR 0
+// RET 40
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 20, 30, 40};
+    return arr[2 + 1];
+}
+
+// NAME ArrayModification
+// ERR 0
+// RET 99
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2, 3, 4, 5};
+    arr[2] = 99;
+    return arr[2];
+}
+
+// NAME MultipleIndexOperations
+// ERR 0
+// RET 17
+
+fn main() i32 {
+    var arr: i32[] = i32{5, 12, 8, 9, 15};
+    return arr[1] + arr[0];
+}
+
+// NAME NestedArrayAccess
+// ERR 0
+// RET 6
+
+fn main() i32 {
+    var arr1: i32[] = i32{0, 1, 2};
+    var arr2: i32[] = i32{3, 4, 5, 6, 7};
+    return arr2[arr1[2] + 1];
+}
+
+// NAME ArrayLengthCalculation
+// ERR 0
+// RET 25
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 15, 20, 25, 30};
+    var last_index: i32 = 3;
+    return arr[last_index];
+}
+
+// NAME ZeroIndexAccess
+// ERR 0
+// RET 100
+
+fn main() i32 {
+    var arr: i32[] = i32{100};
+    return arr[0];
+}
+
+// NAME LargeArrayAccess
+// ERR 0
+// RET 77
+
+fn main() i32 {
+    var arr: i32[] = i32{11, 22, 33, 44, 55, 66, 77, 88, 99};
+    return arr[6];
+}
+
+// NAME ArrayArithmetic
+// ERR 0
+// RET 30
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 15, 20, 25};
+    return arr[0] + arr[2];
+}
+
+// NAME IndexWithSubtraction
+// ERR 0
+// RET 15
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 15, 20, 25};
+    var index: i32 = 3 - 2;
+    return arr[index];
+}
+
+// NAME SequentialAccess
+// ERR 0
+// RET 75
+
+fn main() i32 {
+    var arr: i32[] = i32{25, 50, 75, 100};
+    var sum: i32 = 0;
+    sum = sum + arr[2];
+    return sum;
+}
+
+// NAME ArrayElementMultiplication
+// ERR 0
+// RET 80
+
+fn main() i32 {
+    var arr: i32[] = i32{2, 4, 8, 10};
+    return arr[1] * 2 * arr[3];
+}
