@@ -63,6 +63,18 @@ llvm::Value* ArrayNode::gen()
     return llvm::ConstantArray::get(static_cast<llvm::ArrayType*>(type), eval);
 }
 
+llvm::Value* ArrayNode::gen_ptr() const
+{
+    // For stack arrays, we need to create an alloca and store the array
+    auto* array_type = gen_type();
+    auto* alloca = compiler.get_builder().CreateAlloca(array_type, nullptr, "array_alloca");
+
+    auto* array_value = const_cast<ArrayNode*>(this)->gen();
+    compiler.get_builder().CreateStore(array_value, alloca);
+
+    return alloca;
+}
+
 llvm::Type* ArrayNode::gen_type() const
 {
     // FIXME: This is a temporary solution as there's no "easy" way

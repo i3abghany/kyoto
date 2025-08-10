@@ -18,7 +18,8 @@ NewArrayNode::NewArrayNode(KType* type, size_t n, ModuleCompiler& compiler)
     , n(n)
     , compiler(compiler)
 {
-    generated_type = new ArrayType(type, n);
+    // For heap arrays, new T[n] returns T*, not T[n]
+    generated_type = new PointerType(type->copy());
 }
 
 NewArrayNode::~NewArrayNode()
@@ -28,7 +29,7 @@ NewArrayNode::~NewArrayNode()
 
 std::string NewArrayNode::to_string() const
 {
-    return std::format("new {}[{}]", type->get_class_name(), n);
+    return std::format("new {}[{}]", type->to_string(), n);
 }
 
 llvm::Value* NewArrayNode::gen()

@@ -13,6 +13,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/DeclarationNodes.h"
+#include "kyoto/AST/Expressions/ArrayIndexNode.h"
 #include "kyoto/AST/Expressions/ArrayNode.h"
 #include "kyoto/AST/Expressions/AssignmentNode.h"
 #include "kyoto/AST/Expressions/BinaryNode.h"
@@ -370,13 +371,26 @@ std::any ASTBuilderVisitor::visitMatchExpression(kyoto::KyotoParser::MatchExpres
 std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
-    type->as<ArrayType>()->set_size(ctx->expressionList()->expression().size());
+
+    if (!type->is_array()) {
+        type = new ArrayType(type, ctx->expressionList()->expression().size());
+    } else {
+        type->as<ArrayType>()->set_size(ctx->expressionList()->expression().size());
+    }
+
     std::vector<ExpressionNode*> elems;
     elems.reserve(ctx->expressionList()->expression().size());
     for (const auto arg : ctx->expressionList()->expression()) {
         elems.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
     return (ExpressionNode*)new ArrayNode(elems, type, compiler);
+}
+
+std::any ASTBuilderVisitor::visitArrayIndexExpression(kyoto::KyotoParser::ArrayIndexExpressionContext* ctx)
+{
+    auto* array = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
+    auto* index = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
+    return (ExpressionNode*)new ArrayIndexNode(array, index, compiler);
 }
 
 std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpressionContext* ctx)

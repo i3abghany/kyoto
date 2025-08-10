@@ -50,6 +50,7 @@ expression:
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
 	| ASTERISK expression										# dereferenceExpression
+	| expression OPEN_BRACKET expression CLOSE_BRACKET			# arrayIndexExpression
 	| expression DOT IDENTIFIER									# memberAccessExpression
 	| expression DOT IDENTIFIER LPAREN expressionList RPAREN	# methodCallExpression
 	| AMPERSAND expression										# addressOfExpression
