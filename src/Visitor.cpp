@@ -26,6 +26,7 @@
 #include "kyoto/AST/Expressions/NewArrayNode.h"
 #include "kyoto/AST/Expressions/NewNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
+#include "kyoto/AST/Expressions/SizeofNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/AST/ForStatementNode.h"
@@ -413,6 +414,17 @@ std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArray
             std::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
     const auto size = std::stoul(ctx->INTEGER()->getText());
     return (ExpressionNode*)new NewArrayNode(type, size, compiler);
+}
+
+std::any ASTBuilderVisitor::visitSizeofExpression(kyoto::KyotoParser::SizeofExpressionContext* ctx)
+{
+    if (ctx->type()) {
+        auto* type = std::any_cast<KType*>(visit(ctx->type()));
+        return (ExpressionNode*)new SizeofNode(type, compiler);
+    } else {
+        auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+        return (ExpressionNode*)new SizeofNode(expr, compiler);
+    }
 }
 
 std::any ASTBuilderVisitor::visitIfStatement(kyoto::KyotoParser::IfStatementContext* ctx)

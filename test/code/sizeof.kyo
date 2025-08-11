@@ -1,0 +1,282 @@
+// NAME BasicSizeofI8
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    return sizeof(i8);
+}
+
+// NAME BasicSizeofI16
+// ERR 0
+// RET 2
+
+fn main() i32 {
+    return sizeof(i16);
+}
+
+// NAME BasicSizeofI32
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    return sizeof(i32);
+}
+
+// NAME BasicSizeofI64
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    return sizeof(i64);
+}
+
+// NAME BasicSizeofF32
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    return sizeof(f32);
+}
+
+// NAME BasicSizeofF64
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    return sizeof(f64);
+}
+
+// NAME BasicSizeofChar
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    return sizeof(char);
+}
+
+// NAME BasicSizeofBool
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    return sizeof(bool);
+}
+
+// NAME SizeofPointer
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var size: i32 = sizeof(i32*);
+    return size;
+}
+
+// NAME SizeofVariable
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    var x: i32 = 42;
+    var size: i32 = sizeof(x);
+    return size;
+}
+
+// NAME SizeofArray
+// ERR 0
+// RET 20
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2, 3, 4, 5};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofArrayI8
+// ERR 0
+// RET 10
+
+fn main() i32 {
+    var arr: char[] = char{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofInArithmetic
+// ERR 0
+// RET 12
+
+fn main() i32 {
+    var result: i32 = sizeof(i32) + sizeof(i64);
+    return result;
+}
+
+// NAME SizeofInComparison
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    if (sizeof(i64) > sizeof(i32)) {
+        return 1;
+    }
+    return 0;
+}
+
+// NAME SizeofNestedExpression
+// ERR 0
+// RET 10
+
+fn main() i32 {
+    var x: i32 = 10;
+    var temp: i32 = sizeof(x) * 2;
+    var result: i32 = temp + sizeof(i16);
+    return result;
+}
+
+// NAME SizeofPointerVariable
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var x: i32 = 42;
+    var ptr: i32* = &x;
+    var size: i32 = sizeof(ptr);
+    return size;
+}
+
+// NAME SizeofPointerDeref
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    var x: i32 = 42;
+    var ptr: i32* = &x;
+    var size: i32 = sizeof(*ptr);
+    return size;
+}
+
+// NAME SizeofMultipleTypes
+// ERR 0
+// RET 29
+
+fn main() i32 {
+    var total: i32 = sizeof(i8) + sizeof(i16) + sizeof(i32) + sizeof(i64) + sizeof(f32) + sizeof(f64) + sizeof(char) + sizeof(bool);
+    return total;
+}
+
+// NAME SizeofInFunctionCall
+// ERR 0
+// RET 9
+
+fn takes_i64(x: i32) i32 {
+    return x + 1;
+}
+
+fn main() i32 {
+    var result: i32 = takes_i64(sizeof(f64));
+    return result;
+}
+
+// NAME SizeofZeroArray
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var arr: i32[] = i32{};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofSingleElementArray
+// ERR 0
+// RET 4
+
+fn main() i32 {
+    var arr: i32[] = i32{42};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofCharArray
+// ERR 0
+// RET 5
+
+fn main() i32 {
+    var arr: char[] = char{'h', 'e', 'l', 'l', 'o'};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofBoolArray
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    var arr: bool[] = bool{true, false, true};
+    var size: i32 = sizeof(arr);
+    return size;
+}
+
+// NAME SizeofDoublePointer
+// ERR 0
+// RET 8
+
+fn main() i32 {
+    var size: i32 = sizeof(i32**);
+    return size;
+}
+
+// NAME SizeofComplexArithmetic
+// ERR 0
+// RET 32
+
+fn main() i32 {
+    var arr_size: i32 = sizeof(i64) * 4;  // 8 * 4 = 32
+    return arr_size;
+}
+
+// NAME SizeofInAssignment
+// ERR 0
+// RET 15
+
+fn main() i32 {
+    var sizes: i32[] = i32{sizeof(i8), sizeof(i16), sizeof(i32), sizeof(i64)};
+    var total: i32 = sizes[0] + sizes[1] + sizes[2] + sizes[3];
+    return total;
+}
+
+// NAME SizeofClass
+// ERR 0
+// RET 12
+
+class MyClass {
+    var x: i32;
+    var y: i64;
+
+    constructor(self: MyClass*) {
+        self.x = 0;
+        self.y = 0;
+    }
+}
+
+fn main() i32 {
+    var my_instance: MyClass = MyClass();
+    var size: i32 = sizeof(my_instance);
+    return size;
+}
+
+// NAME SizeofClassMember
+// ERR 0
+// RET 8
+
+class MyClass {
+    var m: i64;
+
+    constructor(self: MyClass*) {
+        self.m = 0;
+    }
+}
+fn main() i32 {
+    var my_instance: MyClass = MyClass();
+    var size: i32 = sizeof(my_instance.m);
+    return size;
+}
