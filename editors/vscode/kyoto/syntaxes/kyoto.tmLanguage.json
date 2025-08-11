@@ -4,7 +4,7 @@
     "patterns": [
         {
             "name": "keyword.control.kyoto",
-            "match": "\\b(if|else|for|while|return|match|var|fn|class|constructor|self|new|free)\\b"
+            "match": "\\b(if|else|for|while|return|match|var|fn|class|constructor|self|new|free|sizeof)\\b"
         },
         {
             "name": "storage.type.kyo",
