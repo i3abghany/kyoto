@@ -14,10 +14,10 @@ fn insertion_sort(arr: i32*, size: i32) {
 
 fn main() i32 {
     var p: i32[] = i32{ 5, 3, 8, 4, 2 };
-    var size: i32 = 5;
+    var size: i32 = sizeof(p) / sizeof(i32);
     insertion_sort(&p[0], size);
-    
-    printf("Sorted array: ");
+
+    printf("Sorted array (size=%d): ", size);
     for (var i = 0; i < size; ++i) {
         printf("%d ", p[i]);
     }
