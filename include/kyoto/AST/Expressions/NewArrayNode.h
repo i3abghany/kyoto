@@ -12,7 +12,7 @@ class ModuleCompiler;
 
 class NewArrayNode : public ExpressionNode {
 public:
-    NewArrayNode(KType* type, size_t n, ModuleCompiler& compiler);
+    NewArrayNode(KType* type, ExpressionNode* size_expr, ModuleCompiler& compiler);
 
     ~NewArrayNode() override;
 
@@ -28,13 +28,13 @@ public:
 
     [[nodiscard]] KType* get_generated_type() const { return generated_type; }
 
-    [[nodiscard]] size_t get_size() const { return n; }
+    [[nodiscard]] ExpressionNode* get_size_expr() const { return size_expr; }
 
-    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { size_expr }; }
 
 private:
     KType* type;
     KType* generated_type;
-    size_t n;
+    ExpressionNode* size_expr;
     ModuleCompiler& compiler;
 };

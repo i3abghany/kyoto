@@ -117,3 +117,125 @@ fn main() i32 {
     y.a = 10;
     return x.a;
 }
+
+// NAME NewArrayLiteral
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var arr: i32* = new i32[10];
+    return 0;
+}
+
+// NAME NewArrayVariable
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var size: i32 = 5;
+    var arr: i32* = new i32[size];
+    return 0;
+}
+
+// NAME NewArrayExpression
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 3;
+    var y: i32 = 2;
+    var arr: i32* = new i32[x + y];
+    return 0;
+}
+
+// NAME NewArrayFunctionCall
+// ERR 0
+// RET 0
+
+fn get_size() i32 {
+    return 8;
+}
+
+fn main() i32 {
+    var arr: i32* = new i32[get_size()];
+    return 0;
+}
+
+// NAME NewArrayDifferentTypes
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var arr1: i8* = new i8[5];
+    var arr2: i16* = new i16[10];
+    var arr3: i64* = new i64[3];
+    return 0;
+}
+
+// NAME NewArrayI16Size
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var size: i16 = 7;
+    var arr: i32* = new i32[size];
+    return 0;
+}
+
+// NAME NewArrayCharSize
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var size: char = 4;
+    var arr: i32* = new i32[size];
+    return 0;
+}
+
+// NAME NewArrayComplexExpression
+// ERR 0
+// RET 0
+
+fn compute_size(a: i32, b: i32) i32 {
+    return a * b + 1;
+}
+
+fn main() i32 {
+    var base: i32 = 3;
+    var multiplier: i32 = 4;
+    var arr: i32* = new i32[compute_size(base, multiplier)];
+    return 0;
+}
+
+// NAME NewArrayArithmetic
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var a: i32 = 10;
+    var b: i32 = 3;
+    var arr1: i32* = new i32[a + b];
+    var arr2: i32* = new i32[a - b];
+    var arr3: i32* = new i32[a * b];
+    return 0;
+}
+
+// NAME NewArrayZeroSize
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var size: i32 = 0;
+    var arr: i32* = new i32[size];
+    return 0;
+}
+
+// NAME NewArrayBoolSize
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var size: bool = true;
+    var arr: i32* = new i32[size];
+    return 0;
+}

@@ -13,9 +13,9 @@
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 
-NewArrayNode::NewArrayNode(KType* type, size_t n, ModuleCompiler& compiler)
+NewArrayNode::NewArrayNode(KType* type, ExpressionNode* size_expr, ModuleCompiler& compiler)
     : type(type)
-    , n(n)
+    , size_expr(size_expr)
     , compiler(compiler)
 {
     // For heap arrays, new T[n] returns T*, not T[n]
@@ -25,36 +25,83 @@ NewArrayNode::NewArrayNode(KType* type, size_t n, ModuleCompiler& compiler)
 NewArrayNode::~NewArrayNode()
 {
     delete generated_type;
+    delete size_expr;
 }
 
 std::string NewArrayNode::to_string() const
 {
-    return std::format("new {}[{}]", type->to_string(), n);
+    return std::format("new {}[{}]", type->to_string(), size_expr->to_string());
 }
 
 llvm::Value* NewArrayNode::gen()
 {
-    const auto& class_name = type->to_string();
-    const auto& class_size = compiler.get_type_size(class_name);
-    const size_t array_size = n * class_size;
+    KType* size_type = size_expr->get_ktype();
+    if (!size_type->is_primitive() || !size_type->as<PrimitiveType>()->is_integer()) {
+        throw std::runtime_error(
+            std::format("Array size expression must be of integer type, got: {}", size_type->to_string()));
+    }
+
+    llvm::Value* size_value = size_expr->gen();
+
+    size_t element_size;
+    if (type->is_primitive()) {
+        element_size = type->as<PrimitiveType>()->width();
+    } else if (type->is_class()) {
+        element_size = compiler.get_type_size(type->get_class_name());
+    } else {
+        throw std::runtime_error(std::format("Unsupported type for new array: {}", type->to_string()));
+    }
+
+    llvm::Value* size_i64;
+    if (size_value->getType()->isIntegerTy(64)) {
+        size_i64 = size_value;
+    } else {
+        size_i64
+            = compiler.get_builder().CreateIntCast(size_value, llvm::Type::getInt64Ty(compiler.get_context()), true);
+    }
+
+    llvm::Value* element_size_value
+        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), element_size);
+    llvm::Value* total_size = compiler.get_builder().CreateMul(size_i64, element_size_value);
 
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
-
-    llvm::Value* size_arg = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size);
-    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, size_arg);
+    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, total_size);
     return ptr;
 }
 
 llvm::Value* NewArrayNode::gen_ptr() const
 {
-    const auto& class_name = type->to_string();
-    const auto& class_size = compiler.get_type_size(class_name);
-    const size_t array_size = n * class_size;
+    KType* size_type = size_expr->get_ktype();
+    if (!size_type->is_primitive() || !size_type->as<PrimitiveType>()->is_integer()) {
+        throw std::runtime_error(
+            std::format("Array size expression must be of integer type, got: {}", size_type->to_string()));
+    }
+
+    llvm::Value* size_value = size_expr->gen();
+
+    size_t element_size;
+    if (type->is_primitive()) {
+        element_size = type->as<PrimitiveType>()->width();
+    } else if (type->is_class()) {
+        element_size = compiler.get_type_size(type->get_class_name());
+    } else {
+        throw std::runtime_error(std::format("Unsupported type for new array: {}", type->to_string()));
+    }
+
+    llvm::Value* size_i64;
+    if (size_value->getType()->isIntegerTy(64)) {
+        size_i64 = size_value;
+    } else {
+        size_i64
+            = compiler.get_builder().CreateIntCast(size_value, llvm::Type::getInt64Ty(compiler.get_context()), true);
+    }
+
+    llvm::Value* element_size_value
+        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), element_size);
+    llvm::Value* total_size = compiler.get_builder().CreateMul(size_i64, element_size_value);
 
     auto* malloc_fn = compiler.get_module()->getFunction("malloc");
-
-    llvm::Value* size_arg = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_size);
-    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, size_arg);
+    auto* ptr = compiler.get_builder().CreateCall(malloc_fn, total_size);
     return ptr;
 }
 

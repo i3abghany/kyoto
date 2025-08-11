@@ -412,8 +412,9 @@ std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArray
     if (!type->is_primitive())
         throw std::runtime_error(
             std::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
-    const auto size = std::stoul(ctx->INTEGER()->getText());
-    return (ExpressionNode*)new NewArrayNode(type, size, compiler);
+
+    auto* size_expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new NewArrayNode(type, size_expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitSizeofExpression(kyoto::KyotoParser::SizeofExpressionContext* ctx)
