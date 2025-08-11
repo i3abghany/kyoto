@@ -1,5 +1,6 @@
 #include "kyoto/AST/Expressions/SizeofNode.h"
 
+#include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/IR/Constants.h"
@@ -43,9 +44,18 @@ std::string SizeofNode::to_string() const
 llvm::Value* SizeofNode::gen()
 {
     KType* target_type;
+    bool should_delete_target_type = false;
 
     if (operand_type == OperandType::Expression) {
-        target_type = expr->get_ktype();
+        // Special case: if the expression is an identifier that refers to a class name,
+        // treat it as a class type instead of trying to look it up as a variable
+        auto* identifier_expr = dynamic_cast<IdentifierExpressionNode*>(expr);
+        if (identifier_expr && compiler.class_exists(identifier_expr->get_name())) {
+            target_type = new ClassType(identifier_expr->get_name());
+            should_delete_target_type = true;
+        } else {
+            target_type = expr->get_ktype();
+        }
     } else {
         target_type = type;
     }
@@ -78,6 +88,10 @@ llvm::Value* SizeofNode::gen()
         size_bytes = compiler.get_type_size(target_type->get_class_name());
     } else {
         throw std::runtime_error("Unsupported type in sizeof expression");
+    }
+
+    if (should_delete_target_type) {
+        delete target_type;
     }
 
     return llvm::ConstantInt::get(llvm::Type::getInt32Ty(compiler.get_context()), size_bytes);

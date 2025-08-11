@@ -280,3 +280,50 @@ fn main() i32 {
     var size: i32 = sizeof(my_instance.m);
     return size;
 }
+
+// NAME SizeofClassMemberArithmetic
+// ERR 0
+// RET 4
+
+class MyClass {
+    var a: i32;
+    var b: i32;
+
+    constructor(self: MyClass*) {
+        self.a = 0;
+        self.b = 1;
+    }
+}
+
+fn main() i32 {
+    var my_instance: MyClass = MyClass();
+    var size: i32 = sizeof(my_instance.a + my_instance.b);
+    return size;
+}
+
+// NAME SizeofClassName
+// ERR 0
+// RET 12
+
+class MyClass {
+    var a: i32;
+    var b: i64;
+
+    constructor(self: MyClass*) {
+        self.a = 0;
+        self.b = 0;
+    }
+}
+fn main() i32 {
+    var size: i32 = sizeof(MyClass);
+    return size;
+}
+
+// NAME SizeofNonExistentClass
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var size: i32 = sizeof(NonExistentClass);
+    return size;
+}
