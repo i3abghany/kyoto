@@ -417,9 +417,9 @@ std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpression
 std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArrayExpressionContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
-    if (!type->is_primitive())
+    if (!type->is_primitive() && !type->is_class())
         throw std::runtime_error(
-            std::format("Only primitive types are supported for new array expressions. Found: {}", type->to_string()));
+            std::format("Only primitive and class types are supported for new array expressions. Found: {}", type->to_string()));
 
     auto* size_expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ExpressionNode*)new NewArrayNode(type, size_expr, compiler);

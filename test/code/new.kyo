@@ -239,3 +239,42 @@ fn main() i32 {
     var arr: i32* = new i32[size];
     return 0;
 }
+
+// NAME NewClassArray
+// ERR 0
+// RET 0
+
+class Point {
+    var x: i32;
+    var y: i32;
+
+    constructor(self: Point*) {
+        self.x = 0;
+        self.y = 0;
+    }
+}
+
+fn main() i32 {
+    var arr: Point* = new Point[5];
+    return 0;
+}
+
+// NAME NewClassArrayDynamic
+// ERR 0
+// RET 0
+
+class Point {
+    var x: i32;
+    var y: i32;
+
+    constructor(self: Point*) {
+        self.x = 0;
+        self.y = 0;
+    }
+}
+
+fn main() i32 {
+    var size: i32 = 10;
+    var arr: Point* = new Point[size];
+    return 0;
+}
