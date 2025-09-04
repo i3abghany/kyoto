@@ -57,11 +57,12 @@ llvm::Value* CastNode::gen()
     // - Widening integer conversions (e.g., i8 to i32)
     // - Boolean to boolean casts
     // - Arbitrary pointer conversions (e.g., T* to U*)
+    // - Identity casts (e.g., T to T)
     // Prohibited casting scenarios:
     // - Narrowing integer conversions (e.g., i32 to i8)
     // - Pointer to integer or integer to pointer conversions
     // - From/to array types
-    // - from/to integer/boolean/char (except boolean to boolean)
+    // - from/to integer/boolean/char one another
 
     auto expr_ktype = expr->get_ktype();
     auto target_ktype = type;
@@ -70,8 +71,7 @@ llvm::Value* CastNode::gen()
         return handle_integer_cast();
     }
 
-    if (expr_ktype->is_boolean() && target_ktype->is_boolean()) {
-        // Boolean to boolean cast is just the identity
+    if (*expr_ktype == *target_ktype) {
         return expr->gen();
     }
 
