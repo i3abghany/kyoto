@@ -11,12 +11,12 @@ Cyoto requires the following dependencies:
 - Java >= 8
 - antlr == 4.13.2
 - Boost >= 1.74.0
-- GCC >= 11 (for C++23 support)
+- GCC >= 13 (for C++23 and std::fmt support)
 
 To install the dependencies on Ubuntu, run the following commands:
 
 ```bash
-$ sudo apt-get install llvm-20-dev cmake default-jre libboost-all-dev gcc-11 g++-11 libfmt-dev libzstd-dev
+$ sudo apt-get install llvm-20-dev cmake default-jre libboost-all-dev gcc-13 g++-13 libfmt-dev libzstd-dev
 ```
 
 Antlr 4.13.2 can be installed from the official website's mirror as follows:
@@ -40,7 +40,7 @@ To build the compiler, run the following commands:
 ```bash
 $ mkdir build
 $ cd build
-$ cmake ..
+$ cmake .. -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13
 $ make cyoto -j$(nproc)
 ```
 
