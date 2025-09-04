@@ -1,0 +1,72 @@
+cdecl fn printf(fmt: str, ...) i32;
+
+class Point {
+    var x: i32;
+    var y: i32;
+
+    constructor(self: Point*) {
+        self.x = 0;
+        self.y = 0;
+    }
+
+    constructor(self: Point*, x_val: i32, y_val: i32) {
+        self.x = x_val;
+        self.y = y_val;
+    }
+}
+
+class VectorOfPoints {
+    var points: Point*;
+    var size: i32;
+    var capacity: i32;
+
+    constructor(self: VectorOfPoints*) {
+        self.points = new Point[1];
+        self.size = 0;
+        self.capacity = 1;
+    }
+    
+    constructor(self: VectorOfPoints*, initial_cap: i32) {
+        self.points = new Point[initial_cap];
+        self.size = 0;
+        self.capacity = initial_cap;
+    }
+
+    fn push(self: VectorOfPoints*, p: Point*) {
+        if (self.size >= self.capacity) {
+            printf("DEBUG: resizing from %d to %d\n", self.capacity, self.capacity * 2);
+            var new_capacity: i32 = self.capacity * 2;
+            var new_points: Point* = new Point[new_capacity];
+            for (var i = 0; i < self.size; ++i) {
+                new_points[i].x = self.points[i].x;
+                new_points[i].y = self.points[i].y;
+            }
+            free self.points;
+            self.points = new_points;
+            self.capacity = new_capacity;
+        }
+        
+        self.points[self.size].x = p.x;
+        self.points[self.size].y = p.y;
+
+        self.size = self.size + 1;
+    }
+
+    fn printAll(self: VectorOfPoints*) {
+        for (var i = 0; i < self.size; ++i) {
+            printf("Point %d: (%d, %d)\n", i + 1, self.points[i].x, self.points[i].y);
+        }
+    }
+}
+
+fn main() i32 {
+    var vec: VectorOfPoints* = new VectorOfPoints();
+
+    for (var i = 1; i <= 5; ++i) {
+        var p: Point = Point(i, i * 2);
+        vec.push(&p);
+    }
+
+    vec.printAll();
+    return 0;
+}
