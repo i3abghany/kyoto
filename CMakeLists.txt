@@ -13,7 +13,6 @@ include(cmake/SetupLLVM.cmake)
 include(cmake/SetupANTLR.cmake)
 include(cmake/SetupGTest.cmake)
 include(cmake/SetupBoost.cmake)
-find_package(fmt CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${ANTLR4_INCLUDE_DIRS})
@@ -60,7 +59,7 @@ add_executable(
     ${SOURCES})
 
 target_compile_options(cyoto PRIVATE -O3)
-target_link_libraries(cyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
+target_link_libraries(cyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
 
 set(TEST_SOURCES
     test/TestDriver.cpp
@@ -88,7 +87,7 @@ add_executable(
 )
 
 target_compile_options(ktest PRIVATE -O3)
-target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES} fmt::fmt-header-only)
+target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
 
 include(GoogleTest)
 gtest_discover_tests(ktest)
