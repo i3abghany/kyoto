@@ -1,5 +1,12 @@
 #include "kyoto/AST/Expressions/SizeofNode.h"
 
+#include <format>
+#include <llvm/IR/DerivedTypes.h>
+#include <stddef.h>
+#include <stdexcept>
+#include <vector>
+
+#include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/Expressions/IdentifierNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

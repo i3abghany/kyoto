@@ -5,7 +5,6 @@
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
-#include "kyoto/AST/Expressions/FunctionCallNode.h"
 
 class KType;
 class ModuleCompiler;

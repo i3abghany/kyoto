@@ -1,6 +1,8 @@
 #include "kyoto/AST/Expressions/ArrayNode.h"
 
 #include <format>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/Type.h>
 #include <stddef.h>
 #include <stdexcept>

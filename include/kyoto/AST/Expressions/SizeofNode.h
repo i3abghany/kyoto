@@ -1,13 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
 class KType;
 class ModuleCompiler;
-namespace llvm {
-class Value;
-class Type;
-} // namespace llvm
 
 class SizeofNode : public ExpressionNode {
 public:

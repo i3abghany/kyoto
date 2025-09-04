@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -8,6 +9,7 @@
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
 class ModuleCompiler;
+
 namespace llvm {
 class Value;
 } // namespace llvm

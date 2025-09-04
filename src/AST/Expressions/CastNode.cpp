@@ -1,9 +1,15 @@
 #include "kyoto/AST/Expressions/CastNode.h"
 
 #include <format>
+#include <llvm/IR/IRBuilder.h>
+#include <stdexcept>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
+
+namespace llvm {
+class Value;
+}
 
 CastNode::CastNode(KType* type, ExpressionNode* expr, ModuleCompiler& compiler)
     : type(type)

@@ -1,9 +1,12 @@
 #include "kyoto/ModuleCompiler.h"
 
+#include <BailErrorStrategy.h>
+#include <BaseErrorListener.h>
 #include <any>
 #include <assert.h>
 #include <cstdlib>
 #include <exception>
+#include <format>
 #include <iostream>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/Support/TypeSize.h>

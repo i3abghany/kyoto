@@ -13,6 +13,7 @@
 #include <boost/process/search_path.hpp>
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>

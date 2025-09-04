@@ -1,14 +1,17 @@
 #include "kyoto/AST/Expressions/ArrayIndexNode.h"
 
 #include <format>
+#include <llvm/ADT/ArrayRef.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Instructions.h>
 #include <stdexcept>
+#include <vector>
 
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Type.h"
-#include "llvm/IR/Value.h"
 
 ArrayIndexNode::ArrayIndexNode(ExpressionNode* array, ExpressionNode* index, ModuleCompiler& compiler)
     : array(array)

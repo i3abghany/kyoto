@@ -8,6 +8,10 @@
 
 class KType;
 class ModuleCompiler;
+class PrimitiveType;
+namespace llvm {
+class Value;
+}
 
 class CastNode : public ExpressionNode {
 public:

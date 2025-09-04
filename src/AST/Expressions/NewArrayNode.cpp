@@ -9,6 +9,9 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
+#include <llvm/IR/Value.h>
+#include <stddef.h>
+#include <stdexcept>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

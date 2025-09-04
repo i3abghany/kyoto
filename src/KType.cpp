@@ -1,6 +1,5 @@
 #include "kyoto/KType.h"
 
-#include <assert.h>
 #include <utility>
 
 #include "llvm/IR/Type.h"

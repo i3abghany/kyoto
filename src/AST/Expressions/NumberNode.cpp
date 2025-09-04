@@ -2,6 +2,7 @@
 
 #include <format>
 #include <stddef.h>
+#include <stdexcept>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

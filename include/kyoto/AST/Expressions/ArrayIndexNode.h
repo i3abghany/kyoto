@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
@@ -10,7 +9,6 @@ class KType;
 
 namespace llvm {
 class Value;
-class Type;
 }
 
 class ArrayIndexNode : public ExpressionNode {
