@@ -69,7 +69,7 @@ std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
 
     auto* ret_type = std::any_cast<KType*>(visit(ctx->type()));
     const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
-    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler, /* is_external = */ true);
     compiler.add_function(proto);
     return (ASTNode*)proto;
 }
@@ -165,8 +165,10 @@ std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::Func
 {
     const auto name = ctx->IDENTIFIER()->getText();
     std::vector<ExpressionNode*> args;
-    for (const auto arg : ctx->expressionList()->expression()) {
-        args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+    if (ctx->expressionList() && !ctx->expressionList()->expression().empty()) {
+        for (const auto arg : ctx->expressionList()->expression()) {
+            args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+        }
     }
     return (ExpressionNode*)new FunctionCall(name, args, compiler);
 }
@@ -418,8 +420,8 @@ std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArray
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
     if (!type->is_primitive() && !type->is_class())
-        throw std::runtime_error(
-            std::format("Only primitive and class types are supported for new array expressions. Found: {}", type->to_string()));
+        throw std::runtime_error(std::format(
+            "Only primitive and class types are supported for new array expressions. Found: {}", type->to_string()));
 
     auto* size_expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ExpressionNode*)new NewArrayNode(type, size_expr, compiler);

@@ -46,10 +46,37 @@ std::string FunctionCall::to_string() const
 
 llvm::Value* FunctionCall::gen()
 {
-    auto* fn = compiler.get_module()->getFunction(name);
-    if (!fn) {
-        throw std::runtime_error(std::format("Function `{}` not found", name));
+    if (name == "main") {
+        auto* fn = compiler.get_module()->getFunction("main");
+        if (fn) {
+            std::vector<llvm::Value*> arg_values;
+            for (auto& arg : args)
+                arg_values.push_back(arg->gen());
+            return compiler.get_builder().CreateCall(fn, arg_values);
+        }
     }
+
+    size_t lookup_arity = args.size();
+    if (is_constructor_call()) {
+        if (destination) {
+            lookup_arity = args.size() + 1;
+        } else {
+            lookup_arity = args.size();
+        }
+    }
+
+    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    auto* fn = compiler.get_module()->getFunction(llvm_name);
+
+    if (!fn) {
+        fn = compiler.get_module()->getFunction(name);
+    }
+
+    if (!fn) {
+        throw std::runtime_error(
+            std::format("Function `{}` with {} arguments not found (looking for `{}`)", name, args.size(), llvm_name));
+    }
+
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) arg_values.push_back(destination);
 
@@ -72,19 +99,50 @@ llvm::Value* FunctionCall::gen_ptr() const
     for (auto& arg : args)
         arg_values.push_back(arg->gen());
 
-    auto* fn = compiler.get_module()->getFunction(name);
+    size_t lookup_arity = args.size();
+    if (is_constructor_call()) {
+        if (destination) {
+            lookup_arity = args.size() + 1;
+        } else {
+            lookup_arity = args.size();
+        }
+    }
+
+    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    auto* fn = compiler.get_module()->getFunction(llvm_name);
+
     if (!fn) {
-        throw std::runtime_error(std::format("Function `{}` not found", name));
+        fn = compiler.get_module()->getFunction(name);
+    }
+
+    if (!fn) {
+        throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));
     }
     return compiler.get_builder().CreateCall(fn, arg_values);
 }
 
 llvm::Type* FunctionCall::gen_type() const
 {
-    const auto* fn = compiler.get_module()->getFunction(name);
-    if (!fn) {
-        throw std::runtime_error(std::format("Function `{}` not found", name));
+    size_t lookup_arity = args.size();
+    if (is_constructor_call()) {
+        if (destination) {
+            lookup_arity = args.size() + 1;
+        } else {
+            lookup_arity = args.size();
+        }
     }
+
+    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    const auto* fn = compiler.get_module()->getFunction(llvm_name);
+
+    if (!fn) {
+        fn = compiler.get_module()->getFunction(name);
+    }
+
+    if (!fn) {
+        throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));
+    }
+
     return fn->getReturnType();
 }
 
@@ -95,9 +153,22 @@ llvm::Value* FunctionCall::trivial_gen()
 
 KType* FunctionCall::get_ktype() const
 {
-    auto fn = compiler.get_function(name);
+    size_t lookup_arity = args.size();
+    if (is_constructor_call()) {
+        if (destination) {
+            lookup_arity = args.size() + 1;
+        } else {
+            lookup_arity = args.size();
+        }
+    }
+
+    auto fn = compiler.get_function(name, lookup_arity);
     if (fn.has_value()) return fn.value()->get_ret_type();
-    throw std::runtime_error(std::format("Function `{}` not found", name));
+
+    fn = compiler.get_function(name);
+    if (fn.has_value()) return fn.value()->get_ret_type();
+
+    throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));
 }
 
 bool FunctionCall::is_trivially_evaluable() const

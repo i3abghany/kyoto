@@ -47,6 +47,7 @@ public:
 
     void add_function(FunctionNode* node);
     std::optional<FunctionNode*> get_function(const std::string& name);
+    std::optional<FunctionNode*> get_function(const std::string& name, size_t arity);
 
     void register_visitors();
     void register_malloc();
@@ -82,6 +83,8 @@ private:
     ASTNode* parse_program();
     void ensure_main_fn() const;
     void llvm_pass();
+
+    std::string make_function_key(const std::string& name, size_t arity) const;
 
 private:
     std::unordered_map<std::string, FunctionNode*> functions;

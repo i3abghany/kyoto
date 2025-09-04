@@ -278,3 +278,28 @@ fn main() i32 {
     var arr: Point* = new Point[size];
     return 0;
 }
+
+// NAME ConstructorOverloading
+// ERR 0
+// RET 42
+
+class Point {
+    var x: i32;
+    var y: i32;
+
+    constructor(self: Point*) {
+        self.x = 42;
+        self.y = 0;
+    }
+
+    constructor(self: Point*, x: i32) {
+        self.x = x;
+        self.y = 0;
+    }
+}
+
+fn main() i32 {
+    var p1: Point = Point();
+    var p2: Point = Point(10);
+    return p1.x;
+}

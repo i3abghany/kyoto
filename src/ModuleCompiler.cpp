@@ -198,12 +198,24 @@ void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 }
 void ModuleCompiler::add_function(FunctionNode* node)
 {
-    functions[node->get_name()] = node;
+    std::string key = make_function_key(node->get_name(), node->get_params().size());
+    functions[key] = node;
 }
 
 std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name)
 {
-    if (functions.contains(name)) return functions[name];
+    for (const auto& [key, func] : functions) {
+        if (key.find(name + "_") == 0) {
+            return func;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name, size_t arity)
+{
+    std::string key = make_function_key(name, arity);
+    if (functions.contains(key)) return functions[key];
     return std::nullopt;
 }
 
@@ -214,7 +226,7 @@ void ModuleCompiler::register_malloc()
     param.name = "size";
     param.type = new PrimitiveType(PrimitiveType::Kind::I64);
     std::vector<FunctionNode::Parameter> args = { param };
-    auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this);
+    auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this, /*is_external = */ true);
     add_function(malloc);
     (void)malloc->gen_prototype();
 }
@@ -226,7 +238,7 @@ void ModuleCompiler::register_free()
     param.name = "ptr";
     param.type = new PointerType(new PrimitiveType(PrimitiveType::Kind::I8));
     std::vector<FunctionNode::Parameter> args = { param };
-    auto* free = new FunctionNode("free", args, false, ret_type, nullptr, *this);
+    auto* free = new FunctionNode("free", args, false, ret_type, nullptr, *this, /* is_external = */ true);
     add_function(free);
     (void)free->gen_prototype();
 }
@@ -365,6 +377,11 @@ void ModuleCompiler::pop_fn_return_type()
 KType* ModuleCompiler::get_fn_return_type() const
 {
     return curr_fn_ret_type;
+}
+
+std::string ModuleCompiler::make_function_key(const std::string& name, size_t arity) const
+{
+    return name + "_" + std::to_string(arity);
 }
 
 size_t ModuleCompiler::n_scopes() const

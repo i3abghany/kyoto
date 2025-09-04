@@ -84,7 +84,7 @@ public:
     };
 
     FunctionNode(std::string name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
-                 ModuleCompiler& compiler);
+                 ModuleCompiler& compiler, bool is_external = false);
     ~FunctionNode() override;
 
     [[nodiscard]] std::string to_string() const override;
@@ -101,6 +101,8 @@ public:
 
     void set_body(ASTNode* body) { this->body = body; }
 
+    [[nodiscard]] bool is_external() const { return is_external_function; }
+
 private:
     [[nodiscard]] std::vector<llvm::Type*> get_arg_types() const;
 
@@ -110,4 +112,5 @@ private:
     KType* ret_type;
     ASTNode* body;
     ModuleCompiler& compiler;
+    bool is_external_function;
 };
