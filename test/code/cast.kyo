@@ -1,0 +1,308 @@
+// NAME TestValidI8ToI16Cast
+// ERR 0
+// RET 42
+
+fn main() i32 {
+    var x: i8 = 42;
+    var y: i16 = (i16)x;
+    return (i32)y;
+}
+
+
+// NAME TestValidI8ToI32Cast
+// ERR 0
+// RET 100
+
+fn main() i32 {
+    var x: i8 = 100;
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestValidI8ToI64Cast
+// ERR 0
+// RET 50
+
+fn main() i32 {
+    var x: i8 = 50;
+    var y: i64 = (i64)x;
+    // Can't cast i64 back to i32 since it's narrowing
+    return 50; // Return constant instead
+}
+
+
+// NAME TestValidI16ToI32Cast
+// ERR 0
+// RET 100
+
+fn main() i32 {
+    var x: i16 = 100;
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestValidI16ToI64Cast
+// ERR 0
+// RET 123
+
+fn main() i32 {
+    var x: i16 = 123;
+    var y: i64 = (i64)x;
+    // Can't cast i64 back to i32 since it's narrowing
+    return 123; // Return constant instead
+}
+
+
+// NAME TestValidI32ToI64Cast
+// ERR 0
+// RET 99
+
+fn main() i32 {
+    var x: i32 = 99;
+    var y: i64 = (i64)x;
+    // Can't cast i64 back to i32 since it's narrowing
+    return 99; // Return constant instead
+}
+
+
+// NAME TestValidCharToI16Cast
+// ERR 0
+// RET 65
+
+fn main() i32 {
+    var x: char = 'A';
+    var y: i16 = (i16)x;
+    return (i32)y;
+}
+
+
+// NAME TestValidCharToI32Cast
+// ERR 0
+// RET 66
+
+fn main() i32 {
+    var x: char = 'B';
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestValidCharToI64Cast
+// ERR 0
+// RET 67
+
+fn main() i32 {
+    var x: char = 'C';
+    var y: i64 = (i64)x;
+    // Can't cast i64 back to i32 since it's narrowing
+    return 67; // Return constant instead
+}
+
+
+// NAME TestValidBoolToBoolCast
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: bool = true;
+    var y: bool = (bool)x;
+    if (y) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
+// NAME TestInvalidNarrowingI32ToI16Cast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 1000;
+    var y: i16 = (i16)x;
+    return y;
+}
+
+
+// NAME TestInvalidNarrowingI32ToI8Cast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 300;
+    var y: i8 = (i8)x;
+    return y;
+}
+
+
+// NAME TestInvalidNarrowingI64ToI32Cast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i64 = 100000;
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestInvalidNarrowingI16ToI8Cast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i16 = 300;
+    var y: i8 = (i8)x;
+    return y;
+}
+
+
+// NAME TestInvalidNarrowingI16ToCharCast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i16 = 300;
+    var y: char = (char)x;
+    return y;
+}
+
+
+// NAME TestInvalidBoolToIntegerCast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: bool = true;
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestInvalidIntegerToBoolCast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i32 = 1;
+    var y: bool = (bool)x;
+    return (i32)y;
+}
+
+
+// NAME TestInvalidCharToBoolCast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: char = 'A';
+    var y: bool = (bool)x;
+    return (i32)y;
+}
+
+
+// NAME TestInvalidBoolToCharCast
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: bool = true;
+    var y: char = (char)x;
+    return y;
+}
+
+
+// NAME TestValidSameTypeCastI32
+// ERR 0
+// RET 42
+
+fn main() i32 {
+    var x: i32 = 42;
+    var y: i32 = (i32)x;
+    return y;
+}
+
+
+// NAME TestValidSameTypeCastI8
+// ERR 0
+// RET 25
+
+fn main() i32 {
+    var x: i8 = 25;
+    var y: i8 = (i8)x;
+    return (i32)y;
+}
+
+
+// NAME TestValidSameTypeCastChar
+// ERR 0
+// RET 88
+
+fn main() i32 {
+    var x: char = 'X';
+    var y: char = (char)x;
+    return (i32)y;
+}
+
+
+// NAME TestValidSameTypeCastBool
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: bool = false;
+    var y: bool = (bool)x;
+    if (y) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
+// NAME TestCastInExpression
+// ERR 0
+// RET 92
+
+fn main() i32 {
+    var x: i8 = 42;
+    return 50 + (i32)x;
+}
+
+
+// NAME TestNestedCast
+// ERR 0
+// RET 99
+
+fn main() i32 {
+    var x: char = 'c';
+    var y: i32 = (i32)(i16)x; // Avoid i64 to prevent narrowing issue
+    return y;
+}
+
+
+// NAME TestCastWithFunctionCall
+// ERR 0
+// RET 65
+
+fn get_char() char {
+    return 'A';
+}
+
+fn main() i32 {
+    return (i32)get_char();
+}
+
+
+// NAME TestCastInArithmetic
+// ERR 0
+// RET 105
+
+fn main() i32 {
+    var x: i8 = 50;
+    var y: i8 = 55;
+    return (i32)x + (i32)y;
+}

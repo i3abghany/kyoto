@@ -17,6 +17,7 @@
 #include "kyoto/AST/Expressions/ArrayNode.h"
 #include "kyoto/AST/Expressions/AssignmentNode.h"
 #include "kyoto/AST/Expressions/BinaryNode.h"
+#include "kyoto/AST/Expressions/CastNode.h"
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
 #include "kyoto/AST/Expressions/IdentifierNode.h"
@@ -392,6 +393,13 @@ std::any ASTBuilderVisitor::visitArrayIndexExpression(kyoto::KyotoParser::ArrayI
     auto* array = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
     auto* index = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
     return (ExpressionNode*)new ArrayIndexNode(array, index, compiler);
+}
+
+std::any ASTBuilderVisitor::visitCastExpression(kyoto::KyotoParser::CastExpressionContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new CastNode(type, expr, compiler);
 }
 
 std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpressionContext* ctx)

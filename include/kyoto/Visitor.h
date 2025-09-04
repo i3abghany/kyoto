@@ -32,6 +32,7 @@ public:
     std::any visitMatchExpression(kyoto::KyotoParser::MatchExpressionContext* ctx) override;
     std::any visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx) override;
     std::any visitArrayIndexExpression(kyoto::KyotoParser::ArrayIndexExpressionContext* ctx) override;
+    std::any visitCastExpression(kyoto::KyotoParser::CastExpressionContext* ctx) override;
     std::any visitNewExpression(kyoto::KyotoParser::NewExpressionContext* ctx) override;
     std::any visitNewArrayExpression(kyoto::KyotoParser::NewArrayExpressionContext* ctx) override;
     std::any visitSizeofExpression(kyoto::KyotoParser::SizeofExpressionContext* ctx) override;

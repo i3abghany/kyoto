@@ -5,6 +5,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/antlr)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -27,6 +28,7 @@ set(SOURCES
     src/AST/Expressions/BinaryArithNode.cpp
     src/AST/Expressions/BinaryCmpNode.cpp
     src/AST/Expressions/BinaryLogicalNode.cpp
+    src/AST/Expressions/CastNode.cpp
     src/AST/Expressions/ExpressionNode.cpp
     src/AST/Expressions/FunctionCallNode.cpp
     src/AST/Expressions/IdentifierNode.cpp
@@ -76,6 +78,7 @@ set(TEST_SOURCES
     test/TestMatch.cpp
     test/TestArrays.cpp
     test/TestSizeof.cpp
+    test/TestCast.cpp
 )
 
 add_executable(

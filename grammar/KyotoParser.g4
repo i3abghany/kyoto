@@ -47,6 +47,7 @@ expression:
 	| LPAREN expression RPAREN									# parenthesizedExpression
 	| NEW type LPAREN expressionList RPAREN						# newExpression
 	| NEW type OPEN_BRACKET expression CLOSE_BRACKET			# newArrayExpression
+	| LPAREN type RPAREN expression								# castExpression
 	| SIZEOF LPAREN (expression | type) RPAREN					# sizeofExpression
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
