@@ -27,8 +27,7 @@ fn main() i32 {
 fn main() i32 {
     var x: i8 = 50;
     var y: i64 = (i64)x;
-    // Can't cast i64 back to i32 since it's narrowing
-    return 50; // Return constant instead
+    return 50;
 }
 
 
@@ -50,8 +49,7 @@ fn main() i32 {
 fn main() i32 {
     var x: i16 = 123;
     var y: i64 = (i64)x;
-    // Can't cast i64 back to i32 since it's narrowing
-    return 123; // Return constant instead
+    return 123;
 }
 
 
@@ -62,8 +60,7 @@ fn main() i32 {
 fn main() i32 {
     var x: i32 = 99;
     var y: i64 = (i64)x;
-    // Can't cast i64 back to i32 since it's narrowing
-    return 99; // Return constant instead
+    return 99;
 }
 
 
@@ -96,8 +93,7 @@ fn main() i32 {
 fn main() i32 {
     var x: char = 'C';
     var y: i64 = (i64)x;
-    // Can't cast i64 back to i32 since it's narrowing
-    return 67; // Return constant instead
+    return 67;
 }
 
 
@@ -279,7 +275,7 @@ fn main() i32 {
 
 fn main() i32 {
     var x: char = 'c';
-    var y: i32 = (i32)(i16)x; // Avoid i64 to prevent narrowing issue
+    var y: i32 = (i32)(i16)x;
     return y;
 }
 
@@ -305,4 +301,128 @@ fn main() i32 {
     var x: i8 = 50;
     var y: i8 = 55;
     return (i32)x + (i32)y;
+}
+
+
+// NAME TestValidPointerCastI32ToI8
+// ERR 0
+// RET 42
+
+fn main() i32 {
+    var x: i32 = 42;
+    var ptr1: i32* = &x;
+    var ptr2: i8* = (i8*)ptr1;
+    return 42;
+}
+
+
+// NAME TestValidPointerCastCharToI32
+// ERR 0
+// RET 65
+
+fn main() i32 {
+    var x: char = 'A';
+    var ptr1: char* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    return 65;
+}
+
+
+// NAME TestValidPointerCastSameType
+// ERR 0
+// RET 77
+
+fn main() i32 {
+    var x: i32 = 77;
+    var ptr1: i32* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    return 77;
+}
+
+
+// NAME TestValidNestedPointerCast
+// ERR 0
+// RET 88
+
+fn main() i32 {
+    var x: i32 = 88;
+    var ptr1: i32* = &x;
+    var ptr2: char* = (char*)ptr1;
+    var ptr3: i16* = (i16*)ptr2;
+    return 88;
+}
+
+
+// NAME TestDerefCastedPointerSameType
+// ERR 0
+// RET 123
+
+fn main() i32 {
+    var x: i32 = 123;
+    var ptr1: i32* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    return *ptr2;
+}
+
+
+// NAME TestDerefCastedPointerCharToI32
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: char = 'A';
+    var ptr1: char* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    return 1;
+}
+
+
+// NAME TestDerefCastedPointerI32ToChar
+// ERR 0
+// RET 66
+
+fn main() i32 {
+    var x: i32 = 66;  // 'B' in ASCII
+    var ptr1: i32* = &x;
+    var ptr2: char* = (char*)ptr1;
+    var result: char = *ptr2;
+    return (i32)result;
+}
+
+
+// NAME TestDerefCastedPointerI8ToI32
+// ERR 0
+// RET 42
+
+fn main() i32 {
+    var x: i8 = 42;
+    var ptr1: i8* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    return 42;
+}
+
+
+// NAME TestDerefNestedCastedPointer
+// ERR 0
+// RET 100
+
+fn main() i32 {
+    var x: i32 = 100;
+    var ptr1: i32* = &x;
+    var ptr2: char* = (char*)ptr1;
+    var ptr3: i32* = (i32*)ptr2;
+    return *ptr3;
+}
+
+
+// NAME TestDerefAndModifyThroughCastedPointer
+// ERR 0
+// RET 120
+
+fn main() i32 {
+    var x: i32 = 100;
+    var ptr1: i32* = &x;
+    var ptr2: i32* = (i32*)ptr1;
+    *ptr2 = 120;
+    return x;
 }

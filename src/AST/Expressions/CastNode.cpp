@@ -76,8 +76,10 @@ llvm::Value* CastNode::gen()
     }
 
     if (expr_ktype->is_pointer() && target_ktype->is_pointer()) {
-        // TODO: implement pointer casts.
-        throw_incompatible_cast_error(expr_ktype, target_ktype);
+        // Pointer to pointer casts are always allowed - just bitcast the pointer
+        auto* expr_val = expr->gen();
+        auto* target_llvm_type = get_llvm_type(target_ktype, compiler);
+        return compiler.get_builder().CreateBitCast(expr_val, target_llvm_type);
     }
 
     throw_incompatible_cast_error(expr_ktype, target_ktype);
