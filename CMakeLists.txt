@@ -44,6 +44,7 @@ set(SOURCES
     src/AST/FreeStatementNode.cpp
     src/AST/IfStatementNode.cpp
     src/AST/ReturnStatement.cpp
+    src/AST/TypeAliasNode.cpp
     src/Analysis/FunctionTermination.cpp
     src/KType.cpp
     src/ModuleCompiler.cpp

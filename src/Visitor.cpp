@@ -34,6 +34,7 @@
 #include "kyoto/AST/FreeStatementNode.h"
 #include "kyoto/AST/IfStatementNode.h"
 #include "kyoto/AST/ReturnStatement.h"
+#include "kyoto/AST/TypeAliasNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/TypeResolver.h"
@@ -91,13 +92,18 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
     auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
     compiler.add_function(proto);
 
+    compiler.push_type_alias_scope();
+
     ASTNode* body = nullptr;
     try {
         body = std::any_cast<ASTNode*>(visit(ctx->block()));
     } catch (const std::bad_any_cast&) {
+        compiler.pop_type_alias_scope();
         delete ret_type;
         throw;
     }
+
+    compiler.pop_type_alias_scope();
 
     proto->set_body(body);
     return (ASTNode*)proto;
@@ -105,10 +111,20 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
 std::any ASTBuilderVisitor::visitBlock(kyoto::KyotoParser::BlockContext* ctx)
 {
+    compiler.push_type_alias_scope();
+
     std::vector<ASTNode*> nodes;
-    for (const auto& stmt : ctx->statement()) {
-        nodes.push_back(std::any_cast<ASTNode*>(visit(stmt)));
+    try {
+        for (const auto& stmt : ctx->statement()) {
+            nodes.push_back(std::any_cast<ASTNode*>(visit(stmt)));
+        }
+    } catch (...) {
+        compiler.pop_type_alias_scope();
+        throw;
     }
+
+    compiler.pop_type_alias_scope();
+
     return (ASTNode*)new BlockNode(nodes, compiler);
 }
 
@@ -140,6 +156,13 @@ std::any ASTBuilderVisitor::visitTypelessDeclaration(kyoto::KyotoParser::Typeles
     std::string name = ctx->IDENTIFIER()->getText();
     auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ASTNode*)new FullDeclarationStatementNode(name, nullptr, expr, compiler);
+}
+
+std::any ASTBuilderVisitor::visitTypeAliasStatement(kyoto::KyotoParser::TypeAliasStatementContext* ctx)
+{
+    auto* original_type = std::any_cast<KType*>(visit(ctx->type()));
+    std::string alias = ctx->IDENTIFIER()->getText();
+    return (ASTNode*)new TypeAliasNode(original_type, alias, compiler);
 }
 
 std::any ASTBuilderVisitor::visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx)
@@ -601,7 +624,14 @@ std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeCont
 
 std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx)
 {
-    return (KType*)new ClassType(ctx->IDENTIFIER()->getText());
+    std::string type_name = ctx->IDENTIFIER()->getText();
+
+    KType* alias_type = compiler.resolve_type_alias(type_name);
+    if (alias_type != nullptr) {
+        return (KType*)alias_type->copy();
+    }
+
+    return (KType*)new ClassType(type_name);
 }
 
 std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,

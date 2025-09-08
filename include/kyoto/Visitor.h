@@ -19,6 +19,7 @@ public:
     std::any visitDeclaration(kyoto::KyotoParser::DeclarationContext* ctx) override;
     std::any visitRegularDeclaration(kyoto::KyotoParser::RegularDeclarationContext* ctx) override;
     std::any visitTypelessDeclaration(kyoto::KyotoParser::TypelessDeclarationContext* ctx) override;
+    std::any visitTypeAliasStatement(kyoto::KyotoParser::TypeAliasStatementContext* ctx) override;
     std::any visitAssignmentExpression(kyoto::KyotoParser::AssignmentExpressionContext* ctx) override;
     std::any visitReturnStatement(kyoto::KyotoParser::ReturnStatementContext* ctx) override;
     std::any visitFreeStatement(kyoto::KyotoParser::FreeStatementContext* ctx) override;

@@ -120,6 +120,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     , module(std::make_unique<llvm::Module>(name, context))
     , data_layout(module->getDataLayout())
 {
+    type_alias_scopes.emplace_back();
     register_visitors();
     register_malloc();
     register_free();
@@ -316,6 +317,8 @@ void ModuleCompiler::push_scope()
 {
     symbol_table.push_scope();
 
+    type_alias_scopes.emplace_back();
+
     // We insert function arguments into the symbol table. This is once we are
     // in the second scope as the first scope is the global scope.
     if (symbol_table.n_scopes() == 2) {
@@ -347,6 +350,10 @@ void ModuleCompiler::pop_scope()
     }
 
     symbol_table.pop_scope();
+
+    if (!type_alias_scopes.empty()) {
+        type_alias_scopes.pop_back();
+    }
 }
 
 FunctionNode* ModuleCompiler::get_current_function_node() const
@@ -456,4 +463,44 @@ bool ModuleCompiler::verify_module(llvm::raw_string_ostream& os) const
     auto err = llvm::verifyModule(*module, &os);
     os.flush();
     return err == false;
+}
+
+void ModuleCompiler::register_type_alias(const std::string& alias, KType* type)
+{
+    if (!type_alias_scopes.empty()) {
+        type_alias_scopes.back()[alias] = type;
+    }
+}
+
+KType* ModuleCompiler::resolve_type_alias(const std::string& alias)
+{
+    for (auto it = type_alias_scopes.rbegin(); it != type_alias_scopes.rend(); ++it) {
+        auto found = it->find(alias);
+        if (found != it->end()) {
+            return found->second;
+        }
+    }
+    return nullptr;
+}
+
+bool ModuleCompiler::is_type_alias(const std::string& name) const
+{
+    for (auto it = type_alias_scopes.rbegin(); it != type_alias_scopes.rend(); ++it) {
+        if (it->find(name) != it->end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ModuleCompiler::push_type_alias_scope()
+{
+    type_alias_scopes.emplace_back();
+}
+
+void ModuleCompiler::pop_type_alias_scope()
+{
+    if (!type_alias_scopes.empty()) {
+        type_alias_scopes.pop_back();
+    }
 }

@@ -10,7 +10,8 @@ topLevel:
 	functionDefinition
 	| fullDeclaration
 	| cdecl
-	| classDefinition;
+	| classDefinition
+	| typeAliasStatement;
 
 block: OPEN_BRACE statement* CLOSE_BRACE;
 
@@ -35,7 +36,8 @@ statement:
 	| ifStatement
 	| forStatement
 	| returnStatement
-	| freeStatement;
+	| freeStatement
+	| typeAliasStatement;
 
 expressionStatement: expression SEMICOLON;
 
@@ -91,6 +93,8 @@ declaration: VAR IDENTIFIER COLON type SEMICOLON;
 returnStatement: RETURN expression? SEMICOLON;
 
 freeStatement: FREE expression SEMICOLON;
+
+typeAliasStatement: TYPEALIAS type IDENTIFIER SEMICOLON;
 
 ifStatement:
 	IF LPAREN expression RPAREN block elseIfElseStatement;

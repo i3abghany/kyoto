@@ -78,6 +78,13 @@ public:
     void insert_dummy_return(llvm::BasicBlock& bb);
     llvm::BasicBlock* create_basic_block(const std::string& name);
 
+    void register_type_alias(const std::string& alias, KType* type);
+    KType* resolve_type_alias(const std::string& alias);
+    bool is_type_alias(const std::string& name) const;
+
+    void push_type_alias_scope();
+    void pop_type_alias_scope();
+
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
@@ -108,4 +115,6 @@ private:
 
     SymbolTable symbol_table;
     TypeResolver type_resolver {};
+
+    std::vector<std::unordered_map<std::string, KType*>> type_alias_scopes;
 };
