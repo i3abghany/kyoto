@@ -2,6 +2,8 @@
 
 #include <BailErrorStrategy.h>
 #include <BaseErrorListener.h>
+#include <Exceptions.h>
+#include <RecognitionException.h>
 #include <any>
 #include <assert.h>
 #include <cstdlib>
@@ -60,6 +62,57 @@ public:
     }
 };
 
+class CustomBailErrorStrategy : public antlr4::BailErrorStrategy {
+public:
+    void recover(antlr4::Parser* recognizer, std::exception_ptr e) override
+    {
+        try {
+            std::rethrow_exception(e);
+        } catch (const antlr4::RecognitionException& ex) {
+            std::string msg = std::format("Parse error at line {}, char {}: {}", ex.getOffendingToken()->getLine(),
+                                          ex.getOffendingToken()->getCharPositionInLine(), ex.what());
+            throw antlr4::ParseCancellationException(msg);
+        } catch (...) {
+            antlr4::BailErrorStrategy::recover(recognizer, e);
+        }
+    }
+
+    antlr4::Token* recoverInline(antlr4::Parser* recognizer) override
+    {
+        auto* currentToken = recognizer->getCurrentToken();
+        auto expectedTokens = recognizer->getExpectedTokens();
+
+        std::string expectedStr = "one of: ";
+        auto& vocab = recognizer->getVocabulary();
+        bool first = true;
+
+        for (size_t token : expectedTokens.toList()) {
+            if (!first) expectedStr += ", ";
+            first = false;
+
+            std::string tokenName = std::string(vocab.getSymbolicName(token));
+            if (tokenName.empty()) {
+                tokenName = std::string(vocab.getLiteralName(token));
+                if (tokenName.empty()) {
+                    tokenName = std::to_string(token);
+                } else {
+                    if (tokenName.size() >= 2 && tokenName[0] == '\'' && tokenName.back() == '\'') {
+                        tokenName = tokenName.substr(1, tokenName.size() - 2);
+                    }
+                }
+            }
+            expectedStr += tokenName;
+        }
+
+        std::string foundToken = currentToken->getText();
+        std::string msg
+            = std::format("Parse error at line {}, char {}: expected {}, but found '{}'", currentToken->getLine(),
+                          currentToken->getCharPositionInLine(), expectedStr, foundToken);
+
+        throw antlr4::ParseCancellationException(msg);
+    }
+};
+
 ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
     : code(code)
     , name(name)
@@ -85,7 +138,7 @@ ASTNode* ModuleCompiler::parse_program()
     parser.removeErrorListeners();
     parser.addErrorListener(new ParserErrorListener());
     parser.setBuildParseTree(true);
-    parser.setErrorHandler(std::make_unique<antlr4::BailErrorStrategy>());
+    parser.setErrorHandler(std::make_unique<CustomBailErrorStrategy>());
     auto* tree = parser.program();
 
     ASTBuilderVisitor visitor(*this);
@@ -172,8 +225,14 @@ std::optional<std::string> ModuleCompiler::gen_ir()
         program->gen();
         llvm_pass();
         ensure_main_fn();
+    } catch (const antlr4::ParseCancellationException& e) {
+        report_error(e.what());
+        return std::nullopt;
     } catch (const std::exception& e) {
         report_error(e.what());
+        return std::nullopt;
+    } catch (...) {
+        report_error("Unknown exception");
         return std::nullopt;
     }
 
