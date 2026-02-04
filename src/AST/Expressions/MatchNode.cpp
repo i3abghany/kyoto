@@ -33,7 +33,8 @@ std::string MatchNode::to_string() const
 
 llvm::Value* MatchNode::gen_cmp(ExpressionNode* lhs, ExpressionNode* rhs)
 {
-    if (lhs->get_ktype()->is_integer() || lhs->get_ktype()->is_pointer())
+    if (lhs->get_ktype()->is_integer() || lhs->get_ktype()->is_pointer() || lhs->get_ktype()->is_boolean()
+        || lhs->get_ktype()->is_char())
         return compiler.get_builder().CreateICmpEQ(lhs->gen(), rhs->gen(), "cmp_match");
 
     throw std::runtime_error(std::format("Unsupported type in match expression: `{}`", lhs->get_ktype()->to_string()));
