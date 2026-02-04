@@ -45,7 +45,7 @@ class VectorOfPoints {
             self.points = new_points;
             self.capacity = new_capacity;
         }
-        
+
         self.points[self.size].x = p.x;
         self.points[self.size].y = p.y;
 
