@@ -3,6 +3,27 @@
 #include <iostream>
 #include <string>
 
+#define DEFINE_KYOTO_TEST_SUITE(SuiteName, Path)                         \
+    class SuiteName : public ::testing::TestWithParam<utils::TestCase> { \
+    protected:                                                           \
+        utils::TestCase test_case;                                       \
+        void SetUp() override                                            \
+        {                                                                \
+            test_case = GetParam();                                      \
+        }                                                                \
+    };                                                                   \
+    TEST_P(SuiteName, SuiteName)                                         \
+    {                                                                    \
+        utils::test_driver(test_case);                                   \
+    }                                                                    \
+                                                                         \
+    static auto generate_test_cases()                                    \
+    {                                                                    \
+        const auto test_cases = utils::File::get_test_cases(Path);       \
+        return test_cases;                                               \
+    }                                                                    \
+    INSTANTIATE_TEST_SUITE_P(SuiteName, SuiteName, testing::ValuesIn(generate_test_cases()));
+
 namespace utils {
 
 class TestCase {
