@@ -1,0 +1,30 @@
+// NAME SimpleTypeAlias
+// ERR 0
+// RET 12
+
+typealias i32 signed;
+
+fn main() i32 {
+    var x: signed = 12;
+    return x;
+}
+
+// NAME TypeAliasInReturn
+// ERR 0
+// RET 13
+
+typealias i32 signed;
+
+fn main() signed {
+    return 13;
+}
+
+// NAME TypeAliasReserved
+// ERR 1
+// RET 1
+
+typealias i32 i8;
+
+fn main() i32 {
+    return 1;
+}
