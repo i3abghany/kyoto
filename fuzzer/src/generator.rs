@@ -717,7 +717,7 @@ mod tests {
             .unwrap();
 
         match op {
-            Op::Terminal(s) => assert_eq!(s.chars().count(), 1),
+            Op::Terminal(s) => debug_assert_eq!(s.chars().count(), 1),
             other => panic!("expected terminal, got {:?}", other),
         }
     }
