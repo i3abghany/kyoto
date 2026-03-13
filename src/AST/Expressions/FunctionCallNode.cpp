@@ -18,6 +18,74 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
+namespace {
+
+std::vector<llvm::Value*> build_call_arg_values(const std::string& name, const std::vector<ExpressionNode*>& args,
+                                                ModuleCompiler& compiler, llvm::Value* destination = nullptr)
+{
+    size_t lookup_arity = args.size();
+    if (destination) {
+        lookup_arity += 1;
+    }
+
+    auto fn_meta = compiler.get_function(name, lookup_arity);
+    if (!fn_meta.has_value()) {
+        fn_meta = compiler.get_function(name);
+    }
+
+    std::vector<llvm::Value*> arg_values;
+    size_t arg_index = 0;
+
+    if (destination) {
+        arg_values.push_back(destination);
+        arg_index = 1;
+    }
+
+    if (!fn_meta.has_value()) {
+        for (auto* arg : args) {
+            arg_values.push_back(arg->gen());
+        }
+        return arg_values;
+    }
+
+    const auto& params = fn_meta.value()->get_params();
+    for (size_t i = 0; i < args.size(); ++i) {
+        auto* arg = args[i];
+        const auto param_index = arg_index + i;
+
+        if (param_index >= params.size()) {
+            arg_values.push_back(arg->gen());
+            continue;
+        }
+
+        const auto* param_type = params[param_index].type;
+        const auto* arg_type = arg->get_ktype();
+
+        if ((param_type->is_integer() && arg_type->is_integer())
+            || (param_type->is_boolean() && arg_type->is_boolean())) {
+            arg_values.push_back(ExpressionNode::handle_integer_conversion(
+                arg, param_type, compiler, "pass as argument", name + "::" + params[param_index].name));
+            continue;
+        }
+
+        if ((param_type->is_pointer() && arg_type->is_pointer() && *param_type == *arg_type)
+            || (param_type->is_string() && arg_type->is_string())
+            || (param_type->is_array() && arg_type->is_array() && *param_type == *arg_type)
+            || (param_type->is_class() && arg_type->is_class() && *param_type == *arg_type)) {
+            arg_values.push_back(arg->gen());
+            continue;
+        }
+
+        throw std::runtime_error(std::format(
+            "Cannot pass argument `{}` (type `{}`) to parameter `{}` of function `{}` (expected `{}`)",
+            arg->to_string(), arg_type->to_string(), params[param_index].name, name, param_type->to_string()));
+    }
+
+    return arg_values;
+}
+
+}
+
 FunctionCall::FunctionCall(std::string name, std::vector<ExpressionNode*> args, ModuleCompiler& compiler)
     : name(std::move(name))
     , args(std::move(args))
@@ -78,10 +146,11 @@ llvm::Value* FunctionCall::gen()
     }
 
     std::vector<llvm::Value*> arg_values;
-    if (destination && is_constructor_call()) arg_values.push_back(destination);
-
-    for (auto& arg : args)
-        arg_values.push_back(arg->gen());
+    if (destination && is_constructor_call()) {
+        arg_values = build_call_arg_values(name, args, compiler, destination);
+    } else {
+        arg_values = build_call_arg_values(name, args, compiler);
+    }
 
     if (fn->arg_size() != arg_values.size() && (!fn->isVarArg() || fn->arg_size() > arg_values.size())) {
         throw std::runtime_error(
@@ -94,10 +163,11 @@ llvm::Value* FunctionCall::gen_ptr() const
 {
     assert(get_ktype()->is_pointer() && "Function does not return a pointer");
     std::vector<llvm::Value*> arg_values;
-    if (destination && is_constructor_call()) arg_values.push_back(destination);
-
-    for (auto& arg : args)
-        arg_values.push_back(arg->gen());
+    if (destination && is_constructor_call()) {
+        arg_values = build_call_arg_values(name, args, compiler, destination);
+    } else {
+        arg_values = build_call_arg_values(name, args, compiler);
+    }
 
     size_t lookup_arity = args.size();
     if (is_constructor_call()) {

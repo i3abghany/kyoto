@@ -1,7 +1,10 @@
 #include "kyoto/AST/Expressions/CastNode.h"
 
 #include <format>
+#include <llvm/IR/Constant.h>
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/Support/Casting.h>
 #include <stdexcept>
 
 #include "kyoto/KType.h"
@@ -50,6 +53,23 @@ llvm::Value* CastNode::handle_integer_cast()
 {
     auto expr_ktype = expr->get_ktype()->as<PrimitiveType>();
     auto target_ktype = type->as<PrimitiveType>();
+
+    if (expr->is_trivially_evaluable()) {
+        if (expr_ktype->is_boolean() != target_ktype->is_boolean()) {
+            throw_incompatible_cast_error(expr_ktype, target_ktype);
+        }
+
+        auto* expr_val = expr->trivial_gen();
+        const auto* constant_int = llvm::dyn_cast<llvm::ConstantInt>(expr_val);
+        if (!constant_int) {
+            throw std::runtime_error(std::format("Expression `{}` is not a constant integer", expr->to_string()));
+        }
+
+        const auto int_val = target_ktype->is_boolean() || expr_ktype->is_boolean() ? constant_int->getZExtValue()
+                                                                                    : constant_int->getSExtValue();
+        ExpressionNode::check_int_range_fit(int_val, target_ktype, compiler, expr->to_string(), "");
+        return llvm::ConstantInt::get(get_llvm_type(target_ktype, compiler), int_val, true);
+    }
 
     check_compatible_integer_cast(expr_ktype, target_ktype);
 

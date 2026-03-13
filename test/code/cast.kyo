@@ -304,6 +304,36 @@ fn main() i32 {
 }
 
 
+// NAME TestValidLiteralNarrowingCastI32ToI8
+// ERR 0
+// RET 50
+
+fn main() i32 {
+    var x: i8 = (i8)50;
+    return (i32)x;
+}
+
+
+// NAME TestValidLiteralNarrowingCastI32ToChar
+// ERR 0
+// RET 65
+
+fn main() i32 {
+    var x: char = (char)65;
+    return (i32)x;
+}
+
+
+// NAME TestInvalidLiteralNarrowingCastOutOfRange
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var x: i8 = (i8)300;
+    return (i32)x;
+}
+
+
 // NAME TestValidPointerCastI32ToI8
 // ERR 0
 // RET 42
