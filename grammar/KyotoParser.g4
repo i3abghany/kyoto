@@ -16,7 +16,9 @@ topLevel:
 block: OPEN_BRACE statement* CLOSE_BRACE;
 
 classDefinition:
-	CLASS IDENTIFIER (COLON IDENTIFIER)? OPEN_BRACE classComponents CLOSE_BRACE;
+	CLASS IDENTIFIER (LESS_THAN IDENTIFIER GREATER_THAN)? (
+		COLON IDENTIFIER
+	)? OPEN_BRACE classComponents CLOSE_BRACE;
 
 classComponents: classComponent*;
 
@@ -138,6 +140,6 @@ type:
 	| F64										# f64Type
 	| STRING									# strType
 	| VOID										# voidType
-	| IDENTIFIER								# classType
+	| IDENTIFIER (LESS_THAN type GREATER_THAN)?	# classType
 	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
 	| type ASTERISK+							# pointerType;

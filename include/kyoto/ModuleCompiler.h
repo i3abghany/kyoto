@@ -40,6 +40,7 @@ public:
 
     llvm::Module* get_module() { return module.get(); }
 
+    const std::string& get_code() const { return code; }
     TypeResolver& get_type_resolver() { return type_resolver; }
 
     std::optional<Symbol> get_symbol(const std::string& name);
@@ -85,6 +86,17 @@ public:
     void push_type_alias_scope();
     void pop_type_alias_scope();
 
+    struct TemplateMetadata {
+        std::string param;
+        std::string raw_text;
+    };
+    void register_template(const std::string& name, const std::string& param, const std::string& raw_text)
+    {
+        template_registry[name] = { param, raw_text };
+    }
+    void instantiate_template(const std::string& name, const std::string& mangled_name, const std::string& type_str);
+    std::vector<ASTNode*>& get_instantiated_nodes() { return instantiated_nodes; }
+
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
     ASTNode* parse_program();
@@ -115,6 +127,9 @@ private:
 
     SymbolTable symbol_table;
     TypeResolver type_resolver {};
+
+    std::unordered_map<std::string, TemplateMetadata> template_registry;
+    std::vector<ASTNode*> instantiated_nodes;
 
     std::vector<std::unordered_map<std::string, KType*>> type_alias_scopes;
 };

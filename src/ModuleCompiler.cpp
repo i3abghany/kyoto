@@ -504,3 +504,42 @@ void ModuleCompiler::pop_type_alias_scope()
         type_alias_scopes.pop_back();
     }
 }
+
+void ModuleCompiler::instantiate_template(const std::string& name, const std::string& mangled_name,
+                                          const std::string& type_str)
+{
+    if (classes.contains(mangled_name)) return;
+    if (std::find_if(instantiated_nodes.begin(), instantiated_nodes.end(),
+                     [&](ASTNode* n) {
+                         auto* cdn = dynamic_cast<ClassDefinitionNode*>(n);
+                         return cdn && cdn->get_name() == mangled_name;
+                     })
+        != instantiated_nodes.end())
+        return;
+
+    if (!template_registry.contains(name)) throw std::runtime_error("Template " + name + " not found");
+
+    classes.insert(mangled_name);
+
+    auto& tmpl = template_registry[name];
+    std::string text = tmpl.raw_text;
+
+    std::regex reg("\\b" + tmpl.param + "\\b");
+
+    std::string class_decl = "class\\s+" + name + "\\s*<\\s*" + tmpl.param + "\\s*>";
+    std::regex class_reg(class_decl);
+    std::string new_text = std::regex_replace(text, class_reg, "class " + mangled_name);
+    new_text = std::regex_replace(new_text, reg, type_str);
+
+    antlr4::ANTLRInputStream input(new_text);
+    kyoto::KyotoLexer lexer(&input);
+    antlr4::CommonTokenStream tokens(&lexer);
+    kyoto::KyotoParser parser(&tokens);
+    parser.removeErrorListeners();
+    auto tree = parser.classDefinition();
+
+    ASTBuilderVisitor visitor(*this);
+    auto node = std::any_cast<ASTNode*>(visitor.visitClassDefinition(tree));
+
+    instantiated_nodes.push_back(node);
+}

@@ -80,6 +80,7 @@ set(TEST_SOURCES
     test/TestSizeof.cpp
     test/TestCast.cpp
     test/TestTypeAlias.cpp
+    test/TestGenerics.cpp
 )
 
 add_executable(

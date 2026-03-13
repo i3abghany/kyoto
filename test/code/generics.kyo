@@ -1,0 +1,83 @@
+// NAME BasicGenericClass
+// ERR 0
+// RET 42
+
+class Box<T> {
+    var value: T;
+
+    constructor(self: Box<T>*, val: T) {
+        self.value = val;
+    }
+
+    fn getValue(self: Box<T>*) T {
+        return self.value;
+    }
+}
+
+fn main() i32 {
+    var intBox: Box<i32>* = new Box<i32>(42);
+    return intBox.getValue();
+}
+
+// NAME GenericClassMultipleInstances
+// ERR 0
+// RET 100
+
+class Wrapper<T> {
+    var item: T;
+    constructor(self: Wrapper<T>*, item: T) {
+        self.item = item;
+    }
+    fn get(self: Wrapper<T>*) T {
+        return self.item;
+    }
+}
+
+fn main() i32 {
+    var x: Wrapper<i32>* = new Wrapper<i32>(100);
+    var y: Wrapper<str>* = new Wrapper<str>("hello");
+    return x.get();
+}
+
+// NAME GenericClassMultiMethod
+// ERR 0
+// RET 20
+
+class Calc<T> {
+    var v: T;
+    constructor(self: Calc<T>*, v: T) {
+        self.v = v;
+    }
+    fn update(self: Calc<T>*, v: T) {
+        self.v = v;
+    }
+    fn get(self: Calc<T>*) T {
+        return self.v;
+    }
+}
+
+fn main() i32 {
+    var c: Calc<i32>* = new Calc<i32>(10);
+    c.update(20);
+    return c.get();
+}
+
+// NAME GenericAsArgument
+// ERR 0
+// RET 5
+
+class Container<T> {
+    var item: T;
+    constructor(self: Container<T>*, item: T) {
+        self.item = item;
+    }
+}
+
+fn extract(c: Container<i32>*) i32 {
+    return c.item;
+}
+
+fn main() i32 {
+    var c: Container<i32>* = new Container<i32>(5);
+    return extract(c);
+}

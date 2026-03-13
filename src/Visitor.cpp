@@ -56,6 +56,13 @@ std::any ASTBuilderVisitor::visitProgram(kyoto::KyotoParser::ProgramContext* ctx
             nodes.push_back(std::any_cast<ASTNode*>(result));
         }
     }
+
+    size_t i = 0;
+    while (i < compiler.get_instantiated_nodes().size()) {
+        nodes.push_back(compiler.get_instantiated_nodes()[i]);
+        i++;
+    }
+
     return (ASTNode*)new ProgramNode(nodes, compiler);
 }
 
@@ -527,13 +534,29 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
 
 std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx)
 {
+    if (ctx->LESS_THAN()) {
+        std::string param = ctx->IDENTIFIER(1)->getText();
+
+        antlr4::Token* startToken = ctx->getStart();
+        antlr4::Token* stopToken = ctx->getStop();
+        size_t start = startToken->getStartIndex();
+        size_t stop = stopToken->getStopIndex();
+        std::string raw_text = compiler.get_code().substr(start, stop - start + 1);
+
+        compiler.register_template(ctx->IDENTIFIER(0)->getText(), param, raw_text);
+        return std::any();
+    }
+
     std::vector<ASTNode*> components;
     compiler.push_class(ctx->IDENTIFIER(0)->getText());
     for (const auto& component : ctx->classComponents()->classComponent()) {
         components.push_back(std::any_cast<ASTNode*>(visit(component)));
     }
     compiler.pop_class();
-    std::string parent = ctx->IDENTIFIER().size() > 1 ? ctx->IDENTIFIER(1)->getText() : "";
+    std::string parent = "";
+    if (ctx->COLON()) {
+        parent = ctx->IDENTIFIER().back()->getText();
+    }
     return (ASTNode*)new ClassDefinitionNode(ctx->IDENTIFIER(0)->getText(), parent, components, compiler);
 }
 
@@ -625,6 +648,20 @@ std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeCont
 std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx)
 {
     std::string type_name = ctx->IDENTIFIER()->getText();
+
+    if (ctx->LESS_THAN()) {
+        KType* inner = std::any_cast<KType*>(visit(ctx->type()));
+        std::string inner_text = ctx->type()->getText();
+
+        std::string inner_mangled = inner_text;
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '*', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '<', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '>', '_');
+
+        std::string mangled_name = type_name + "_" + inner_mangled;
+        compiler.instantiate_template(type_name, mangled_name, inner_text);
+        type_name = mangled_name;
+    }
 
     KType* alias_type = compiler.resolve_type_alias(type_name);
     if (alias_type != nullptr) {
