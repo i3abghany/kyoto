@@ -81,3 +81,47 @@ fn main() i32 {
     var c: Container<i32>* = new Container<i32>(5);
     return extract(c);
 }
+
+// NAME GenericVectorOfStrings
+// ERR 0
+// RET 3
+
+class Vector<T> {
+    var data: T*;
+    var size: i32;
+    var capacity: i32;
+
+    constructor(self: Vector<T>*, initial_cap: i32) {
+        self.data = new T[initial_cap];
+        self.size = 0;
+        self.capacity = initial_cap;
+    }
+
+    fn push(self: Vector<T>*, item: T) {
+        if (self.size >= self.capacity) {
+            var new_capacity: i32 = self.capacity * 2;
+            var new_data: T* = new T[new_capacity];
+            for (var i = 0; i < self.size; ++i) {
+                new_data[i] = self.data[i];
+            }
+            free self.data;
+            self.data = new_data;
+            self.capacity = new_capacity;
+        }
+
+        self.data[self.size] = item;
+        self.size = self.size + 1;
+    }
+
+    fn get(self: Vector<T>*, index: i32) T {
+        return self.data[index];
+    }
+}
+
+fn main() i32 {
+    var vec: Vector<str>* = new Vector<str>(2);
+    vec.push("hello");
+    vec.push("world");
+    vec.push("!");
+    return vec.size;
+}

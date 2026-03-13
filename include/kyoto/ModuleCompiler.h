@@ -1,14 +1,14 @@
 #pragma once
 
-#include <llvm/IR/DataLayout.h>
 #include <cstddef>
+#include <format>
+#include <llvm/IR/DataLayout.h>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <format>
 
 #include "kyoto/ClassMetadata.h"
 #include "kyoto/Resolution/AnalysisVisitor.h"

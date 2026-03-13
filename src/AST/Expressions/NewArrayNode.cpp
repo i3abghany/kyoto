@@ -36,6 +36,25 @@ std::string NewArrayNode::to_string() const
     return std::format("new {}[{}]", type->to_string(), size_expr->to_string());
 }
 
+namespace {
+size_t get_element_size(const KType* type, ModuleCompiler& compiler)
+{
+    if (type->is_primitive()) {
+        return type->as<PrimitiveType>()->width();
+    }
+
+    if (type->is_pointer()) {
+        return compiler.get_module()->getDataLayout().getPointerSize();
+    }
+
+    if (type->is_class()) {
+        return compiler.get_type_size(type->get_class_name());
+    }
+
+    throw std::runtime_error(std::format("Unsupported type for new array: {}", type->to_string()));
+}
+}
+
 llvm::Value* NewArrayNode::gen()
 {
     KType* size_type = size_expr->get_ktype();
@@ -46,14 +65,7 @@ llvm::Value* NewArrayNode::gen()
 
     llvm::Value* size_value = size_expr->gen();
 
-    size_t element_size;
-    if (type->is_primitive()) {
-        element_size = type->as<PrimitiveType>()->width();
-    } else if (type->is_class()) {
-        element_size = compiler.get_type_size(type->get_class_name());
-    } else {
-        throw std::runtime_error(std::format("Unsupported type for new array: {}", type->to_string()));
-    }
+    size_t element_size = get_element_size(type, compiler);
 
     llvm::Value* size_i64;
     if (size_value->getType()->isIntegerTy(64)) {
@@ -82,14 +94,7 @@ llvm::Value* NewArrayNode::gen_ptr() const
 
     llvm::Value* size_value = size_expr->gen();
 
-    size_t element_size;
-    if (type->is_primitive()) {
-        element_size = type->as<PrimitiveType>()->width();
-    } else if (type->is_class()) {
-        element_size = compiler.get_type_size(type->get_class_name());
-    } else {
-        throw std::runtime_error(std::format("Unsupported type for new array: {}", type->to_string()));
-    }
+    size_t element_size = get_element_size(type, compiler);
 
     llvm::Value* size_i64;
     if (size_value->getType()->isIntegerTy(64)) {
@@ -110,9 +115,7 @@ llvm::Value* NewArrayNode::gen_ptr() const
 
 llvm::Type* NewArrayNode::gen_type() const
 {
-    if (type->is_class()) return llvm::PointerType::get(compiler.get_llvm_struct(type->get_class_name()), 0);
-
-    return ASTNode::get_llvm_type(type, compiler);
+    return ASTNode::get_llvm_type(generated_type, compiler);
 }
 
 KType* NewArrayNode::get_ktype() const

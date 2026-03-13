@@ -1,15 +1,15 @@
-#include <stddef.h>
-#include <stdint.h>
 #include <Token.h>
+#include <algorithm>
 #include <any>
 #include <format>
 #include <initializer_list>
 #include <optional>
 #include <regex>
+#include <stddef.h>
 #include <stdexcept>
+#include <stdint.h>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "KyotoParser.h"
 #include "kyoto/AST/ASTNode.h"
@@ -451,9 +451,10 @@ std::any ASTBuilderVisitor::visitNewExpression(kyoto::KyotoParser::NewExpression
 std::any ASTBuilderVisitor::visitNewArrayExpression(kyoto::KyotoParser::NewArrayExpressionContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
-    if (!type->is_primitive() && !type->is_class())
-        throw std::runtime_error(std::format(
-            "Only primitive and class types are supported for new array expressions. Found: {}", type->to_string()));
+    if (!type->is_primitive() && !type->is_class() && !type->is_pointer())
+        throw std::runtime_error(
+            std::format("Only primitive, class, and pointer types are supported for new array expressions. Found: {}",
+                        type->to_string()));
 
     auto* size_expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     return (ExpressionNode*)new NewArrayNode(type, size_expr, compiler);
