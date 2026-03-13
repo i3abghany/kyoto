@@ -1,6 +1,4 @@
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
 use std::vec;
 
 use fuzzer::ast::Grammar;
@@ -22,10 +20,6 @@ struct Args {
     #[arg(short, long, default_value = "10")]
     max_depth: usize,
 
-    /// Number of iterations (per thread) to run the fuzzer
-    #[arg(short, long, default_value_t = 100)]
-    iters: usize,
-
     /// Number of threads to use for fuzzing. If set to 0, it will use the number of available CPUs.
     #[arg(short, long, default_value = "0")]
     threads: usize,
@@ -35,7 +29,7 @@ struct Args {
     output: String,
 
     /// Enable test logging
-    #[arg(short, long, default_value_t = false)]
+    #[arg(long, default_value_t = false)]
     log: bool,
 }
 
@@ -45,11 +39,8 @@ fn get_garmmar(lexer: &String, parser: &String) -> Grammar {
     g
 }
 
-fn stats_worker(stats: Arc<fuzzer::harness::FuzzStats>, running: Arc<AtomicBool>) {
+fn stats_worker(stats: Arc<fuzzer::harness::FuzzStats>) {
     loop {
-        if !running.load(Ordering::Acquire) {
-            break;
-        }
         std::thread::sleep(std::time::Duration::from_secs(2));
         println!("Current stats: {}", stats.get_stats());
     }
@@ -66,7 +57,6 @@ fn main() {
     let output_dir = Arc::new(args.output);
 
     let max_depth = args.max_depth;
-    let num_iters = args.iters;
     let num_threads = if args.threads > 0 {
         args.threads
     } else {
@@ -87,23 +77,17 @@ fn main() {
                 grammar_clone,
                 stats_clone,
                 max_depth,
-                num_iters,
                 outdir_clone,
                 args.log,
             );
         }));
     }
 
-    let running_flag = Arc::new(AtomicBool::new(true));
-    let stats_running_clone = Arc::clone(&running_flag);
-    let stats_handle = std::thread::spawn(move || {
-        stats_worker(shared_stats, stats_running_clone);
+    std::thread::spawn(move || {
+        stats_worker(shared_stats);
     });
 
     for handle in handles {
         handle.join().expect("Thread panicked");
     }
-
-    running_flag.store(false, Ordering::Release);
-    stats_handle.join().expect("Stats thread panicked");
 }

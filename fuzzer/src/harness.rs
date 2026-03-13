@@ -2,6 +2,7 @@ use crate::ast::Grammar;
 use crate::generator::Generator;
 use rand::rng;
 use std::io::Write;
+use std::process::Command;
 use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
@@ -62,7 +63,7 @@ fn run_cyoto_compiler(program_str: &str, cyoto_path: &str) -> Result<(), String>
         .map_err(|e| e.to_string())?;
     file.flush().map_err(|e| e.to_string())?;
 
-    let output = std::process::Command::new(cyoto_path)
+    let output = Command::new(cyoto_path)
         .arg(file.path())
         .output()
         .map_err(|e| e.to_string())?;
@@ -98,30 +99,20 @@ pub fn fuzz_worker(
     grammar: Arc<Grammar>,
     stats: Arc<FuzzStats>,
     max_depth: usize,
-    num_iters: usize,
     output_dir: Arc<String>,
     log: bool,
 ) {
     let mut rng = rng();
     let mut generator = Generator::new(&grammar, &mut rng, max_depth);
-    let mut curr_iters = 0;
-    const BATCH: usize = 10;
-    loop {
-        if curr_iters >= num_iters {
-            break;
-        }
 
-        curr_iters += 1;
-        if curr_iters % BATCH == 0 {
-            stats.increment(BATCH);
-        }
+    loop {
+        stats.increment(1);
 
         let gen_op = generator.generate_ast();
         match gen_op {
             Ok(_) => {}
             Err(e) => {
                 eprintln!("Thread {}: Error generating AST: {}", thread_id, e);
-                curr_iters -= 1;
                 continue;
             }
         }
@@ -129,7 +120,6 @@ pub fn fuzz_worker(
         let st = generator.stringify_op(&gen_op.unwrap().definition);
 
         if st.is_empty() {
-            curr_iters -= 1;
             continue;
         }
 
