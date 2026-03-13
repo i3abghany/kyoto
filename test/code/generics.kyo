@@ -125,3 +125,38 @@ fn main() i32 {
     vec.push("!");
     return vec.size;
 }
+
+// NAME GenericMethodCallOnMemberAccess
+// ERR 0
+// RET 0
+
+class Vector<T> {
+    var data: T*;
+    var size: i32;
+    var capacity: i32;
+
+    constructor(self: Vector<T>*, initial_cap: i32) {
+        self.data = new T[initial_cap];
+        self.size = 0;
+        self.capacity = initial_cap;
+    }
+
+    fn length(self: Vector<T>*) i32 {
+        return self.size;
+    }
+}
+
+typealias Vector<i32> IntList;
+
+class Holder {
+    var list: IntList*;
+
+    constructor(self: Holder*) {
+        self.list = new IntList(4);
+    }
+}
+
+fn main() i32 {
+    var holder: Holder* = new Holder();
+    return holder.list.length();
+}

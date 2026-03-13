@@ -10,7 +10,7 @@ class ExpressionNode;
 
 class MethodCall : public FunctionCall {
 public:
-    MethodCall(std::string instance_name, std::string name, std::vector<ExpressionNode*> args,
+    MethodCall(ExpressionNode* instance, std::string instance_text, std::string name, std::vector<ExpressionNode*> args,
                ModuleCompiler& compiler);
     ~MethodCall();
 
@@ -22,11 +22,13 @@ public:
     [[nodiscard]] llvm::Value* trivial_gen() override;
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
-    [[nodiscard]] const std::string& get_instance_name() const { return instance_name; }
-    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return FunctionCall::get_children(); }
+    [[nodiscard]] const std::string& get_instance_name() const { return instance_text; }
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
-    void initalize_name_prefix() const;
+    void prepare_call() const;
 
 private:
-    std::string instance_name;
+    mutable ExpressionNode* instance;
+    std::string instance_text;
+    mutable bool prepared = false;
 };

@@ -259,13 +259,14 @@ std::any ASTBuilderVisitor::visitMemberAccessExpression(kyoto::KyotoParser::Memb
 
 std::any ASTBuilderVisitor::visitMethodCallExpression(kyoto::KyotoParser::MethodCallExpressionContext* ctx)
 {
+    auto* instance = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
     const auto instance_name = ctx->expression()->getText();
     const auto name = ctx->IDENTIFIER()->getText();
     std::vector<ExpressionNode*> args;
     for (const auto arg : ctx->expressionList()->expression()) {
         args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
     }
-    return (ExpressionNode*)new MethodCall(instance_name, name, args, compiler);
+    return (ExpressionNode*)new MethodCall(instance, instance_name, name, args, compiler);
 }
 
 std::any ASTBuilderVisitor::visitPrefixIncrementExpression(kyoto::KyotoParser::PrefixIncrementExpressionContext* ctx)
