@@ -1,13 +1,15 @@
+#include <stddef.h>
+#include <stdint.h>
+#include <Token.h>
 #include <any>
 #include <format>
 #include <initializer_list>
 #include <optional>
 #include <regex>
-#include <stddef.h>
 #include <stdexcept>
-#include <stdint.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "KyotoParser.h"
 #include "kyoto/AST/ASTNode.h"

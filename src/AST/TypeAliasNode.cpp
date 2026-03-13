@@ -1,6 +1,6 @@
 #include "kyoto/AST/TypeAliasNode.h"
 
-#include <memory>
+#include <utility>
 
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"

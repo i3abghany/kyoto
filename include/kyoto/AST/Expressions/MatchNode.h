@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <format>
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 
