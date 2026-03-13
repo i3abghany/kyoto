@@ -134,6 +134,7 @@ pub fn fuzz_worker(
         }
 
         if log {
+            std::fs::create_dir_all("cases").expect("Failed to create cases directory");
             let id = Uuid::new_v4();
             let mut file = std::fs::File::create(format!("cases/input_{}.txt", id.to_string()))
                 .expect("Failed to create input file");
