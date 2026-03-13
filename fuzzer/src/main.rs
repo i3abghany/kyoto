@@ -1,6 +1,6 @@
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 use std::vec;
 
 use fuzzer::ast::Grammar;
@@ -33,6 +33,10 @@ struct Args {
     /// Output directory for crashes
     #[arg(short, long, default_value = "crashes")]
     output: String,
+
+    /// Enable test logging
+    #[arg(short, long, default_value_t = false)]
+    log: bool,
 }
 
 fn get_garmmar(lexer: &String, parser: &String) -> Grammar {
@@ -72,7 +76,7 @@ fn main() {
     let mut handles = vec![];
     println!("Starting {} threads for fuzzing", num_threads);
 
-    for i in 0..num_threads - 1 {
+    for i in 0..num_threads {
         let grammar_clone = Arc::clone(&shared_grammar);
         let stats_clone = Arc::clone(&shared_stats);
         let outdir_clone = Arc::clone(&output_dir);
@@ -85,6 +89,7 @@ fn main() {
                 max_depth,
                 num_iters,
                 outdir_clone,
+                args.log,
             );
         }));
     }

@@ -3,8 +3,8 @@ use crate::generator::Generator;
 use rand::rng;
 use std::io::Write;
 use std::sync::{
-    atomic::{AtomicUsize, Ordering},
     Arc,
+    atomic::{AtomicUsize, Ordering},
 };
 use tempfile::NamedTempFile;
 use uuid::Uuid;
@@ -100,6 +100,7 @@ pub fn fuzz_worker(
     max_depth: usize,
     num_iters: usize,
     output_dir: Arc<String>,
+    log: bool,
 ) {
     let mut rng = rng();
     let mut generator = Generator::new(&grammar, &mut rng, max_depth);
@@ -130,6 +131,14 @@ pub fn fuzz_worker(
         if st.is_empty() {
             curr_iters -= 1;
             continue;
+        }
+
+        if log {
+            let id = Uuid::new_v4();
+            let mut file = std::fs::File::create(format!("cases/input_{}.txt", id.to_string()))
+                .expect("Failed to create input file");
+            file.write_all(st.as_bytes())
+                .expect("Failed to write to input file");
         }
 
         match run_cyoto_compiler(&st, "../build/cyoto") {
