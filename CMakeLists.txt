@@ -94,4 +94,4 @@ target_compile_options(ktest PRIVATE -O3)
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
 
 include(GoogleTest)
-gtest_discover_tests(ktest)
+gtest_discover_tests(ktest DISCOVERY_MODE PRE_TEST)
