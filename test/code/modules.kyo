@@ -1,0 +1,51 @@
+// NAME ImportEmptyModule
+// ERR 0
+// RET 4
+
+import mods.empty;
+
+fn main() i32 {
+    return 4;
+}
+
+// NAME ImportModuleWithMain
+// ERR 0
+// RET 0
+
+import mods.modmain;
+
+fn main() i32 {
+    return 0;
+}
+
+// NAME FunctionResolutionFromModule
+// ERR 0
+// RET 42
+
+import mods.a;
+
+fn main() i32 {
+    return mods.a::answer();
+}
+
+// NAME ImportMultipleModulesFunctionResolution
+// ERR 0
+// RET 43
+
+import mods.a;
+import mods.b;
+
+fn main() i32 {
+    return mods.b::answer();
+}
+
+// NAME NoFullPathModule
+// ERR 1
+// RET 0
+
+import mods.a;
+
+fn main() i32 {
+    // Should be mods.a::answer().
+    return a::answer();
+}

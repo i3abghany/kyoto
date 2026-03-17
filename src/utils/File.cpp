@@ -37,7 +37,7 @@ std::string File::get_source(const std::string_view filename)
 std::vector<TestCase> File::get_test_cases(const std::string_view filename)
 {
     const auto source = get_source(filename);
-    return split_test_cases(source);
+    return split_test_cases(source, std::filesystem::path(filename));
 }
 
 int32_t File::execute_ir(const std::string& ir)
@@ -113,7 +113,7 @@ bool File::is_executable(const std::string& name)
     return !path.empty();
 }
 
-std::vector<TestCase> File::split_test_cases(const std::string& source)
+std::vector<TestCase> File::split_test_cases(const std::string& source, const std::filesystem::path& filename)
 {
     std::vector<TestCase> test_cases;
     size_t start = 0;
@@ -123,17 +123,17 @@ std::vector<TestCase> File::split_test_cases(const std::string& source)
     while ((delim_pos = source.find(delim, start + 1)) != std::string::npos) {
         std::string test_case = { data + start, delim_pos - start };
         boost::trim(test_case);
-        test_cases.emplace_back(parse_test_case(test_case));
+        test_cases.emplace_back(parse_test_case(test_case, filename));
         start = delim_pos;
     }
 
     std::string test_case = { data + start, source.size() - start };
     boost::trim(test_case);
-    test_cases.emplace_back(parse_test_case(test_case));
+    test_cases.emplace_back(parse_test_case(test_case, filename));
     return test_cases;
 }
 
-TestCase File::parse_test_case(const std::string& test_case)
+TestCase File::parse_test_case(const std::string& test_case, const std::filesystem::path& filename)
 {
     std::string code;
     int32_t expected_return = 0;
@@ -159,7 +159,7 @@ TestCase File::parse_test_case(const std::string& test_case)
     else code = line;
 
     code += std::string { std::istreambuf_iterator<char>(iss), {} };
-    return TestCase(name, code, expected_return, error, skip);
+    return TestCase(name, code, expected_return, error, skip, filename);
 }
 
 }

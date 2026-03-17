@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <stdint.h>
 #include <string>
 #include <string_view>
@@ -21,8 +22,8 @@ public:
     static bool is_executable(const std::string& filename);
 
 private:
-    static std::vector<TestCase> split_test_cases(const std::string& source);
-    static TestCase parse_test_case(const std::string& test_case);
+    static std::vector<TestCase> split_test_cases(const std::string& source, const std::filesystem::path& filename);
+    static TestCase parse_test_case(const std::string& test_case, const std::filesystem::path& filename);
 };
 
 }
