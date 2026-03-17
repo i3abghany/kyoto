@@ -12,7 +12,9 @@
 #include <assert.h>
 #include <cstdlib>
 #include <exception>
+#include <filesystem>
 #include <format>
+#include <functional>
 #include <iostream>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/Support/TypeSize.h>
@@ -34,6 +36,7 @@
 #include "kyoto/Resolution/ConstructorIdentifierVisitor.h"
 #include "kyoto/Resolution/FunctionIdentifierVisitor.h"
 #include "kyoto/Visitor.h"
+#include "kyoto/utils/File.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Analysis/CGSCCPassManager.h"
 #include "llvm/Analysis/LoopAnalysisManager.h"
@@ -102,10 +105,8 @@ public:
                 tokenName = std::string(vocab.getLiteralName(token));
                 if (tokenName.empty()) {
                     tokenName = std::to_string(token);
-                } else {
-                    if (tokenName.size() >= 2 && tokenName[0] == '\'' && tokenName.back() == '\'') {
-                        tokenName = tokenName.substr(1, tokenName.size() - 2);
-                    }
+                } else if (tokenName.size() >= 2 && tokenName[0] == '\'' && tokenName.back() == '\'') {
+                    tokenName = tokenName.substr(1, tokenName.size() - 2);
                 }
             }
             expectedStr += tokenName;
@@ -120,22 +121,25 @@ public:
     }
 };
 
-ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name)
+ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name,
+                               std::optional<std::filesystem::path> entry_path)
     : code(code)
     , name(name)
+    , entry_path(std::move(entry_path))
     , builder(context)
     , module(std::make_unique<llvm::Module>(name, context))
     , data_layout(module->getDataLayout())
 {
     type_alias_scopes.emplace_back();
+    current_module_name = "__main__";
     register_visitors();
     register_malloc();
     register_free();
 }
 
-ASTNode* ModuleCompiler::parse_program()
+ASTNode* ModuleCompiler::parse_program(const std::string& source)
 {
-    antlr4::ANTLRInputStream input(code);
+    antlr4::ANTLRInputStream input(source);
     kyoto::KyotoLexer lexer(&input);
     lexer.removeErrorListeners();
     lexer.addErrorListener(new LexerErrorListener());
@@ -153,10 +157,213 @@ ASTNode* ModuleCompiler::parse_program()
     return std::any_cast<ASTNode*>(visitor.visit(tree));
 }
 
+void ModuleCompiler::enter_module_context(const std::string& module_name)
+{
+    current_module_name = module_name;
+    const auto it = loaded_modules.find(module_name);
+    if (it != loaded_modules.end()) {
+        current_source_path = it->second.path;
+        code = it->second.code;
+    } else {
+        current_source_path.clear();
+    }
+}
+
+std::string ModuleCompiler::mangle_module_name(const std::string& module_name) const
+{
+    std::string mangled = module_name;
+    std::replace(mangled.begin(), mangled.end(), '.', '_');
+    return mangled;
+}
+
+std::string ModuleCompiler::make_qualified_name(const std::string& module_name, const std::string& entity_name) const
+{
+    if (module_name.empty()) return entity_name;
+    return mangle_module_name(module_name) + "__" + entity_name;
+}
+
+std::string ModuleCompiler::qualify_local_name(const std::string& entity_name) const
+{
+    return make_qualified_name(current_module_name, entity_name);
+}
+
+std::string ModuleCompiler::resolve_module_reference(const std::string& module_name) const
+{
+    if (!is_imported_module_visible(module_name)) {
+        throw std::runtime_error(
+            std::format("Module `{}` is not imported into `{}`", module_name, current_module_name));
+    }
+    return module_name;
+}
+
+std::string ModuleCompiler::qualify_imported_name(const std::string& module_name, const std::string& entity_name) const
+{
+    return make_qualified_name(resolve_module_reference(module_name), entity_name);
+}
+
+bool ModuleCompiler::is_imported_module_visible(const std::string& module_name) const
+{
+    const auto it = module_imports.find(current_module_name);
+    if (it == module_imports.end()) return false;
+    return it->second.contains(module_name);
+}
+
+std::vector<std::string> ModuleCompiler::parse_imports(const std::string& source,
+                                                       const std::filesystem::path& path) const
+{
+    try {
+        antlr4::ANTLRInputStream input(source);
+        kyoto::KyotoLexer lexer(&input);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new LexerErrorListener());
+        antlr4::CommonTokenStream tokens(&lexer);
+        tokens.fill();
+
+        kyoto::KyotoParser parser(&tokens);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new ParserErrorListener());
+        parser.setBuildParseTree(true);
+        parser.setErrorHandler(std::make_unique<CustomBailErrorStrategy>());
+        auto* tree = parser.program();
+
+        std::vector<std::string> imports;
+        for (auto* rawTopLevel : tree->topLevel()) {
+            auto* topLevel = const_cast<kyoto::KyotoParser::TopLevelContext*>(rawTopLevel);
+            if (!topLevel->importStatement()) continue;
+
+            std::string module_name;
+            auto* modulePath
+                = const_cast<kyoto::KyotoParser::ModulePathContext*>(topLevel->importStatement()->modulePath());
+            for (size_t i = 0; i < modulePath->IDENTIFIER().size(); ++i) {
+                if (!module_name.empty()) module_name += ".";
+                module_name += modulePath->IDENTIFIER(i)->getText();
+            }
+            imports.push_back(module_name);
+        }
+        return imports;
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::format("{}: {}", path.string(), e.what()));
+    }
+}
+
+void ModuleCompiler::load_module_recursive(const std::string& module_name, const std::filesystem::path& path,
+                                           const std::string* source, std::vector<std::string>& stack)
+{
+    const auto normalized_path = std::filesystem::weakly_canonical(path);
+
+    if (std::find(stack.begin(), stack.end(), module_name) != stack.end()) {
+        std::string cycle;
+        for (const auto& item : stack) {
+            if (!cycle.empty()) cycle += " -> ";
+            cycle += item;
+        }
+        cycle += " -> " + module_name;
+        throw std::runtime_error(std::format("Import cycle detected: {}", cycle));
+    }
+
+    const auto existing = loaded_modules.find(module_name);
+    if (existing != loaded_modules.end()) {
+        if (existing->second.path != normalized_path) {
+            throw std::runtime_error(std::format("Module `{}` resolves to multiple files: `{}` and `{}`", module_name,
+                                                 existing->second.path.string(), normalized_path.string()));
+        }
+        return;
+    }
+
+    std::string module_source = source ? *source : utils::File::get_source(normalized_path.string());
+    stack.push_back(module_name);
+
+    auto imports = parse_imports(module_source, normalized_path);
+    loaded_modules.emplace(module_name,
+                           LoadedModule { module_name, normalized_path, std::move(module_source), std::move(imports) });
+    module_imports[module_name] = {};
+
+    const auto base_dir = normalized_path.parent_path();
+    const auto imported_names = loaded_modules.at(module_name).imports;
+    for (const auto& imported_module : imported_names) {
+        module_imports[module_name].insert(imported_module);
+
+        std::filesystem::path imported_path = base_dir;
+        std::string relative = imported_module;
+        std::replace(relative.begin(), relative.end(), '.', std::filesystem::path::preferred_separator);
+        imported_path /= relative + ".kyo";
+        if (!std::filesystem::exists(imported_path)) {
+            throw std::runtime_error(std::format("{}: imported module `{}` not found at `{}`", normalized_path.string(),
+                                                 imported_module, imported_path.string()));
+        }
+
+        load_module_recursive(imported_module, imported_path, nullptr, stack);
+    }
+
+    stack.pop_back();
+}
+
+void ModuleCompiler::load_modules()
+{
+    loaded_modules.clear();
+    module_imports.clear();
+
+    if (!entry_path.has_value()) {
+        const auto inline_path = std::filesystem::path("<memory>");
+        loaded_modules.emplace("__main__",
+                               LoadedModule {
+                                   "__main__",
+                                   inline_path,
+                                   code,
+                                   {},
+                               });
+        module_imports["__main__"] = {};
+        current_source_path = inline_path;
+        current_module_name = "__main__";
+        return;
+    }
+
+    auto root_path = std::filesystem::weakly_canonical(*entry_path);
+    std::vector<std::string> stack;
+    load_module_recursive("__main__", root_path, &code, stack);
+    current_source_path = root_path;
+    current_module_name = "__main__";
+}
+
+std::vector<std::string> ModuleCompiler::topo_sort_modules() const
+{
+    enum class VisitState { Pending, Visiting, Done };
+
+    std::unordered_map<std::string, VisitState> states;
+    std::vector<std::string> ordered;
+    ordered.reserve(loaded_modules.size());
+
+    std::function<void(const std::string&)> dfs = [&](const std::string& module_name) {
+        auto state = states[module_name];
+        if (state == VisitState::Done) return;
+        if (state == VisitState::Visiting) {
+            throw std::runtime_error(std::format("Import cycle detected at `{}`", module_name));
+        }
+
+        states[module_name] = VisitState::Visiting;
+        if (const auto imports_it = module_imports.find(module_name); imports_it != module_imports.end()) {
+            for (const auto& dependency : imports_it->second) {
+                dfs(dependency);
+            }
+        }
+
+        states[module_name] = VisitState::Done;
+        ordered.push_back(module_name);
+    };
+
+    dfs("__main__");
+    return ordered;
+}
+
+std::unique_ptr<ASTNode> ModuleCompiler::build_module_ast(const std::string& module_name)
+{
+    enter_module_context(module_name);
+    instantiated_nodes.clear();
+    return std::unique_ptr<ASTNode>(parse_program(code));
+}
+
 void ModuleCompiler::llvm_pass()
 {
-    // We are only using the FunctionAnalysisManager but apparently we need to
-    // register all of those managers.
     llvm::LoopAnalysisManager LAM;
     llvm::FunctionAnalysisManager FAM;
     llvm::CGSCCAnalysisManager CGAM;
@@ -195,9 +402,7 @@ void ModuleCompiler::insert_dummy_return(llvm::BasicBlock& bb)
 {
     const auto* llvm_type = bb.getParent()->getReturnType();
 
-    if (!llvm_type) {
-        return;
-    }
+    if (!llvm_type) return;
 
     builder.SetInsertPoint(&bb);
 
@@ -219,18 +424,35 @@ llvm::BasicBlock* ModuleCompiler::create_basic_block(const std::string& name)
 std::optional<std::string> ModuleCompiler::gen_ir()
 {
     auto report_error = [](const std::string& msg) {
-        constexpr auto RED = "\033[0;31m";
-        constexpr auto NC = "\033[0m";
+        constexpr auto* RED = "\033[0;31m";
+        constexpr auto* NC = "\033[0m";
         std::cerr << RED << "Error: " << NC << msg << std::endl;
     };
 
     try {
-        auto program = std::unique_ptr<ASTNode>(parse_program());
+        load_modules();
 
-        for (auto& visitor : analysis_visitors)
-            visitor->visit(program.get());
+        std::vector<std::unique_ptr<ASTNode>> module_asts;
+        const auto module_order = topo_sort_modules();
+        module_asts.reserve(module_order.size());
 
-        program->gen();
+        for (const auto& module_name : module_order) {
+            auto ast = build_module_ast(module_name);
+            module_asts.push_back(std::move(ast));
+        }
+
+        for (size_t i = 0; i < module_order.size(); ++i) {
+            enter_module_context(module_order[i]);
+            for (auto& visitor : analysis_visitors) {
+                visitor->visit(module_asts[i].get());
+            }
+        }
+
+        for (size_t i = 0; i < module_order.size(); ++i) {
+            enter_module_context(module_order[i]);
+            module_asts[i]->gen();
+        }
+
         llvm_pass();
         ensure_main_fn();
     } catch (const antlr4::ParseCancellationException& e) {
@@ -266,6 +488,7 @@ void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 {
     symbol_table.add_symbol(name, symbol);
 }
+
 void ModuleCompiler::add_function(FunctionNode* node)
 {
     std::string key = make_function_key(node->get_name(), node->get_params().size());
@@ -275,9 +498,7 @@ void ModuleCompiler::add_function(FunctionNode* node)
 std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name)
 {
     for (const auto& [key, func] : functions) {
-        if (key.find(name + "_") == 0) {
-            return func;
-        }
+        if (key.find(name + "_") == 0) return func;
     }
     return std::nullopt;
 }
@@ -296,7 +517,7 @@ void ModuleCompiler::register_malloc()
     param.name = "size";
     param.type = new PrimitiveType(PrimitiveType::Kind::I64);
     std::vector<FunctionNode::Parameter> args = { param };
-    auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this, /*is_external = */ true);
+    auto* malloc = new FunctionNode("malloc", args, false, ret_type, nullptr, *this, true, "malloc");
     add_function(malloc);
     (void)malloc->gen_prototype();
 }
@@ -308,7 +529,7 @@ void ModuleCompiler::register_free()
     param.name = "ptr";
     param.type = new PointerType(new PrimitiveType(PrimitiveType::Kind::I8));
     std::vector<FunctionNode::Parameter> args = { param };
-    auto* free = new FunctionNode("free", args, false, ret_type, nullptr, *this, /* is_external = */ true);
+    auto* free = new FunctionNode("free", args, false, ret_type, nullptr, *this, true, "free");
     add_function(free);
     (void)free->gen_prototype();
 }
@@ -358,9 +579,7 @@ void ModuleCompiler::pop_scope()
 
     symbol_table.pop_scope();
 
-    if (!type_alias_scopes.empty()) {
-        type_alias_scopes.pop_back();
-    }
+    if (!type_alias_scopes.empty()) type_alias_scopes.pop_back();
 }
 
 FunctionNode* ModuleCompiler::get_current_function_node() const
@@ -474,6 +693,11 @@ bool ModuleCompiler::verify_module(llvm::raw_string_ostream& os) const
 
 void ModuleCompiler::register_type_alias(const std::string& alias, KType* type)
 {
+    if (building_top_level) {
+        module_type_aliases[current_module_name][alias] = std::unique_ptr<KType>(type->copy());
+        return;
+    }
+
     if (!type_alias_scopes.empty()) {
         type_alias_scopes.back()[alias] = type;
     }
@@ -483,8 +707,24 @@ KType* ModuleCompiler::resolve_type_alias(const std::string& alias)
 {
     for (auto it = type_alias_scopes.rbegin(); it != type_alias_scopes.rend(); ++it) {
         auto found = it->find(alias);
-        if (found != it->end()) {
-            return found->second;
+        if (found != it->end()) return found->second;
+    }
+
+    if (const auto module_it = module_type_aliases.find(current_module_name); module_it != module_type_aliases.end()) {
+        if (const auto alias_it = module_it->second.find(alias); alias_it != module_it->second.end()) {
+            return alias_it->second.get();
+        }
+    }
+
+    return nullptr;
+}
+
+KType* ModuleCompiler::resolve_type_alias(const std::string& module_name, const std::string& alias)
+{
+    const auto resolved_module = resolve_module_reference(module_name);
+    if (const auto module_it = module_type_aliases.find(resolved_module); module_it != module_type_aliases.end()) {
+        if (const auto alias_it = module_it->second.find(alias); alias_it != module_it->second.end()) {
+            return alias_it->second.get();
         }
     }
     return nullptr;
@@ -493,10 +733,13 @@ KType* ModuleCompiler::resolve_type_alias(const std::string& alias)
 bool ModuleCompiler::is_type_alias(const std::string& name) const
 {
     for (auto it = type_alias_scopes.rbegin(); it != type_alias_scopes.rend(); ++it) {
-        if (it->find(name) != it->end()) {
-            return true;
-        }
+        if (it->find(name) != it->end()) return true;
     }
+
+    if (const auto module_it = module_type_aliases.find(current_module_name); module_it != module_type_aliases.end()) {
+        return module_it->second.contains(name);
+    }
+
     return false;
 }
 
@@ -507,9 +750,7 @@ void ModuleCompiler::push_type_alias_scope()
 
 void ModuleCompiler::pop_type_alias_scope()
 {
-    if (!type_alias_scopes.empty()) {
-        type_alias_scopes.pop_back();
-    }
+    if (!type_alias_scopes.empty()) type_alias_scopes.pop_back();
 }
 
 void ModuleCompiler::instantiate_template(const std::string& name, const std::string& mangled_name,
@@ -521,8 +762,9 @@ void ModuleCompiler::instantiate_template(const std::string& name, const std::st
                          auto* cdn = dynamic_cast<ClassDefinitionNode*>(n);
                          return cdn && cdn->get_name() == mangled_name;
                      })
-        != instantiated_nodes.end())
+        != instantiated_nodes.end()) {
         return;
+    }
 
     if (!template_registry.contains(name)) throw std::runtime_error("Template " + name + " not found");
 
@@ -530,10 +772,14 @@ void ModuleCompiler::instantiate_template(const std::string& name, const std::st
 
     auto& tmpl = template_registry[name];
     std::string text = tmpl.raw_text;
+    std::string source_template_name = name;
+    if (const auto pos = source_template_name.rfind("__"); pos != std::string::npos) {
+        source_template_name = source_template_name.substr(pos + 2);
+    }
 
     std::regex reg("\\b" + tmpl.param + "\\b");
 
-    std::string class_decl = "class\\s+" + name + "\\s*<\\s*" + tmpl.param + "\\s*>";
+    std::string class_decl = "class\\s+" + source_template_name + "\\s*<\\s*" + tmpl.param + "\\s*>";
     std::regex class_reg(class_decl);
     std::string new_text = std::regex_replace(text, class_reg, "class " + mangled_name);
     new_text = std::regex_replace(new_text, reg, type_str);

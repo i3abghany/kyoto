@@ -52,9 +52,10 @@ std::any ASTBuilderVisitor::visitProgram(kyoto::KyotoParser::ProgramContext* ctx
 {
     std::vector<ASTNode*> nodes;
     for (const auto node : ctx->topLevel()) {
+        compiler.set_building_top_level(true);
         std::any result = visit(node);
+        compiler.set_building_top_level(false);
         if (result.has_value()) {
-            // throw std::runtime_error("ASTBuilderVisitor: visit returned no value");
             nodes.push_back(std::any_cast<ASTNode*>(result));
         }
     }
@@ -68,9 +69,15 @@ std::any ASTBuilderVisitor::visitProgram(kyoto::KyotoParser::ProgramContext* ctx
     return (ASTNode*)new ProgramNode(nodes, compiler);
 }
 
+std::any ASTBuilderVisitor::visitImportStatement(kyoto::KyotoParser::ImportStatementContext* ctx)
+{
+    return {};
+}
+
 std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
 {
-    const auto name = ctx->IDENTIFIER()->getText();
+    const auto external_name = ctx->IDENTIFIER()->getText();
+    const auto name = compiler.qualify_local_name(external_name);
     std::vector<FunctionNode::Parameter> args;
     for (const auto& paramCtx : ctx->parameterList()->parameter()) {
         auto* type = std::any_cast<KType*>(visit(paramCtx->type()));
@@ -79,15 +86,24 @@ std::any ASTBuilderVisitor::visitCdecl(kyoto::KyotoParser::CdeclContext* ctx)
 
     auto* ret_type = std::any_cast<KType*>(visit(ctx->type()));
     const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
-    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler, /* is_external = */ true);
+    auto* proto
+        = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler, /* is_external = */ true, external_name);
     compiler.add_function(proto);
     return (ASTNode*)proto;
 }
 
 std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx)
 {
-    auto name = ctx->IDENTIFIER()->getText();
-    if (compiler.get_current_class() != "") name = compiler.get_current_class() + "_" + name;
+    const auto source_name = ctx->IDENTIFIER()->getText();
+    auto name = source_name;
+    std::string linkage_name;
+    if (compiler.get_current_class() != "") {
+        name = compiler.get_current_class() + "_" + name;
+        linkage_name = name;
+    } else {
+        name = compiler.qualify_local_name(name);
+        linkage_name = source_name == "main" && compiler.get_current_module_name() == "__main__" ? "main" : name;
+    }
 
     std::vector<FunctionNode::Parameter> args;
 
@@ -98,7 +114,7 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
     auto* ret_type = ctx->type() ? std::any_cast<KType*>(visit(ctx->type())) : KType::get_void();
     const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
-    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler);
+    auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler, false, linkage_name);
     compiler.add_function(proto);
 
     compiler.push_type_alias_scope();
@@ -195,7 +211,22 @@ std::any ASTBuilderVisitor::visitFreeStatement(kyoto::KyotoParser::FreeStatement
 
 std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx)
 {
-    const auto name = ctx->IDENTIFIER()->getText();
+    const auto source_name = ctx->IDENTIFIER()->getText();
+    const auto name = source_name == "main" ? source_name : compiler.qualify_local_name(source_name);
+    std::vector<ExpressionNode*> args;
+    if (ctx->expressionList() && !ctx->expressionList()->expression().empty()) {
+        for (const auto arg : ctx->expressionList()->expression()) {
+            args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+        }
+    }
+    return (ExpressionNode*)new FunctionCall(name, args, compiler);
+}
+
+std::any
+ASTBuilderVisitor::visitQualifiedFunctionCallExpression(kyoto::KyotoParser::QualifiedFunctionCallExpressionContext* ctx)
+{
+    const auto module_name = visit_module_path(ctx->modulePath());
+    const auto name = compiler.qualify_imported_name(module_name, ctx->IDENTIFIER()->getText());
     std::vector<ExpressionNode*> args;
     if (ctx->expressionList() && !ctx->expressionList()->expression().empty()) {
         for (const auto arg : ctx->expressionList()->expression()) {
@@ -538,6 +569,9 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
 
 std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx)
 {
+    const auto raw_class_name = ctx->IDENTIFIER(0)->getText();
+    const auto class_name
+        = raw_class_name.find("__") != std::string::npos ? raw_class_name : compiler.qualify_local_name(raw_class_name);
     if (ctx->LESS_THAN()) {
         std::string param = ctx->IDENTIFIER(1)->getText();
 
@@ -547,21 +581,21 @@ std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefini
         size_t stop = stopToken->getStopIndex();
         std::string raw_text = compiler.get_code().substr(start, stop - start + 1);
 
-        compiler.register_template(ctx->IDENTIFIER(0)->getText(), param, raw_text);
+        compiler.register_template(class_name, param, raw_text);
         return std::any();
     }
 
     std::vector<ASTNode*> components;
-    compiler.push_class(ctx->IDENTIFIER(0)->getText());
+    compiler.push_class(class_name);
     for (const auto& component : ctx->classComponents()->classComponent()) {
         components.push_back(std::any_cast<ASTNode*>(visit(component)));
     }
     compiler.pop_class();
     std::string parent = "";
     if (ctx->COLON()) {
-        parent = ctx->IDENTIFIER().back()->getText();
+        parent = compiler.qualify_local_name(ctx->IDENTIFIER().back()->getText());
     }
-    return (ASTNode*)new ClassDefinitionNode(ctx->IDENTIFIER(0)->getText(), parent, components, compiler);
+    return (ASTNode*)new ClassDefinitionNode(class_name, parent, components, compiler);
 }
 
 std::any ASTBuilderVisitor::visitClassComponent(kyoto::KyotoParser::ClassComponentContext* ctx)
@@ -662,8 +696,8 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
         std::replace(inner_mangled.begin(), inner_mangled.end(), '<', '_');
         std::replace(inner_mangled.begin(), inner_mangled.end(), '>', '_');
 
-        std::string mangled_name = type_name + "_" + inner_mangled;
-        compiler.instantiate_template(type_name, mangled_name, inner_text);
+        std::string mangled_name = compiler.qualify_local_name(type_name + "_" + inner_mangled);
+        compiler.instantiate_template(compiler.qualify_local_name(type_name), mangled_name, inner_text);
         type_name = mangled_name;
     }
 
@@ -672,7 +706,31 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
         return (KType*)alias_type->copy();
     }
 
-    return (KType*)new ClassType(type_name);
+    if (type_name.find("__") != std::string::npos) {
+        return (KType*)new ClassType(type_name);
+    }
+    return (KType*)new ClassType(compiler.qualify_local_name(type_name));
+}
+
+std::any ASTBuilderVisitor::visitQualifiedClassType(kyoto::KyotoParser::QualifiedClassTypeContext* ctx)
+{
+    const auto module_name = visit_module_path(ctx->modulePath());
+    const auto alias = ctx->IDENTIFIER()->getText();
+    if (KType* alias_type = compiler.resolve_type_alias(module_name, alias); alias_type != nullptr) {
+        return (KType*)alias_type->copy();
+    }
+
+    return (KType*)new ClassType(compiler.qualify_imported_name(module_name, alias));
+}
+
+std::string ASTBuilderVisitor::visit_module_path(kyoto::KyotoParser::ModulePathContext* ctx) const
+{
+    std::string module_name;
+    for (size_t i = 0; i < ctx->IDENTIFIER().size(); ++i) {
+        if (!module_name.empty()) module_name += ".";
+        module_name += ctx->IDENTIFIER(i)->getText();
+    }
+    return module_name;
 }
 
 std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,

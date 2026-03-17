@@ -57,7 +57,7 @@ int run(int argc, const char* argv[])
 
     const auto& file = files[0];
     auto source = utils::File::get_source(file);
-    ModuleCompiler compiler(source);
+    ModuleCompiler compiler(source, "main", file);
 
     auto output = vm["output"].as<std::string>();
     auto ir = compiler.gen_ir();

@@ -133,11 +133,20 @@ llvm::Value* FunctionCall::gen()
         }
     }
 
+    auto fn_meta = compiler.get_function(name, lookup_arity);
+    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
+
     std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    if (fn_meta.has_value()) {
+        llvm_name = fn_meta.value()->is_external()
+            ? fn_meta.value()->get_linkage_name()
+            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
+    }
+
     auto* fn = compiler.get_module()->getFunction(llvm_name);
 
-    if (!fn) {
-        fn = compiler.get_module()->getFunction(name);
+    if (!fn && fn_meta.has_value() && fn_meta.value()->get_linkage_name() == "main") {
+        fn = compiler.get_module()->getFunction("main");
     }
 
     if (!fn) {
@@ -178,12 +187,17 @@ llvm::Value* FunctionCall::gen_ptr() const
         }
     }
 
-    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
-    auto* fn = compiler.get_module()->getFunction(llvm_name);
+    auto fn_meta = compiler.get_function(name, lookup_arity);
+    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
 
-    if (!fn) {
-        fn = compiler.get_module()->getFunction(name);
+    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    if (fn_meta.has_value()) {
+        llvm_name = fn_meta.value()->is_external()
+            ? fn_meta.value()->get_linkage_name()
+            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
     }
+
+    auto* fn = compiler.get_module()->getFunction(llvm_name);
 
     if (!fn) {
         throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));
@@ -202,12 +216,17 @@ llvm::Type* FunctionCall::gen_type() const
         }
     }
 
-    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
-    const auto* fn = compiler.get_module()->getFunction(llvm_name);
+    auto fn_meta = compiler.get_function(name, lookup_arity);
+    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
 
-    if (!fn) {
-        fn = compiler.get_module()->getFunction(name);
+    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
+    if (fn_meta.has_value()) {
+        llvm_name = fn_meta.value()->is_external()
+            ? fn_meta.value()->get_linkage_name()
+            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
     }
+
+    const auto* fn = compiler.get_module()->getFunction(llvm_name);
 
     if (!fn) {
         throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));

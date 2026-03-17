@@ -1,10 +1,12 @@
 #pragma once
 
 #include <cstddef>
+#include <filesystem>
 #include <format>
 #include <llvm/IR/DataLayout.h>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -31,7 +33,8 @@ class StructType;
 
 class ModuleCompiler {
 public:
-    explicit ModuleCompiler(const std::string& code, const std::string& name = "main");
+    explicit ModuleCompiler(const std::string& code, const std::string& name = "main",
+                            std::optional<std::filesystem::path> entry_path = std::nullopt);
 
     std::optional<std::string> gen_ir();
 
@@ -42,6 +45,8 @@ public:
     llvm::Module* get_module() { return module.get(); }
 
     const std::string& get_code() const { return code; }
+    const std::filesystem::path& get_source_path() const { return current_source_path; }
+    const std::string& get_current_module_name() const { return current_module_name; }
     TypeResolver& get_type_resolver() { return type_resolver; }
 
     std::optional<Symbol> get_symbol(const std::string& name);
@@ -50,6 +55,10 @@ public:
     void add_function(FunctionNode* node);
     std::optional<FunctionNode*> get_function(const std::string& name);
     std::optional<FunctionNode*> get_function(const std::string& name, size_t arity);
+    std::string qualify_local_name(const std::string& name) const;
+    std::string qualify_imported_name(const std::string& module_name, const std::string& name) const;
+    std::string resolve_module_reference(const std::string& module_name) const;
+    bool is_imported_module_visible(const std::string& module_name) const;
 
     void register_visitors();
     void register_malloc();
@@ -82,6 +91,7 @@ public:
 
     void register_type_alias(const std::string& alias, KType* type);
     KType* resolve_type_alias(const std::string& alias);
+    KType* resolve_type_alias(const std::string& module_name, const std::string& alias);
     bool is_type_alias(const std::string& name) const;
 
     void push_type_alias_scope();
@@ -98,13 +108,32 @@ public:
     void instantiate_template(const std::string& name, const std::string& mangled_name, const std::string& type_str);
     std::vector<ASTNode*>& get_instantiated_nodes() { return instantiated_nodes; }
 
+    void set_building_top_level(bool value) { building_top_level = value; }
+    bool is_building_top_level() const { return building_top_level; }
+
 private:
     bool verify_module(llvm::raw_string_ostream& os) const;
-    ASTNode* parse_program();
+    ASTNode* parse_program(const std::string& source);
     void ensure_main_fn() const;
     void llvm_pass();
+    void load_modules();
+    void load_module_recursive(const std::string& module_name, const std::filesystem::path& path,
+                               const std::string* source, std::vector<std::string>& stack);
+    std::vector<std::string> parse_imports(const std::string& source, const std::filesystem::path& path) const;
+    std::unique_ptr<ASTNode> build_module_ast(const std::string& module_name);
+    std::vector<std::string> topo_sort_modules() const;
+    std::string mangle_module_name(const std::string& module_name) const;
+    std::string make_qualified_name(const std::string& module_name, const std::string& name) const;
+    void enter_module_context(const std::string& module_name);
 
     std::string make_function_key(const std::string& name, size_t arity) const;
+
+    struct LoadedModule {
+        std::string name;
+        std::filesystem::path path;
+        std::string code;
+        std::vector<std::string> imports;
+    };
 
 private:
     std::unordered_map<std::string, FunctionNode*> functions;
@@ -114,6 +143,10 @@ private:
 
     std::string code;
     std::string name;
+    std::optional<std::filesystem::path> entry_path;
+    std::filesystem::path current_source_path;
+    std::string current_module_name;
+    bool building_top_level = false;
 
     std::unordered_set<std::string> classes;
     std::string current_class;
@@ -133,4 +166,7 @@ private:
     std::vector<ASTNode*> instantiated_nodes;
 
     std::vector<std::unordered_map<std::string, KType*>> type_alias_scopes;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::unique_ptr<KType>>> module_type_aliases;
+    std::unordered_map<std::string, LoadedModule> loaded_modules;
+    std::unordered_map<std::string, std::set<std::string>> module_imports;
 };

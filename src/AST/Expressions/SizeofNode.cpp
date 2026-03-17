@@ -57,8 +57,10 @@ llvm::Value* SizeofNode::gen()
         // Special case: if the expression is an identifier that refers to a class name,
         // treat it as a class type instead of trying to look it up as a variable
         auto* identifier_expr = dynamic_cast<IdentifierExpressionNode*>(expr);
-        if (identifier_expr && compiler.class_exists(identifier_expr->get_name())) {
-            target_type = new ClassType(identifier_expr->get_name());
+        const auto local_class_name
+            = identifier_expr ? compiler.qualify_local_name(identifier_expr->get_name()) : std::string {};
+        if (identifier_expr && compiler.class_exists(local_class_name)) {
+            target_type = new ClassType(local_class_name);
             should_delete_target_type = true;
         } else {
             target_type = expr->get_ktype();

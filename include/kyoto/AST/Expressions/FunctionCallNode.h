@@ -47,6 +47,8 @@ public:
         name = prefix + name;
     }
 
+    void set_name(std::string new_name) { name = std::move(new_name); }
+
 protected:
     bool is_constructor { false };
     std::string name;

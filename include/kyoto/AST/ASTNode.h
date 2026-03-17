@@ -84,7 +84,7 @@ public:
     };
 
     FunctionNode(std::string name, std::vector<Parameter> args, bool varargs, KType* ret_type, ASTNode* body,
-                 ModuleCompiler& compiler, bool is_external = false);
+                 ModuleCompiler& compiler, bool is_external = false, std::string linkage_name = "");
     ~FunctionNode() override;
 
     [[nodiscard]] std::string to_string() const override;
@@ -93,6 +93,7 @@ public:
 
     [[nodiscard]] const std::vector<Parameter>& get_params() const { return args; }
     [[nodiscard]] std::string get_name() const { return name; }
+    [[nodiscard]] const std::string& get_linkage_name() const { return linkage_name; }
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { body }; }
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
@@ -113,4 +114,5 @@ private:
     ASTNode* body;
     ModuleCompiler& compiler;
     bool is_external_function;
+    std::string linkage_name;
 };

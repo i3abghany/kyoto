@@ -12,6 +12,7 @@ class ASTBuilderVisitor final : public kyoto::KyotoParserBaseVisitor {
 public:
     explicit ASTBuilderVisitor(ModuleCompiler& compiler);
     std::any visitProgram(kyoto::KyotoParser::ProgramContext* ctx) override;
+    std::any visitImportStatement(kyoto::KyotoParser::ImportStatementContext* ctx) override;
     std::any visitCdecl(kyoto::KyotoParser::CdeclContext* ctx) override;
     std::any visitFunctionDefinition(kyoto::KyotoParser::FunctionDefinitionContext* ctx) override;
     std::any visitBlock(kyoto::KyotoParser::BlockContext* ctx) override;
@@ -25,6 +26,8 @@ public:
     std::any visitFreeStatement(kyoto::KyotoParser::FreeStatementContext* ctx) override;
 
     std::any visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx) override;
+    std::any
+    visitQualifiedFunctionCallExpression(kyoto::KyotoParser::QualifiedFunctionCallExpressionContext* ctx) override;
     std::any visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx) override;
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
     std::any visitCharExpression(kyoto::KyotoParser::CharExpressionContext* ctx) override;
@@ -91,8 +94,10 @@ public:
     std::any visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx) override;
     std::any visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx) override;
     std::any visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx) override;
+    std::any visitQualifiedClassType(kyoto::KyotoParser::QualifiedClassTypeContext* ctx) override;
 
 private:
+    [[nodiscard]] std::string visit_module_path(kyoto::KyotoParser::ModulePathContext* ctx) const;
     [[nodiscard]] std::optional<int64_t> parse_signed_integer_into(const std::string& str,
                                                                    PrimitiveType::Kind kind) const;
     [[nodiscard]] std::optional<int64_t> parse_bool(const std::string& str) const;
