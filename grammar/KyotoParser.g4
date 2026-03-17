@@ -7,11 +7,16 @@ options {
 program: topLevel* EOF;
 
 topLevel:
-	functionDefinition
+	importStatement
+	| functionDefinition
 	| fullDeclaration
 	| cdecl
 	| classDefinition
 	| typeAliasStatement;
+
+importStatement: IMPORT modulePath SEMICOLON;
+
+modulePath: IDENTIFIER (DOT IDENTIFIER)*;
 
 block: OPEN_BRACE statement* CLOSE_BRACE;
 
@@ -44,41 +49,42 @@ statement:
 expressionStatement: expression SEMICOLON;
 
 expression:
-	number														# numberExpression
-	| CHAR_LITERAL												# charExpression
-	| STRING_LITERAL											# stringExpression
-	| IDENTIFIER												# identifierExpression
-	| LPAREN expression RPAREN									# parenthesizedExpression
-	| NEW type LPAREN expressionList RPAREN						# newExpression
-	| NEW type OPEN_BRACKET expression CLOSE_BRACKET			# newArrayExpression
-	| LPAREN type RPAREN expression								# castExpression
-	| SIZEOF LPAREN (expression | type) RPAREN					# sizeofExpression
-	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE		# matchExpression
-	| type OPEN_BRACE expressionList CLOSE_BRACE				# arrayExpression
-	| ASTERISK expression										# dereferenceExpression
-	| expression OPEN_BRACKET expression CLOSE_BRACKET			# arrayIndexExpression
-	| expression DOT IDENTIFIER									# memberAccessExpression
-	| expression DOT IDENTIFIER LPAREN expressionList RPAREN	# methodCallExpression
-	| AMPERSAND expression										# addressOfExpression
-	| PLUS_PLUS expression										# prefixIncrementExpression
-	| MINUS_MINUS expression									# prefixDecrementExpression
-	| MINUS expression											# negationExpression
-	| PLUS expression											# positiveExpression
-	| IDENTIFIER LPAREN expressionList RPAREN					# functionCallExpression
-	| expression ASTERISK expression							# multiplicationExpression
-	| expression SLASH expression								# divisionExpression
-	| expression PERCENT expression								# modulusExpression
-	| expression PLUS expression								# additionExpression
-	| expression MINUS expression								# subtractionExpression
-	| expression EQUALS expression								# equalsExpression
-	| expression NOT_EQUALS expression							# notEqualsExpression
-	| expression LESS_THAN expression							# lessThanExpression
-	| expression LESS_THAN_OR_EQUAL expression					# lessThanOrEqualExpression
-	| expression GREATER_THAN expression						# greaterThanExpression
-	| expression GREATER_THAN_OR_EQUAL expression				# greaterThanOrEqualExpression
-	| expression LOGICAL_AND expression							# logicalAndExpression
-	| expression LOGICAL_OR expression							# logicalOrExpression
-	| <assoc = right> expression EQUAL expression				# assignmentExpression;
+	number																# numberExpression
+	| CHAR_LITERAL														# charExpression
+	| STRING_LITERAL													# stringExpression
+	| IDENTIFIER														# identifierExpression
+	| LPAREN expression RPAREN											# parenthesizedExpression
+	| NEW type LPAREN expressionList RPAREN								# newExpression
+	| NEW type OPEN_BRACKET expression CLOSE_BRACKET					# newArrayExpression
+	| LPAREN type RPAREN expression										# castExpression
+	| SIZEOF LPAREN (expression | type) RPAREN							# sizeofExpression
+	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE				# matchExpression
+	| type OPEN_BRACE expressionList CLOSE_BRACE						# arrayExpression
+	| ASTERISK expression												# dereferenceExpression
+	| expression OPEN_BRACKET expression CLOSE_BRACKET					# arrayIndexExpression
+	| expression DOT IDENTIFIER											# memberAccessExpression
+	| expression DOT IDENTIFIER LPAREN expressionList RPAREN			# methodCallExpression
+	| AMPERSAND expression												# addressOfExpression
+	| PLUS_PLUS expression												# prefixIncrementExpression
+	| MINUS_MINUS expression											# prefixDecrementExpression
+	| MINUS expression													# negationExpression
+	| PLUS expression													# positiveExpression
+	| modulePath DOUBLE_COLON IDENTIFIER LPAREN expressionList RPAREN	# qualifiedFunctionCallExpression
+	| IDENTIFIER LPAREN expressionList RPAREN							# functionCallExpression
+	| expression ASTERISK expression									# multiplicationExpression
+	| expression SLASH expression										# divisionExpression
+	| expression PERCENT expression										# modulusExpression
+	| expression PLUS expression										# additionExpression
+	| expression MINUS expression										# subtractionExpression
+	| expression EQUALS expression										# equalsExpression
+	| expression NOT_EQUALS expression									# notEqualsExpression
+	| expression LESS_THAN expression									# lessThanExpression
+	| expression LESS_THAN_OR_EQUAL expression							# lessThanOrEqualExpression
+	| expression GREATER_THAN expression								# greaterThanExpression
+	| expression GREATER_THAN_OR_EQUAL expression						# greaterThanOrEqualExpression
+	| expression LOGICAL_AND expression									# logicalAndExpression
+	| expression LOGICAL_OR expression									# logicalOrExpression
+	| <assoc = right> expression EQUAL expression						# assignmentExpression;
 
 number: INTEGER | FLOAT | TRUE | FALSE;
 
@@ -140,6 +146,7 @@ type:
 	| F64										# f64Type
 	| STRING									# strType
 	| VOID										# voidType
+	| modulePath DOUBLE_COLON IDENTIFIER		# qualifiedClassType
 	| IDENTIFIER (LESS_THAN type GREATER_THAN)?	# classType
 	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
 	| type ASTERISK+							# pointerType;

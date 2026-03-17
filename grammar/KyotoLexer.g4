@@ -42,6 +42,7 @@ CLOSE_BRACKET: ']';
 COMMA: ',';
 COLON: ':';
 DOT: '.';
+DOUBLE_COLON: '::';
 
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
@@ -85,6 +86,7 @@ FREE: 'free';
 SIZEOF: 'sizeof';
 
 TYPEALIAS: 'typealias';
+IMPORT: 'import';
 
 // This has to be defined after all the keywords because it will match all of them if defined first.
 // IDENTIFIER: LETTER (LETTER | [0-9])*;
