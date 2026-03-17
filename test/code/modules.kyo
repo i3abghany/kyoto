@@ -49,3 +49,44 @@ fn main() i32 {
     // Should be mods.a::answer().
     return a::answer();
 }
+
+// NAME ImportNestedModuleFunctionResolution
+// ERR 0
+// RET 7
+
+import mods.nested.calc;
+
+fn main() i32 {
+    return mods.nested.calc::seven();
+}
+
+// NAME ImportedTypeAliasAndClassResolution
+// ERR 0
+// RET 9
+
+import mods.types;
+
+fn main() i32 {
+    var p: mods.types::PointPtr = new mods.types::Point(9);
+    return p.get();
+}
+
+// NAME NoImplicitReexport
+// ERR 1
+// RET 0
+
+import mods.outer;
+
+fn main() i32 {
+    return mods.a::answer();
+}
+
+// NAME ImportedModuleOwnDeclarationsStillWork
+// ERR 0
+// RET 5
+
+import mods.outer;
+
+fn main() i32 {
+    return mods.outer::outer_value();
+}

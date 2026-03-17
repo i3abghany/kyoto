@@ -1,0 +1,13 @@
+class Point {
+    var value: i32;
+
+    constructor(self: Point*, value: i32) {
+        self.value = value;
+    }
+
+    fn get(self: Point*) i32 {
+        return self.value;
+    }
+}
+
+typealias Point* PointPtr;
