@@ -4,8 +4,8 @@ use rand::rng;
 use std::io::Write;
 use std::process::Command;
 use std::sync::{
-    Arc,
     atomic::{AtomicUsize, Ordering},
+    Arc,
 };
 use tempfile::NamedTempFile;
 use uuid::Uuid;

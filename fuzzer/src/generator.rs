@@ -631,7 +631,7 @@ impl<'a, R: Rng> Generator<'a, R> {
 mod tests {
     use super::*;
     use crate::ast::{Grammar, RuleType};
-    use rand::{SeedableRng, rngs::StdRng};
+    use rand::{rngs::StdRng, SeedableRng};
     use std::collections::HashMap;
 
     fn minimal_grammar() -> Grammar {
