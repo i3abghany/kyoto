@@ -41,4 +41,14 @@ class Vector<T> {
         }
         return self.data[index];
     }
+
+    fn swap(self: Vector<T>*, i: i32, j: i32) {
+        if (i < 0 || i >= self.size || j < 0 || j >= self.size) {
+            printf("ERROR: Index out of bounds\n");
+            exit(1);
+        }
+        var temp: T = self.data[i];
+        self.data[i] = self.data[j];
+        self.data[j] = temp;
+    }
 }

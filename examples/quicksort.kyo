@@ -1,0 +1,44 @@
+cdecl fn printf(fmt: str, ...) i32;
+import vec;
+
+fn quicksort(v: vec::Vector<i32>*, lo: i32, hi: i32) {
+    if (lo >= hi) { return; }
+    var p: i32 = partition(v, lo, hi);
+    quicksort(v, lo, p - 1); quicksort(v, p + 1, hi);
+}
+
+fn partition(v: vec::Vector<i32>*, lo: i32, hi: i32) i32 {
+    var p: i32 = v.get(hi);
+    var i: i32 = lo - 1;
+    for (var j: i32 = lo; j < hi; ++j) {
+        if (v.get(j) < p) { ++i; v.swap(i, j); }
+    }
+    v.swap(i + 1, hi);
+    return i + 1;
+}
+
+fn main() i32 {
+    var v: vec::Vector<i32>* = new vec::Vector<i32>(10);
+    v.push(10);
+    v.push(7);
+    v.push(8);
+    v.push(9);
+    v.push(1);
+    v.push(5);
+
+    printf("Original array: ");
+    for (var i = 0; i < v.size; ++i) {
+        printf("%d ", v.get(i));
+    }
+    printf("\n");
+
+    quicksort(v, 0, v.size - 1);
+
+    printf("Sorted array: ");
+    for (var i = 0; i < v.size; ++i) {
+        printf("%d ", v.get(i));
+    }
+    printf("\n");
+    
+    return 0;
+}
