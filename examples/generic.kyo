@@ -1,53 +1,13 @@
 cdecl fn printf(fmt: str, ...) i32;
 cdecl fn exit(code: i32) void;
 
-class Vector<T> {
-    var data: T*;
-    var size: i32; 
-    var capacity: i32;
-
-    constructor(self: Vector<T>*) {
-        self.data = new T[1];
-        self.size = 0;
-        self.capacity = 1;
-    }
-
-    constructor(self: Vector<T>*, initial_cap: i32) {
-        self.data = new T[initial_cap];
-        self.size = 0;
-        self.capacity = initial_cap;
-    }
-
-    fn push(self: Vector<T>*, item: T) {
-        if (self.size >= self.capacity) {
-            printf("DEBUG: resizing from %d to %d\n", self.capacity, self.capacity * 2);
-            var new_capacity: i32 = self.capacity * 2;
-            var new_data: T* = new T[new_capacity];
-            for (var i = 0; i < self.size; ++i) {
-                new_data[i] = self.data[i];
-            }
-            free self.data;
-            self.data = new_data;
-            self.capacity = new_capacity;
-        }
-        self.data[self.size] = item;
-        self.size = self.size + 1;
-    }
-
-    fn get(self: Vector<T>*, index: i32) T {
-        if (index < 0 || index >= self.size) {
-            printf("ERROR: Index out of bounds\n");
-            exit(1);
-        }
-        return self.data[index];
-    }
-}
+import vec;
 
 fn main() i32 {
-    var vec: Vector<str>* = new Vector<str>(2);
-    vec.push("hello");
-    vec.push("world");
-    vec.push("!");
-    printf("%s %s%s\n", vec.get(0), vec.get(1), vec.get(2));
+    var ve: vec::Vector<str>* = new vec::Vector<str>(2);
+    ve.push("hello");
+    ve.push("world");
+    ve.push("!");
+    printf("%s %s%s\n", ve.get(0), ve.get(1), ve.get(2));
     return 0;
 }

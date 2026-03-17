@@ -689,7 +689,7 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
 
     if (ctx->LESS_THAN()) {
         KType* inner = std::any_cast<KType*>(visit(ctx->type()));
-        std::string inner_text = ctx->type()->getText();
+        std::string inner_text = stringify_type_for_template(inner);
 
         std::string inner_mangled = inner_text;
         std::replace(inner_mangled.begin(), inner_mangled.end(), '*', '_');
@@ -715,9 +715,29 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
 std::any ASTBuilderVisitor::visitQualifiedClassType(kyoto::KyotoParser::QualifiedClassTypeContext* ctx)
 {
     const auto module_name = visit_module_path(ctx->modulePath());
-    const auto alias = ctx->IDENTIFIER()->getText();
+    auto alias = ctx->IDENTIFIER()->getText();
+
+    if (ctx->LESS_THAN()) {
+        KType* inner = std::any_cast<KType*>(visit(ctx->type()));
+        std::string inner_text = stringify_type_for_template(inner);
+
+        std::string inner_mangled = inner_text;
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '*', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '<', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '>', '_');
+
+        const auto qualified_template_name = compiler.qualify_imported_name(module_name, alias);
+        const auto mangled_name = compiler.qualify_imported_name(module_name, alias + "_" + inner_mangled);
+        compiler.instantiate_template(qualified_template_name, mangled_name, inner_text);
+        alias = mangled_name;
+    }
+
     if (KType* alias_type = compiler.resolve_type_alias(module_name, alias); alias_type != nullptr) {
         return (KType*)alias_type->copy();
+    }
+
+    if (alias.find("__") != std::string::npos) {
+        return (KType*)new ClassType(alias);
     }
 
     return (KType*)new ClassType(compiler.qualify_imported_name(module_name, alias));
@@ -731,6 +751,53 @@ std::string ASTBuilderVisitor::visit_module_path(kyoto::KyotoParser::ModulePathC
         module_name += ctx->IDENTIFIER(i)->getText();
     }
     return module_name;
+}
+
+std::string ASTBuilderVisitor::stringify_type_for_template(const KType* type) const
+{
+    if (type->is_pointer()) {
+        return stringify_type_for_template(type->as<PointerType>()->get_pointee()) + "*";
+    }
+
+    if (type->is_array()) {
+        return stringify_type_for_template(type->as<ArrayType>()->get_element_type()) + "[]";
+    }
+
+    if (type->is_class()) {
+        return type->get_class_name();
+    }
+
+    if (type->is_void()) return "void";
+    if (type->is_string()) return "str";
+
+    if (const auto* primitive = dynamic_cast<const PrimitiveType*>(type)) {
+        switch (primitive->get_kind()) {
+        case PrimitiveType::Kind::Boolean:
+            return "bool";
+        case PrimitiveType::Kind::Char:
+            return "char";
+        case PrimitiveType::Kind::I8:
+            return "i8";
+        case PrimitiveType::Kind::I16:
+            return "i16";
+        case PrimitiveType::Kind::I32:
+            return "i32";
+        case PrimitiveType::Kind::I64:
+            return "i64";
+        case PrimitiveType::Kind::F32:
+            return "f32";
+        case PrimitiveType::Kind::F64:
+            return "f64";
+        case PrimitiveType::Kind::String:
+            return "str";
+        case PrimitiveType::Kind::Void:
+            return "void";
+        default:
+            break;
+        }
+    }
+
+    return type->to_string();
 }
 
 std::optional<int64_t> ASTBuilderVisitor::parse_signed_integer_into(const std::string& str,

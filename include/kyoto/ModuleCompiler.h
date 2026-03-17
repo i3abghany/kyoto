@@ -124,6 +124,7 @@ private:
     std::vector<std::string> topo_sort_modules() const;
     std::string mangle_module_name(const std::string& module_name) const;
     std::string make_qualified_name(const std::string& module_name, const std::string& name) const;
+    std::string module_name_from_qualified_symbol(const std::string& qualified_name) const;
     void enter_module_context(const std::string& module_name);
 
     std::string make_function_key(const std::string& name, size_t arity) const;

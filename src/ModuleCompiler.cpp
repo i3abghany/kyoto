@@ -182,6 +182,21 @@ std::string ModuleCompiler::make_qualified_name(const std::string& module_name, 
     return mangle_module_name(module_name) + "__" + entity_name;
 }
 
+std::string ModuleCompiler::module_name_from_qualified_symbol(const std::string& qualified_name) const
+{
+    const auto pos = qualified_name.find("__");
+    if (pos == std::string::npos) return current_module_name;
+
+    const auto mangled_module = qualified_name.substr(0, pos);
+    for (const auto& [module_name, module_info] : loaded_modules) {
+        if (mangle_module_name(module_name) == mangled_module) {
+            return module_name;
+        }
+    }
+
+    return current_module_name;
+}
+
 std::string ModuleCompiler::qualify_local_name(const std::string& entity_name) const
 {
     return make_qualified_name(current_module_name, entity_name);
@@ -784,6 +799,15 @@ void ModuleCompiler::instantiate_template(const std::string& name, const std::st
     std::string new_text = std::regex_replace(text, class_reg, "class " + mangled_name);
     new_text = std::regex_replace(new_text, reg, type_str);
 
+    const auto previous_module_name = current_module_name;
+    const auto previous_source_path = current_source_path;
+    const auto previous_code = code;
+    const auto owner_module = module_name_from_qualified_symbol(name);
+
+    if (loaded_modules.contains(owner_module)) {
+        enter_module_context(owner_module);
+    }
+
     antlr4::ANTLRInputStream input(new_text);
     kyoto::KyotoLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
@@ -793,6 +817,10 @@ void ModuleCompiler::instantiate_template(const std::string& name, const std::st
 
     ASTBuilderVisitor visitor(*this);
     auto node = std::any_cast<ASTNode*>(visitor.visitClassDefinition(tree));
+
+    current_module_name = previous_module_name;
+    current_source_path = previous_source_path;
+    code = previous_code;
 
     instantiated_nodes.push_back(node);
 }

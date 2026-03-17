@@ -98,6 +98,7 @@ public:
 
 private:
     [[nodiscard]] std::string visit_module_path(kyoto::KyotoParser::ModulePathContext* ctx) const;
+    [[nodiscard]] std::string stringify_type_for_template(const KType* type) const;
     [[nodiscard]] std::optional<int64_t> parse_signed_integer_into(const std::string& str,
                                                                    PrimitiveType::Kind kind) const;
     [[nodiscard]] std::optional<int64_t> parse_bool(const std::string& str) const;

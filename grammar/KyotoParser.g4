@@ -146,7 +146,7 @@ type:
 	| F64										# f64Type
 	| STRING									# strType
 	| VOID										# voidType
-	| modulePath DOUBLE_COLON IDENTIFIER		# qualifiedClassType
+	| modulePath DOUBLE_COLON IDENTIFIER (LESS_THAN type GREATER_THAN)?	# qualifiedClassType
 	| IDENTIFIER (LESS_THAN type GREATER_THAN)?	# classType
 	| type OPEN_BRACKET CLOSE_BRACKET			# arrayType
 	| type ASTERISK+							# pointerType;
