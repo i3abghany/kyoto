@@ -8,6 +8,7 @@
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
+#include "kyoto/AST/Expressions/MemberAccessNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
@@ -84,6 +85,20 @@ void MethodCall::prepare_call() const
 
     auto* instance_type = instance->get_ktype();
     auto class_name = instance_type->get_class_name();
+
+    if (compiler.class_exists(class_name)) {
+        auto& class_metadata = compiler.get_class_metadata(class_name);
+        if (const auto* member_decl = class_metadata.node->get_declaration_of(name); member_decl) {
+            auto* member_type = member_decl->as<DeclarationStatementNode>()->get_ktype();
+            if (member_type->is_function()) {
+                const_cast<MethodCall*>(this)->callee = new MemberAccessNode(instance, name, compiler);
+                const_cast<MethodCall*>(this)->instance = nullptr;
+                const_cast<MethodCall*>(this)->prepared = true;
+                return;
+            }
+        }
+    }
+
     ExpressionNode* self = instance;
     if (!instance_type->is_pointer_to_class("")) {
         self = new UnaryNode(instance, UnaryNode::UnaryOp::AddressOf, compiler);

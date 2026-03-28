@@ -105,7 +105,6 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
         name = compiler.qualify_local_name(name);
         linkage_name = source_name == "main" && compiler.get_current_module_name() == "__main__" ? "main" : name;
     }
-
     std::vector<FunctionNode::Parameter> args;
 
     for (const auto param_ctx : ctx->parameterList()->parameter()) {

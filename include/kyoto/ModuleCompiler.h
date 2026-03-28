@@ -150,7 +150,7 @@ private:
     bool building_top_level = false;
 
     std::unordered_set<std::string> classes;
-    std::string current_class;
+    std::vector<std::string> class_stack;
 
     std::vector<std::unique_ptr<IAnalysisVisitor>> analysis_visitors;
     std::unordered_map<std::string, ClassMetadata> classes_metadata;

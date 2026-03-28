@@ -610,18 +610,18 @@ void ModuleCompiler::set_current_function(FunctionNode* node, llvm::Function* fu
 
 void ModuleCompiler::push_class(std::string name)
 {
-    current_class = std::move(name);
-    classes.insert(current_class);
+    classes.insert(name);
+    class_stack.push_back(std::move(name));
 }
 
 void ModuleCompiler::pop_class()
 {
-    current_class = "";
+    if (!class_stack.empty()) class_stack.pop_back();
 }
 
 std::string ModuleCompiler::get_current_class() const
 {
-    return current_class;
+    return class_stack.empty() ? "" : class_stack.back();
 }
 
 bool ModuleCompiler::class_exists(const std::string& name) const
