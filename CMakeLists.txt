@@ -6,8 +6,11 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
 
 include(cmake/SetupLLVM.cmake)
 include(cmake/SetupANTLR.cmake)
@@ -55,13 +58,15 @@ set(SOURCES
     src/utils/File.cpp
     ${ANTLR_SOURCES})
 
+add_library(kyoto_obj OBJECT ${SOURCES})
+target_link_libraries(kyoto_obj PUBLIC antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
+
 add_executable(
     cyoto
     main.cpp
-    ${SOURCES})
+    $<TARGET_OBJECTS:kyoto_obj>)
 
-target_compile_options(cyoto PRIVATE -O3)
-target_link_libraries(cyoto antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
+target_link_libraries(cyoto PRIVATE antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
 
 set(TEST_SOURCES
     test/TestDriver.cpp
@@ -87,11 +92,10 @@ set(TEST_SOURCES
 
 add_executable(
     ktest
-    ${SOURCES}
+    $<TARGET_OBJECTS:kyoto_obj>
     ${TEST_SOURCES}
 )
 
-target_compile_options(ktest PRIVATE -O3)
 target_link_libraries(ktest PRIVATE gtest_main gtest antlr4_static ${llvm_libs} ${Boost_LIBRARIES})
 
 include(GoogleTest)

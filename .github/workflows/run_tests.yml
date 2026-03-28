@@ -9,6 +9,10 @@ on:
 
 env:
   BUILD_TYPE: Release
+  CCACHE_DIR: ~/.cache/ccache
+  CCACHE_BASEDIR: ${{ github.workspace }}
+  CCACHE_COMPILERCHECK: content
+  CCACHE_MAXSIZE: 5G
 
 jobs:
   build:
@@ -33,18 +37,31 @@ jobs:
       run: sudo ln -s /usr/bin/lli-20 /usr/bin/lli
 
     - name: Install Prerequisites
-      run: sudo apt update && sudo apt install libboost1.74-all-dev default-jre libfmt-dev -y
+      run: sudo apt update && sudo apt install libboost1.74-all-dev default-jre libfmt-dev ccache -y
+
+    - name: Restore ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ${{ runner.os }}-ccache-${{ env.BUILD_TYPE }}-${{ hashFiles('CMakeLists.txt', 'cmake/**/*.cmake', 'grammar/*.g4', 'include/**/*.h', 'include/**/*.hpp', 'src/**/*.cpp', 'main.cpp', 'test/**/*.cpp') }}
+        restore-keys: |
+          ${{ runner.os }}-ccache-${{ env.BUILD_TYPE }}-
 
     - name: Download ANTLR4.13.2
       run: wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O ${{github.workspace}}/antlr-4.13.2-complete.jar && chmod +x ${{github.workspace}}/antlr-4.13.2-complete.jar
 
-    - name: Configure CMake
-      run: export PATH="${{github.workspace}}:$PATH" && echo $PATH && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Zero ccache stats
+      run: ccache --zero-stats
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -- -j4
+    - name: Configure CMake
+      run: export PATH="${{github.workspace}}:$PATH" && echo $PATH && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Build tests
+      run: cmake --build ${{github.workspace}}/build --target ktest --config ${{env.BUILD_TYPE}} -- -j4
+
+    - name: ccache stats
+      run: ccache --show-stats
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ./ktest
-
