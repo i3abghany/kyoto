@@ -16,6 +16,7 @@ class Value;
 class FunctionCall : public ExpressionNode {
 public:
     FunctionCall(std::string name, std::vector<ExpressionNode*> args, ModuleCompiler& compiler);
+    FunctionCall(ExpressionNode* callee, std::vector<ExpressionNode*> args, ModuleCompiler& compiler);
     virtual ~FunctionCall();
 
     [[nodiscard]] std::string to_string() const override;
@@ -28,11 +29,12 @@ public:
 
     [[nodiscard]] const std::string& get_name() const { return name; }
     [[nodiscard]] const std::vector<ExpressionNode*>& get_args() const { return args; }
+    [[nodiscard]] ExpressionNode* get_callee() const { return callee; }
 
     void insert_arg(ExpressionNode* node, size_t index);
     void set_destination(llvm::Value* dest);
 
-    [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { args.begin(), args.end() }; }
+    [[nodiscard]] std::vector<ASTNode*> get_children() const override;
 
     [[nodiscard]] bool is_constructor_call() const { return is_constructor; }
     void set_as_constructor_call()
@@ -52,6 +54,7 @@ public:
 protected:
     bool is_constructor { false };
     std::string name;
+    ExpressionNode* callee = nullptr;
     std::vector<ExpressionNode*> args;
     ModuleCompiler& compiler;
 

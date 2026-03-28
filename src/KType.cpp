@@ -1,5 +1,6 @@
 #include "kyoto/KType.h"
 
+#include <format>
 #include <utility>
 
 #include "llvm/IR/Type.h"
@@ -258,6 +259,69 @@ bool ArrayType::operator==(const KType& other) const
 KType* ArrayType::copy() const
 {
     return new ArrayType(element_type->copy());
+}
+
+FunctionType::FunctionType(std::vector<KType*> param_types, KType* return_type)
+    : param_types(std::move(param_types))
+    , return_type(return_type)
+{
+}
+
+FunctionType::~FunctionType()
+{
+    for (auto* param_type : param_types)
+        delete param_type;
+    if (!return_type->is_void()) delete return_type;
+}
+
+std::string FunctionType::to_string() const
+{
+    std::string result = "fn (";
+    for (size_t i = 0; i < param_types.size(); ++i) {
+        result += param_types[i]->to_string();
+        if (i + 1 < param_types.size()) result += ", ";
+    }
+    result += ") ";
+    result += return_type->to_string();
+    return result;
+}
+
+bool FunctionType::operator==(const KType& other) const
+{
+    const auto* other_function = dynamic_cast<const FunctionType*>(&other);
+    if (!other_function) return false;
+    if (*return_type != *other_function->return_type) return false;
+    if (param_types.size() != other_function->param_types.size()) return false;
+
+    for (size_t i = 0; i < param_types.size(); ++i) {
+        if (*param_types[i] != *other_function->param_types[i]) return false;
+    }
+
+    return true;
+}
+
+KType* FunctionType::copy() const
+{
+    std::vector<KType*> copied_param_types;
+    copied_param_types.reserve(param_types.size());
+    for (auto* param_type : param_types)
+        copied_param_types.push_back(param_type->copy());
+    return new FunctionType(std::move(copied_param_types), return_type->copy());
+}
+
+bool FunctionType::is_function() const
+{
+    return true;
+}
+
+const std::vector<KType*>& FunctionType::get_param_types() const
+{
+    return param_types;
+}
+
+KType* FunctionType::get_return_type() const
+{
+    return return_type;
 }
 
 KType* ArrayType::get_element_type() const

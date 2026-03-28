@@ -92,6 +92,10 @@ llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const 
         return expr->gen();
     }
 
+    if (type->is_function() && expr->get_ktype()->is_function() && type->operator==(*expr->get_ktype())) {
+        return expr->gen();
+    }
+
     throw std::runtime_error(
         std::format("Type of expression `{}` (type: `{}`) can't be assigned to the variable `{}` (type `{}`)",
                     expr->to_string(), expr->get_ktype()->to_string(), name, type->to_string()));

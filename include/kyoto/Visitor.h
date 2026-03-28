@@ -27,7 +27,10 @@ public:
 
     std::any visitFunctionCallExpression(kyoto::KyotoParser::FunctionCallExpressionContext* ctx) override;
     std::any
+    visitIndirectFunctionCallExpression(kyoto::KyotoParser::IndirectFunctionCallExpressionContext* ctx) override;
+    std::any
     visitQualifiedFunctionCallExpression(kyoto::KyotoParser::QualifiedFunctionCallExpressionContext* ctx) override;
+    std::any visitAnonymousFunctionExpression(kyoto::KyotoParser::AnonymousFunctionExpressionContext* ctx) override;
     std::any visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx) override;
     std::any visitNumberExpression(kyoto::KyotoParser::NumberExpressionContext* ctx) override;
     std::any visitCharExpression(kyoto::KyotoParser::CharExpressionContext* ctx) override;
@@ -93,6 +96,7 @@ public:
     std::any visitVoidType(kyoto::KyotoParser::VoidTypeContext* ctx) override;
     std::any visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx) override;
     std::any visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx) override;
+    std::any visitFunctionType(kyoto::KyotoParser::FunctionTypeContext* ctx) override;
     std::any visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx) override;
     std::any visitQualifiedClassType(kyoto::KyotoParser::QualifiedClassTypeContext* ctx) override;
 

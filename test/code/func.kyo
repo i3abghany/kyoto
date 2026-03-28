@@ -293,3 +293,90 @@ fn gcd(a: i32, b: i32) i32 {
 fn main() i32 {
     return gcd(987654321, 123456789);
 }
+
+// NAME FunctionTypeVariableAndHigherOrderCall
+// ERR 0
+// RET 5
+
+fn consume(f: fn (i32, i32) i32) i32 {
+    return f(2, 3);
+}
+
+fn main() i32 {
+    var add: fn (i32, i32) i32 = fn (x: i32, y: i32) i32 {
+        return x + y;
+    };
+    return consume(add);
+}
+
+// NAME AnonymousFunctionPassedDirectly
+// ERR 0
+// RET 6
+
+fn consume(f: fn (i32, i32) i32) i32 {
+    return f(2, 3);
+}
+
+fn main() i32 {
+    return consume(fn (x: i32, y: i32) i32 {
+        return x * y;
+    });
+}
+
+// NAME AnonymousFunctionImmediateInvocation
+// ERR 0
+// RET 3
+
+fn main() i32 {
+    return (fn (x: i32, y: i32) i32 {
+        return x - y;
+    })(5, 2);
+}
+
+// NAME FunctionWithIncorrectNumberOfArguments
+// ERR 1
+// RET 0
+
+fn consume(f: fn (i32) i32) i32 {
+    return f(5);
+}
+
+fn main() i32 {
+    return consume(fn (x: i32, y: i32) i32 {
+        return x + y;
+    });
+}
+
+// NAME FunctionWithIncorrectArgumentTypes
+// ERR 1
+// RET 0
+
+fn consume(f: fn (i32) i32) i32 {
+    return f(5);
+}
+
+fn main() i32 {
+    return consume(fn (x: str) i32 {
+        return 0;
+    });
+}
+
+// NAME HigherOrderFunctionWithMultipleFunctionArguments
+// ERR 0
+// RET 27
+
+fn consume(x: fn(i32, i32) i32, y: fn(i32, i32) i32) i32 {
+    return x(2, 4) + y(3, 7);
+}
+
+fn main() i32 {
+    var add: fn(i32, i32) i32 = fn(a: i32, b: i32) i32 {
+        return a + b;
+    };
+
+    var mul: fn(i32, i32) i32 = fn(a: i32, b: i32) i32 {
+        return a * b;
+    };
+
+    return consume(add, mul);
+}

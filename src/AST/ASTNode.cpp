@@ -21,7 +21,7 @@
 llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
 {
     auto& context = compiler.get_context();
-    if (type->is_pointer()) {
+    if (type->is_pointer() || type->is_function()) {
         return llvm::PointerType::get(context, 0);
     }
 

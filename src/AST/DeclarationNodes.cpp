@@ -129,6 +129,10 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
         return expr->gen();
     }
 
+    if (type->is_function() && expr_ktype->is_function() && type->operator==(*expr_ktype)) {
+        return expr->gen();
+    }
+
     std::string expr_ktype_str = expr_ktype->to_string();
     if (expr_ktype->is_void() && expr->is<FunctionCall>() && expr->as<FunctionCall>()->is_constructor_call()) {
         expr_ktype_str = std::format("class {}", expr->to_string().substr(0, expr->to_string().find('_')));

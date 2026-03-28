@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,4 +26,5 @@ public:
 private:
     std::string name;
     ModuleCompiler& compiler;
+    mutable std::unique_ptr<KType> resolved_function_type;
 };

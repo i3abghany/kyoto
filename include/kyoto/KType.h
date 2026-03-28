@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 namespace llvm {
 class Type;
@@ -18,6 +19,7 @@ public:
     [[nodiscard]] virtual bool is_pointer() const { return false; }
     [[nodiscard]] virtual bool is_array() const { return false; }
     [[nodiscard]] virtual bool is_class() const { return false; }
+    [[nodiscard]] virtual bool is_function() const { return false; }
     [[nodiscard]] virtual bool is_void() const { return false; }
     [[nodiscard]] virtual bool is_string() const { return false; }
     [[nodiscard]] virtual bool is_integer() const { return false; }
@@ -133,4 +135,21 @@ public:
 private:
     KType* element_type;
     size_t size;
+};
+
+class FunctionType : public KType {
+public:
+    FunctionType(std::vector<KType*> param_types, KType* return_type);
+    ~FunctionType() override;
+    [[nodiscard]] std::string to_string() const override;
+    bool operator==(const KType& other) const override;
+    [[nodiscard]] KType* copy() const override;
+    [[nodiscard]] bool is_function() const override;
+
+    [[nodiscard]] const std::vector<KType*>& get_param_types() const;
+    [[nodiscard]] KType* get_return_type() const;
+
+private:
+    std::vector<KType*> param_types;
+    KType* return_type;
 };

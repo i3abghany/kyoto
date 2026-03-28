@@ -15,6 +15,7 @@
 #include "kyoto/AST/ASTNode.h"
 #include "kyoto/AST/ClassDefinitionNode.h"
 #include "kyoto/AST/DeclarationNodes.h"
+#include "kyoto/AST/Expressions/AnonymousFunctionNode.h"
 #include "kyoto/AST/Expressions/ArrayIndexNode.h"
 #include "kyoto/AST/Expressions/ArrayNode.h"
 #include "kyoto/AST/Expressions/AssignmentNode.h"
@@ -223,6 +224,19 @@ std::any ASTBuilderVisitor::visitFunctionCallExpression(kyoto::KyotoParser::Func
 }
 
 std::any
+ASTBuilderVisitor::visitIndirectFunctionCallExpression(kyoto::KyotoParser::IndirectFunctionCallExpressionContext* ctx)
+{
+    auto* callee = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    std::vector<ExpressionNode*> args;
+    if (ctx->expressionList() && !ctx->expressionList()->expression().empty()) {
+        for (const auto arg : ctx->expressionList()->expression()) {
+            args.push_back(std::any_cast<ExpressionNode*>(visit(arg)));
+        }
+    }
+    return (ExpressionNode*)new FunctionCall(callee, args, compiler);
+}
+
+std::any
 ASTBuilderVisitor::visitQualifiedFunctionCallExpression(kyoto::KyotoParser::QualifiedFunctionCallExpressionContext* ctx)
 {
     const auto module_name = visit_module_path(ctx->modulePath());
@@ -234,6 +248,31 @@ ASTBuilderVisitor::visitQualifiedFunctionCallExpression(kyoto::KyotoParser::Qual
         }
     }
     return (ExpressionNode*)new FunctionCall(name, args, compiler);
+}
+
+std::any
+ASTBuilderVisitor::visitAnonymousFunctionExpression(kyoto::KyotoParser::AnonymousFunctionExpressionContext* ctx)
+{
+    std::vector<FunctionNode::Parameter> args;
+    std::vector<KType*> param_types;
+
+    for (const auto param_ctx : ctx->anonymousFunction()->parameterList()->parameter()) {
+        auto* type = std::any_cast<KType*>(visit(param_ctx->type()));
+        param_types.push_back(type->copy());
+        args.push_back({ param_ctx->IDENTIFIER()->getText(), type });
+    }
+
+    auto* ret_type = std::any_cast<KType*>(visit(ctx->anonymousFunction()->type()));
+    auto* body = std::any_cast<ASTNode*>(visit(ctx->anonymousFunction()->block()));
+
+    const auto anon_name
+        = compiler.qualify_local_name("__anon_fn_" + std::to_string(compiler.get_instantiated_nodes().size()));
+    auto* function = new FunctionNode(anon_name, args, false, ret_type, body, compiler, false, anon_name);
+    compiler.add_function(function);
+    compiler.get_instantiated_nodes().push_back(function);
+
+    auto* function_type = new FunctionType(std::move(param_types), ret_type->copy());
+    return (ExpressionNode*)new AnonymousFunctionNode(function, function_type, compiler);
 }
 
 std::any ASTBuilderVisitor::visitStringExpression(kyoto::KyotoParser::StringExpressionContext* ctx)
@@ -675,6 +714,17 @@ std::any ASTBuilderVisitor::visitArrayType(kyoto::KyotoParser::ArrayTypeContext*
     return (KType*)new ArrayType(type, 0);
 }
 
+std::any ASTBuilderVisitor::visitFunctionType(kyoto::KyotoParser::FunctionTypeContext* ctx)
+{
+    std::vector<KType*> param_types;
+    for (const auto param_ctx : ctx->functionTypeParameterList()->type()) {
+        param_types.push_back(std::any_cast<KType*>(visit(param_ctx)));
+    }
+
+    auto* return_type = std::any_cast<KType*>(visit(ctx->type()));
+    return (KType*)new FunctionType(std::move(param_types), return_type);
+}
+
 std::any ASTBuilderVisitor::visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx)
 {
     auto* type = std::any_cast<KType*>(visit(ctx->type()));
@@ -761,6 +811,18 @@ std::string ASTBuilderVisitor::stringify_type_for_template(const KType* type) co
 
     if (type->is_array()) {
         return stringify_type_for_template(type->as<ArrayType>()->get_element_type()) + "[]";
+    }
+
+    if (type->is_function()) {
+        const auto* function_type = type->as<FunctionType>();
+        std::string result = "fn(";
+        for (size_t i = 0; i < function_type->get_param_types().size(); ++i) {
+            result += stringify_type_for_template(function_type->get_param_types()[i]);
+            if (i + 1 < function_type->get_param_types().size()) result += ",";
+        }
+        result += ")->";
+        result += stringify_type_for_template(function_type->get_return_type());
+        return result;
     }
 
     if (type->is_class()) {
