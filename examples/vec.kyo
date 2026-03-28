@@ -20,7 +20,6 @@ class Vector<T> {
 
     fn push(self: Vector<T>*, item: T) {
         if (self.size >= self.capacity) {
-            printf("DEBUG: resizing from %d to %d\n", self.capacity, self.capacity * 2);
             var new_capacity: i32 = self.capacity * 2;
             var new_data: T* = new T[new_capacity];
             for (var i = 0; i < self.size; ++i) {
