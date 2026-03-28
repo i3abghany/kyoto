@@ -53,6 +53,7 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/Host.h"
 
 class LexerErrorListener : public antlr4::BaseErrorListener {
 public:
@@ -130,6 +131,7 @@ ModuleCompiler::ModuleCompiler(const std::string& code, const std::string& name,
     , module(std::make_unique<llvm::Module>(name, context))
     , data_layout(module->getDataLayout())
 {
+    module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
     type_alias_scopes.emplace_back();
     current_module_name = "__main__";
     register_visitors();
