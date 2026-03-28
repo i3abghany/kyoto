@@ -33,6 +33,28 @@ class Vector<T> {
         self.size = self.size + 1;
     }
 
+    fn pop(self: Vector<T>*) T {
+        if (self.size == 0) {
+            printf("ERROR: Cannot pop from an empty vector\n");
+            exit(1);
+        }
+
+        self.size = self.size - 1;
+        return self.data[self.size];
+    }
+
+    fn back(self: Vector<T>*) T {
+        if (self.size == 0) {
+            printf("ERROR: Vector is empty\n");
+            exit(1);
+        }
+        return self.data[self.size - 1];
+    }
+
+    fn empty(self: Vector<T>*) bool {
+        return self.size == 0;
+    }
+
     fn get(self: Vector<T>*, index: i32) T {
         if (index < 0 || index >= self.size) {
             printf("ERROR: Index out of bounds\n");
