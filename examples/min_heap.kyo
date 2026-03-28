@@ -1,0 +1,114 @@
+cdecl fn printf(fmt: str, ...) i32;
+cdecl fn exit(code: i32) void;
+
+import vec;
+
+class MinHeap<T> {
+    var data: vec::Vector<T>*;
+    var cmp: fn (T, T) bool;
+
+    constructor(self: MinHeap<T>*, cmp: fn (T, T) bool) {
+        self.data = new vec::Vector<T>(4);
+        self.cmp = cmp;
+    }
+
+    fn is_empty(self: MinHeap<T>*) bool {
+        return self.data.size == 0;
+    }
+
+    fn bubble_up(self: MinHeap<T>*, index: i32) {
+        for (; index > 0;) {
+            var parent: i32 = (index - 1) / 2;
+            if (self.cmp(self.data.get(parent), self.data.get(index)) == false) {
+                return;
+            }
+            self.data.swap(parent, index);
+            index = parent;
+        }
+    }
+
+    fn bubble_down(self: MinHeap<T>*, index: i32) {
+        for (;;) {
+            var left: i32 = index * 2 + 1;
+            var right: i32 = left + 1;
+            var smallest: i32 = index;
+
+            if (left < self.data.size) {
+                if (self.cmp(self.data.get(smallest), self.data.get(left))) {
+                    smallest = left;
+                }
+            }
+
+            if (right < self.data.size) {
+                if (self.cmp(self.data.get(smallest), self.data.get(right))) {
+                    smallest = right;
+                }
+            }
+
+            if (smallest == index) {
+                return;
+            }
+
+            self.data.swap(index, smallest);
+            index = smallest;
+        }
+    }
+
+    fn peek(self: MinHeap<T>*) T {
+        if (self.is_empty()) {
+            printf("ERROR: Priority queue is empty\n");
+            exit(1);
+        }
+        return self.data.get(0);
+    }
+
+    fn push(self: MinHeap<T>*, value: T) {
+        self.data.push(value);
+        self.bubble_up(self.data.size - 1);
+    }
+
+    fn pop(self: MinHeap<T>*) T {
+        if (self.is_empty()) {
+            printf("ERROR: Priority queue is empty\n");
+            exit(1);
+        }
+
+        var min_value: T = self.data.get(0);
+        var last_index: i32 = self.data.size - 1;
+
+        if (last_index == 0) {
+            self.data.size = 0;
+            return min_value;
+        }
+
+        self.data.data[0] = self.data.data[last_index];
+        self.data.size = last_index;
+        self.bubble_down(0);
+        return min_value;
+    }
+
+}
+
+fn main() i32 {
+    var pq: MinHeap<i32>* = new MinHeap<i32>(fn (a: i32, b: i32) bool { return a > b; });
+    var values: i32[] = i32{ 7, 2, 9, 1, 5, 3 };
+    var count: i32 = sizeof(values) / sizeof(i32);
+
+    printf("push: ");
+    for (var i = 0; i < count; ++i) {
+        pq.push(values[i]);
+        printf("%d ", values[i]);
+    }
+    printf("\n");
+
+    printf("peek: %d\n", pq.peek());
+    printf("pop order: ");
+    for (; pq.is_empty() != true;) {
+        printf("%d ", pq.pop());
+    }
+    printf("\n");
+
+    free pq.data;
+    free pq;
+    return 0;
+}
