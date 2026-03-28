@@ -64,6 +64,7 @@ expression:
 	| MINUS_MINUS expression											# prefixDecrementExpression
 	| MINUS expression													# negationExpression
 	| PLUS expression													# positiveExpression
+	| NOT expression													# notExpression
 	| modulePath DOUBLE_COLON IDENTIFIER LPAREN expressionList RPAREN	# qualifiedFunctionCallExpression
 	| IDENTIFIER LPAREN expressionList RPAREN							# functionCallExpression
 	| LPAREN expression RPAREN LPAREN expressionList RPAREN				# indirectFunctionCallExpression

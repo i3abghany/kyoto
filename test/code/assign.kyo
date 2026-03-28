@@ -230,6 +230,34 @@ fn main() i32 {
     return x;
 }
 
+// NAME TestAssignmentLogicalNot
+// ERR 0
+// RET 0
+
+fn main() i32 {
+    var x: bool;
+    x = !true;
+    if (x) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+// NAME TestAssignmentLogicalNot2
+// ERR 0
+// RET 1
+
+fn main() i32 {
+    var x: bool;
+    x = !false;
+    if (!x) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
 
 // NAME TestAssignmentNegativeOverflow
 // ERR 1

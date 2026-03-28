@@ -43,6 +43,7 @@ llvm::Value* UnaryNode::gen()
 
     if (op == UnaryOp::Negate) return compiler.get_builder().CreateNeg(expr_val, "negval");
     if (op == UnaryOp::Positive) return expr_val;
+    if (op == UnaryOp::LogicalNot) return gen_logical_not();
     if (op == UnaryOp::PrefixDecrement) return gen_prefix_decrement();
     if (op == UnaryOp::PrefixIncrement) return gen_prefix_increment();
     if (op == UnaryOp::AddressOf) {
@@ -99,6 +100,20 @@ KType* UnaryNode::get_ktype() const
         return expr_ktype->as<PointerType>()->get_pointee();
     }
     return expr->get_ktype();
+}
+
+llvm::Value* UnaryNode::gen_logical_not() const
+{
+    assert(op == UnaryOp::LogicalNot && "Expected logical not unary");
+
+    auto* expr_ktype = expr->get_ktype()->as<PrimitiveType>();
+    if (!expr_ktype->is_boolean()) {
+        throw std::runtime_error(std::format("Cannot apply op `!` to non-boolean expression `{}` of type `{}`",
+                                             expr->to_string(), expr_ktype->to_string()));
+    }
+
+    auto* expr_val = expr->gen();
+    return compiler.get_builder().CreateNot(expr_val, "lnot");
 }
 
 llvm::Value* UnaryNode::gen_prefix_increment() const

@@ -28,6 +28,7 @@ ASTERISK: '*';
 SLASH: '/';
 PERCENT: '%';
 EQUAL: '=';
+NOT: '!';
 
 STRING_LITERAL: '"' (~["\\\r\n] | '\\' .)* '"';
 CHAR_LITERAL: '\'' (~['\\\r\n] | '\\' .) '\'';

@@ -362,6 +362,12 @@ std::any ASTBuilderVisitor::visitPositiveExpression(kyoto::KyotoParser::Positive
     return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::Positive, compiler);
 }
 
+std::any ASTBuilderVisitor::visitNotExpression(kyoto::KyotoParser::NotExpressionContext* ctx)
+{
+    auto* expr = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    return (ExpressionNode*)new UnaryNode(expr, UnaryNode::UnaryOp::LogicalNot, compiler);
+}
+
 std::any ASTBuilderVisitor::visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx)
 {
     auto* lhs = std::any_cast<ExpressionNode*>(visit(ctx->children[0]));

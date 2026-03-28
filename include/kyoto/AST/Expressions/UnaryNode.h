@@ -17,6 +17,7 @@ public:
     enum class UnaryOp {
         Negate,
         Positive,
+        LogicalNot,
         PrefixIncrement,
         PrefixDecrement,
         AddressOf,
@@ -42,6 +43,7 @@ private:
     std::string op_to_string() const;
     bool simple_op() const;
 
+    llvm::Value* gen_logical_not() const;
     llvm::Value* gen_prefix_increment() const;
     llvm::Value* gen_prefix_decrement() const;
 

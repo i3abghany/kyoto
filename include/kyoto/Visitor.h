@@ -55,6 +55,7 @@ public:
 
     std::any visitNegationExpression(kyoto::KyotoParser::NegationExpressionContext* ctx) override;
     std::any visitPositiveExpression(kyoto::KyotoParser::PositiveExpressionContext* ctx) override;
+    std::any visitNotExpression(kyoto::KyotoParser::NotExpressionContext* ctx) override;
 
     std::any visitMultiplicationExpression(kyoto::KyotoParser::MultiplicationExpressionContext* ctx) override;
     std::any visitDivisionExpression(kyoto::KyotoParser::DivisionExpressionContext* ctx) override;

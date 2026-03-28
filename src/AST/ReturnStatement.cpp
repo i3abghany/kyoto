@@ -95,10 +95,9 @@ bool ReturnStatementNode::are_compatible_pointer_types() const
 
 llvm::Value* ReturnStatementNode::generate_pointer_return_value() const
 {
-    llvm::Value* expr_val = expr->gen_ptr();
+    llvm::Value* expr_val = expr->gen();
     assert(expr_val && "Expression must be a pointer");
-    auto fn_ret_type = compiler.get_fn_return_type();
-    return compiler.get_builder().CreateLoad(get_llvm_type(fn_ret_type, compiler), expr_val);
+    return expr_val;
 }
 
 std::vector<ASTNode*> ReturnStatementNode::get_children() const
