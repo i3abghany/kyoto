@@ -26,9 +26,11 @@ $ sudo apt-get install llvm-20-dev cmake default-jre libboost-all-dev gcc-13 g++
 Antlr 4.13.2 can be installed from the official website's mirror as follows:
 
 ```bash
-$ wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O /path/to/install
-$ chmod +x /path/to/install/antlr-4.13.2-complete.jar
-$ export PATH="/path/to/install:$PATH"
+$ export REPO_TOP_LEVEL=`git rev-parse --show-toplevel`
+$ mkdir -p $REPO_TOP_LEVEL/thirdparty
+$ wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O $REPO_TOP_LEVEL/thirdparty/antlr-4.13.2-complete.jar
+$ chmod +x $REPO_TOP_LEVEL/thirdparty/antlr-4.13.2-complete.jar
+$ export PATH="$REPO_TOP_LEVEL/thirdparty:$PATH"
 ```
 
 If llvm-20 is not available in the package manager, it can be installed using the script provided on the official website as follows:
