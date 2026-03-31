@@ -23,6 +23,37 @@
 
 #include "kyoto/utils/Test.h"
 
+namespace {
+
+std::string find_executable_or_throw(std::initializer_list<const char*> candidates, const std::string& purpose)
+{
+    for (const auto* candidate : candidates) {
+        const auto path = boost::process::search_path(candidate);
+        if (!path.empty()) return path.string();
+    }
+
+    std::ostringstream os;
+    bool first = true;
+    for (const auto* candidate : candidates) {
+        if (!first) os << ", ";
+        first = false;
+        os << candidate;
+    }
+
+    throw std::runtime_error(std::format("Could not find {} in PATH (tried: {})", purpose, os.str()));
+}
+
+std::optional<std::string> find_executable(std::initializer_list<const char*> candidates)
+{
+    for (const auto* candidate : candidates) {
+        const auto path = boost::process::search_path(candidate);
+        if (!path.empty()) return path.string();
+    }
+    return std::nullopt;
+}
+
+} // namespace
+
 namespace utils {
 
 std::string File::get_source(const std::string_view filename)
@@ -50,12 +81,10 @@ int32_t File::execute_ir(const std::string& ir)
     ofs << ir;
     ofs.close();
 
-    if (!is_executable("lli")) {
-        throw std::runtime_error("Could not find `lli` in PATH");
-    }
+    const auto lli = find_executable_or_throw({ "lli-20", "lli" }, "`lli` executable");
 
     boost::process::ipstream error_stream;
-    boost::process::child proc { "lli " + temp_file.string(), boost::process::std_err > error_stream };
+    boost::process::child proc { lli, temp_file.string(), boost::process::std_err > error_stream };
     proc.wait();
     int exit_code = proc.exit_code();
     boost::filesystem::remove(temp_file);
@@ -73,19 +102,19 @@ bool File::compile_ir_to_binary(const std::string& ir, const std::string& output
     ofs << ir;
     ofs.close();
 
-    if (is_executable("clang")) {
-        std::string cmd = "clang -O2 " + temp_ir_file.string() + " -o " + output_path;
-        boost::process::child proc { cmd };
+    if (const auto clang = find_executable({ "clang-20", "clang" }); clang.has_value()) {
+        boost::process::child proc { *clang, "-O2", temp_ir_file.string(), "-o", output_path };
         proc.wait();
         boost::filesystem::remove(temp_ir_file);
         return proc.exit_code() == 0;
     }
 
-    if (is_executable("llc") && is_executable("gcc")) {
+    const auto llc = find_executable({ "llc-20", "llc" });
+    const auto gcc = find_executable({ "gcc" });
+    if (llc.has_value() && gcc.has_value()) {
         auto temp_asm_file
             = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path("temp-%%%%-%%%%.s");
-        std::string llc_cmd = "llc -O2 " + temp_ir_file.string() + " -o " + temp_asm_file.string();
-        boost::process::child llc_proc { llc_cmd };
+        boost::process::child llc_proc { *llc, "-O2", temp_ir_file.string(), "-o", temp_asm_file.string() };
         llc_proc.wait();
 
         if (llc_proc.exit_code() != 0) {
@@ -93,8 +122,7 @@ bool File::compile_ir_to_binary(const std::string& ir, const std::string& output
             return false;
         }
 
-        std::string gcc_cmd = "gcc " + temp_asm_file.string() + " -o " + output_path;
-        boost::process::child gcc_proc { gcc_cmd };
+        boost::process::child gcc_proc { *gcc, temp_asm_file.string(), "-o", output_path };
         gcc_proc.wait();
 
         boost::filesystem::remove(temp_ir_file);
