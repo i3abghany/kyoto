@@ -69,6 +69,8 @@ RETURN: 'return';
 
 VAR: 'var';
 
+WHILE: 'while';
+
 IF: 'if';
 ELSE: 'else';
 

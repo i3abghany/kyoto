@@ -17,7 +17,7 @@ class MinHeap<T> {
     }
 
     fn bubble_up(self: MinHeap<T>*, index: i32) {
-        for (; index > 0;) {
+        while (index > 0) {
             var parent: i32 = (index - 1) / 2;
             if (self.cmp(self.data.get(parent), self.data.get(index)) == false) {
                 return;
@@ -28,7 +28,7 @@ class MinHeap<T> {
     }
 
     fn bubble_down(self: MinHeap<T>*, index: i32) {
-        for (;;) {
+        while (true) {
             var left: i32 = index * 2 + 1;
             var right: i32 = left + 1;
             var smallest: i32 = index;
@@ -103,7 +103,7 @@ fn main() i32 {
 
     printf("peek: %d\n", pq.peek());
     printf("pop order: ");
-    for (; !pq.is_empty();) {
+    while (!pq.is_empty()) {
         printf("%d ", pq.pop());
     }
     printf("\n");

@@ -36,6 +36,7 @@ statement:
 	| fullDeclaration
 	| ifStatement
 	| forStatement
+	| whileStatement
 	| returnStatement
 	| freeStatement
 	| typeAliasStatement;
@@ -108,6 +109,8 @@ elseIfElseStatement:
 	| optionalElseStatement										# elseStatement;
 
 optionalElseStatement: ELSE block | /* empty */;
+
+whileStatement: WHILE LPAREN expression RPAREN block;
 
 forStatement: FOR LPAREN forInit forCondition forUpdate RPAREN block;
 

@@ -611,6 +611,15 @@ std::any ASTBuilderVisitor::visitForStatement(kyoto::KyotoParser::ForStatementCo
     return (ASTNode*)new ForStatementNode(init, condition, update, body, compiler);
 }
 
+std::any ASTBuilderVisitor::visitWhileStatement(kyoto::KyotoParser::WhileStatementContext* ctx)
+{
+    auto* condition = std::any_cast<ExpressionNode*>(visit(ctx->expression()));
+    auto* body = std::any_cast<ASTNode*>(visit(ctx->block()));
+    // NOTE: We represent while loops as for loops with only a condition.
+    return (ASTNode*)new ForStatementNode(nullptr, new ExpressionStatementNode(condition, compiler), nullptr, body,
+                                          compiler);
+}
+
 std::any ASTBuilderVisitor::visitClassDefinition(kyoto::KyotoParser::ClassDefinitionContext* ctx)
 {
     const auto raw_class_name = ctx->IDENTIFIER(0)->getText();
