@@ -1,0 +1,20 @@
+// NAME CharArrayIndexing
+// ERR 0
+// RET 98
+
+fn main() i32 {
+    var message: char[] = char{'a', 'b', 'c'};
+    return (i32)message[1];
+}
+
+
+// NAME CharArrayAssignmentAndIndexing
+// ERR 0
+// RET 122
+
+fn main() i32 {
+    var message: char[] = char{'a', 'b', 'c'};
+    message[2] = 'z';
+    var x: char = message[2];
+    return (i32)x;
+}

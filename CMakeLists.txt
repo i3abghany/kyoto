@@ -83,6 +83,7 @@ set(TEST_SOURCES
     test/TestPointers.cpp
     test/TestMatch.cpp
     test/TestArrays.cpp
+    test/TestCharArrayIndex.cpp
     test/TestSizeof.cpp
     test/TestCast.cpp
     test/TestTypeAlias.cpp

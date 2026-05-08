@@ -52,7 +52,6 @@ expression:
 	| LPAREN expression RPAREN											# parenthesizedExpression
 	| NEW type LPAREN expressionList RPAREN								# newExpression
 	| NEW type OPEN_BRACKET expression CLOSE_BRACKET					# newArrayExpression
-	| LPAREN type RPAREN expression										# castExpression
 	| SIZEOF LPAREN (expression | type) RPAREN							# sizeofExpression
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE				# matchExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE						# arrayExpression
@@ -60,6 +59,7 @@ expression:
 	| expression OPEN_BRACKET expression CLOSE_BRACKET					# arrayIndexExpression
 	| expression DOT IDENTIFIER											# memberAccessExpression
 	| expression DOT IDENTIFIER LPAREN expressionList RPAREN			# methodCallExpression
+	| LPAREN type RPAREN expression										# castExpression
 	| AMPERSAND expression												# addressOfExpression
 	| PLUS_PLUS expression												# prefixIncrementExpression
 	| MINUS_MINUS expression											# prefixDecrementExpression

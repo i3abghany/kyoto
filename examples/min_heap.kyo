@@ -87,6 +87,9 @@ class MinHeap<T> {
         return min_value;
     }
 
+    fn size(self: MinHeap<T>*) i32 {
+        return self.data.size;
+    }
 }
 
 fn main() i32 {
