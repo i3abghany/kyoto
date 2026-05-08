@@ -1,0 +1,160 @@
+cdecl fn printf(fmt: str, ...) i32;
+import min_heap;
+
+class HuffmanNode {
+    var symbol: i32;
+    var freq: i32;
+    var order: i32;
+    var is_leaf: bool;
+    var left: HuffmanNode*;
+    var right: HuffmanNode*;
+
+    constructor(self: HuffmanNode*) {
+        self.symbol = 63;
+        self.freq = 0;
+        self.order = 0;
+        self.is_leaf = false;
+        self.left = self;
+        self.right = self;
+    }
+}
+
+fn make_leaf(symbol: i32, freq: i32, order: i32) HuffmanNode* {
+    var node: HuffmanNode* = new HuffmanNode();
+    node.symbol = symbol;
+    node.freq = freq;
+    node.order = order;
+    node.is_leaf = true;
+    node.left = node;
+    node.right = node;
+    return node;
+}
+
+fn make_internal(left: HuffmanNode*, right: HuffmanNode*, order: i32) HuffmanNode* {
+    var node: HuffmanNode* = new HuffmanNode();
+    node.symbol = 42;
+    node.freq = left.freq + right.freq;
+    node.order = order;
+    node.is_leaf = false;
+    node.left = left;
+    node.right = right;
+    return node;
+}
+
+fn print_bits(bits: char*, length: i32) {
+    if (length == 0) {
+        printf("0");
+        return;
+    }
+
+    for (var i = 0; i < length; ++i) {
+        printf("%c", bits[i]);
+    }
+}
+
+fn print_codes(node: HuffmanNode*, bits: char*, length: i32) {
+    if (node.is_leaf) {
+        printf("  '%c' (%d): ", node.symbol, node.freq);
+        print_bits(bits, length);
+        printf("\n");
+        return;
+    }
+
+    bits[length] = '0';
+    print_codes(node.left, bits, length + 1);
+    bits[length] = '1';
+    print_codes(node.right, bits, length + 1);
+}
+
+fn emit_code(node: HuffmanNode*, target: i32, bits: char*, length: i32) bool {
+    if (node.is_leaf) {
+        if (node.symbol == target) {
+            print_bits(bits, length);
+            return true;
+        }
+        return false;
+    }
+
+    bits[length] = '0';
+    if (emit_code(node.left, target, bits, length + 1)) {
+        return true;
+    }
+
+    bits[length] = '1';
+    return emit_code(node.right, target, bits, length + 1);
+}
+
+fn free_tree(node: HuffmanNode*) {
+    if (!node.is_leaf) {
+        free_tree(node.left);
+        free_tree(node.right);
+    }
+    free node;
+}
+
+fn main() i32 {
+    var message: char[] = char{'b', 'e', 'e', 'p', ' ', 'b', 'o', 'o', 'p', ' ', 'b', 'e', 'e', 'p', '!'};
+    var message_size: i32 = sizeof(message) / sizeof(char);
+
+    var frequencies: i32* = new i32[128];
+    for (var i = 0; i < 128; ++i) {
+        frequencies[i] = 0;
+    }
+
+    for (var i = 0; i < message_size; ++i) {
+        var index: i32 = (i32)message[i];
+        frequencies[index] = frequencies[index] + 1;
+    }
+
+    var heap: min_heap::MinHeap<HuffmanNode*>* = new min_heap::MinHeap<HuffmanNode*>(fn (a: HuffmanNode*, b: HuffmanNode*) bool {
+        if (a.freq == b.freq) {
+            return a.order > b.order;
+        }
+        return a.freq > b.freq;
+    });
+
+    var next_order: i32 = 0;
+    printf("message: ");
+    for (var i = 0; i < message_size; ++i) {
+        printf("%c", message[i]);
+    }
+    printf("\n");
+
+    printf("frequencies:\n");
+    for (var i = 0; i < 128; ++i) {
+        if (frequencies[i] > 0) {
+            printf("  '%c': %d\n", i, frequencies[i]);
+            heap.push(make_leaf(i, frequencies[i], next_order));
+            next_order = next_order + 1;
+        }
+    }
+
+    while (heap.size() > 1) {
+        var left: HuffmanNode* = heap.pop();
+        var right: HuffmanNode* = heap.pop();
+        heap.push(make_internal(left, right, next_order));
+        next_order = next_order + 1;
+    }
+
+    var root: HuffmanNode* = heap.pop();
+    var bits: char* = new char[128];
+
+    printf("codes:\n");
+    print_codes(root, bits, 0);
+
+    printf("encoded: ");
+    for (var i = 0; i < message_size; ++i) {
+        emit_code(root, (i32)message[i], bits, 0);
+        if (i + 1 < message_size) {
+            printf(" ");
+        }
+    }
+    printf("\n");
+
+    free bits;
+    free_tree(root);
+    free heap.data;
+    free heap;
+    free frequencies;
+    return 0;
+}
