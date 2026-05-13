@@ -17,28 +17,24 @@ class HuffmanNode {
         self.left = self;
         self.right = self;
     }
-}
 
-fn make_leaf(symbol: i32, freq: i32, order: i32) HuffmanNode* {
-    var node: HuffmanNode* = new HuffmanNode();
-    node.symbol = symbol;
-    node.freq = freq;
-    node.order = order;
-    node.is_leaf = true;
-    node.left = node;
-    node.right = node;
-    return node;
-}
+    constructor(self: HuffmanNode*, symbol: i32, freq: i32, order: i32) {
+        self.symbol = symbol;
+        self.freq = freq;
+        self.order = order;
+        self.is_leaf = true;
+        self.left = self;
+        self.right = self;
+    }
 
-fn make_internal(left: HuffmanNode*, right: HuffmanNode*, order: i32) HuffmanNode* {
-    var node: HuffmanNode* = new HuffmanNode();
-    node.symbol = 42;
-    node.freq = left.freq + right.freq;
-    node.order = order;
-    node.is_leaf = false;
-    node.left = left;
-    node.right = right;
-    return node;
+    constructor(self: HuffmanNode*, left: HuffmanNode*, right: HuffmanNode*, order: i32) {
+        self.symbol = 42;
+        self.freq = left.freq + right.freq;
+        self.order = order;
+        self.is_leaf = false;
+        self.left = left;
+        self.right = right;
+    }
 }
 
 fn print_bits(bits: char*, length: i32) {
@@ -124,7 +120,7 @@ fn main() i32 {
     for (var i = 0; i < 128; ++i) {
         if (frequencies[i] > 0) {
             printf("  '%c': %d\n", i, frequencies[i]);
-            heap.push(make_leaf(i, frequencies[i], next_order));
+            heap.push(new HuffmanNode(i, frequencies[i], next_order));
             next_order = next_order + 1;
         }
     }
@@ -132,7 +128,7 @@ fn main() i32 {
     while (heap.size() > 1) {
         var left: HuffmanNode* = heap.pop();
         var right: HuffmanNode* = heap.pop();
-        heap.push(make_internal(left, right, next_order));
+        heap.push(new HuffmanNode(left, right, next_order));
         next_order = next_order + 1;
     }
 
