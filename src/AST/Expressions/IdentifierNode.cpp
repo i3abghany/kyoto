@@ -24,13 +24,6 @@ std::optional<FunctionNode*> resolve_function_metadata(const std::string& name, 
     return std::nullopt;
 }
 
-std::string resolve_llvm_function_name(FunctionNode* fn)
-{
-    if (fn->get_linkage_name() == "main" && !fn->is_external()) return "main";
-    if (fn->is_external()) return fn->get_linkage_name();
-    return fn->get_linkage_name() + "_" + std::to_string(fn->get_params().size());
-}
-
 FunctionType* copy_function_type(FunctionNode* fn)
 {
     std::vector<KType*> param_types;
@@ -64,7 +57,7 @@ llvm::Value* IdentifierExpressionNode::gen()
     auto fn = resolve_function_metadata(name, compiler);
     if (!fn.has_value()) throw std::runtime_error(std::format("Unknown symbol `{}`", name));
 
-    auto* llvm_fn = compiler.get_module()->getFunction(resolve_llvm_function_name(fn.value()));
+    auto* llvm_fn = compiler.get_module()->getFunction(compiler.get_function_llvm_name(fn.value()));
     if (!llvm_fn) throw std::runtime_error(std::format("Unknown function `{}`", name));
     return llvm_fn;
 }

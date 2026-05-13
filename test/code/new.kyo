@@ -303,3 +303,47 @@ fn main() i32 {
     var p2: Point = Point(10);
     return p1.x;
 }
+
+// NAME ConstructorOverloadByParameterType
+// ERR 0
+// RET 96
+
+class Point {
+    var x: i32;
+
+    constructor(self: Point*, x: i32) {
+        self.x = 32;
+    }
+
+    constructor(self: Point*, x: i64) {
+        self.x = 64;
+    }
+}
+
+fn main() i32 {
+    var wide: i64 = 7;
+    var p1: Point = Point(1);
+    var p2: Point = Point(wide);
+    return p1.x + p2.x;
+}
+
+// NAME ConstructorOverloadAmbiguousPrimitiveConversion
+// ERR 1
+// RET 0
+
+class Point {
+    var x: i32;
+
+    constructor(self: Point*, x: i8) {
+        self.x = 8;
+    }
+
+    constructor(self: Point*, x: char) {
+        self.x = 1;
+    }
+}
+
+fn main() i32 {
+    var p: Point = Point(1);
+    return p.x;
+}

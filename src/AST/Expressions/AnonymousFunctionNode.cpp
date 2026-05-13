@@ -28,10 +28,7 @@ std::string AnonymousFunctionNode::to_string() const
 
 llvm::Value* AnonymousFunctionNode::gen()
 {
-    const auto llvm_name = function->is_external()
-        ? function->get_linkage_name()
-        : function->get_linkage_name() + "_" + std::to_string(function->get_params().size());
-    auto* fn = compiler.get_module()->getFunction(llvm_name);
+    auto* fn = compiler.get_module()->getFunction(compiler.get_function_llvm_name(function));
     if (!fn) {
         throw std::runtime_error(std::format("Anonymous function `{}` not found in module", function->get_name()));
     }

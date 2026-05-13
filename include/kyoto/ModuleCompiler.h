@@ -55,6 +55,9 @@ public:
     void add_function(FunctionNode* node);
     std::optional<FunctionNode*> get_function(const std::string& name);
     std::optional<FunctionNode*> get_function(const std::string& name, size_t arity);
+    std::vector<FunctionNode*> get_functions(const std::string& name, size_t arity) const;
+    std::optional<FunctionNode*> get_external_varargs_function(const std::string& name, size_t arity) const;
+    std::string get_function_llvm_name(const FunctionNode* node) const;
     std::string qualify_local_name(const std::string& name) const;
     std::string qualify_imported_name(const std::string& module_name, const std::string& name) const;
     std::string resolve_module_reference(const std::string& module_name) const;
@@ -127,7 +130,10 @@ private:
     std::string module_name_from_qualified_symbol(const std::string& qualified_name) const;
     void enter_module_context(const std::string& module_name);
 
-    std::string make_function_key(const std::string& name, size_t arity) const;
+    std::string make_function_key(const FunctionNode* node) const;
+    std::string make_function_signature_suffix(const FunctionNode* node) const;
+    std::string mangle_type_name(const KType* type) const;
+    std::string sanitize_mangled_component(const std::string& value) const;
 
     struct LoadedModule {
         std::string name;

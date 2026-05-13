@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <any>
 #include <assert.h>
+#include <cctype>
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
@@ -508,23 +509,62 @@ void ModuleCompiler::add_symbol(const std::string& name, Symbol symbol)
 
 void ModuleCompiler::add_function(FunctionNode* node)
 {
-    std::string key = make_function_key(node->get_name(), node->get_params().size());
+    std::string key = make_function_key(node);
+    if (functions.contains(key)) {
+        throw std::runtime_error(std::format("Function `{}` already has an overload with signature `{}`",
+                                             node->get_name(), make_function_signature_suffix(node)));
+    }
     functions[key] = node;
 }
 
 std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name)
 {
-    for (const auto& [key, func] : functions) {
-        if (key.find(name + "_") == 0) return func;
+    FunctionNode* result = nullptr;
+    for (const auto& [_, func] : functions) {
+        if (func->get_name() != name) continue;
+        if (result) return std::nullopt;
+        result = func;
     }
-    return std::nullopt;
+    if (!result) return std::nullopt;
+    return result;
 }
 
 std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name, size_t arity)
 {
-    std::string key = make_function_key(name, arity);
-    if (functions.contains(key)) return functions[key];
-    return std::nullopt;
+    auto candidates = get_functions(name, arity);
+    if (candidates.size() != 1) return std::nullopt;
+    return candidates.front();
+}
+
+std::vector<FunctionNode*> ModuleCompiler::get_functions(const std::string& name, size_t arity) const
+{
+    std::vector<FunctionNode*> result;
+    for (const auto& [_, func] : functions) {
+        if (func->get_name() == name && func->get_params().size() == arity) result.push_back(func);
+    }
+    return result;
+}
+
+std::optional<FunctionNode*> ModuleCompiler::get_external_varargs_function(const std::string& name, size_t arity) const
+{
+    FunctionNode* result = nullptr;
+    for (const auto& [_, func] : functions) {
+        if (func->get_name() != name || !func->is_external() || !func->is_varargs()) continue;
+        if (func->get_params().size() > arity) continue;
+        if (result) {
+            throw std::runtime_error(std::format("Multiple cdecl varargs declarations match function `{}`", name));
+        }
+        result = func;
+    }
+    if (!result) return std::nullopt;
+    return result;
+}
+
+std::string ModuleCompiler::get_function_llvm_name(const FunctionNode* node) const
+{
+    if (node->get_linkage_name() == "main" && !node->is_external()) return "main";
+    if (node->is_external()) return node->get_linkage_name();
+    return node->get_linkage_name() + "_" + make_function_signature_suffix(node);
 }
 
 void ModuleCompiler::register_malloc()
@@ -691,9 +731,82 @@ KType* ModuleCompiler::get_fn_return_type() const
     return curr_fn_ret_type;
 }
 
-std::string ModuleCompiler::make_function_key(const std::string& name, size_t arity) const
+std::string ModuleCompiler::make_function_key(const FunctionNode* node) const
 {
-    return name + "_" + std::to_string(arity);
+    return node->get_name() + "$" + make_function_signature_suffix(node);
+}
+
+std::string ModuleCompiler::make_function_signature_suffix(const FunctionNode* node) const
+{
+    std::string result = std::to_string(node->get_params().size());
+    for (const auto& param : node->get_params()) {
+        result += "_" + mangle_type_name(param.type);
+    }
+    if (node->is_varargs()) result += "_varargs";
+    return result;
+}
+
+std::string ModuleCompiler::mangle_type_name(const KType* type) const
+{
+    if (type->is_primitive()) {
+        switch (type->as<PrimitiveType>()->get_kind()) {
+        case PrimitiveType::Kind::Boolean:
+            return "bool";
+        case PrimitiveType::Kind::Char:
+            return "char";
+        case PrimitiveType::Kind::I8:
+            return "i8";
+        case PrimitiveType::Kind::I16:
+            return "i16";
+        case PrimitiveType::Kind::I32:
+            return "i32";
+        case PrimitiveType::Kind::I64:
+            return "i64";
+        case PrimitiveType::Kind::F32:
+            return "f32";
+        case PrimitiveType::Kind::F64:
+            return "f64";
+        case PrimitiveType::Kind::String:
+            return "str";
+        case PrimitiveType::Kind::Void:
+            return "void";
+        case PrimitiveType::Kind::Unknown:
+            return "unknown";
+        }
+    }
+
+    if (type->is_pointer()) return "P" + mangle_type_name(type->as<PointerType>()->get_pointee());
+
+    if (type->is_array()) {
+        const auto* array_type = type->as<ArrayType>();
+        return "A" + std::to_string(array_type->get_size()) + "_" + mangle_type_name(array_type->get_element_type());
+    }
+
+    if (type->is_class()) return "C" + sanitize_mangled_component(type->get_class_name());
+
+    if (type->is_function()) {
+        const auto* function_type = type->as<FunctionType>();
+        std::string result = "F" + std::to_string(function_type->get_param_types().size());
+        for (const auto* param_type : function_type->get_param_types())
+            result += "_" + mangle_type_name(param_type);
+        result += "_R" + mangle_type_name(function_type->get_return_type());
+        return result;
+    }
+
+    return sanitize_mangled_component(type->to_string());
+}
+
+std::string ModuleCompiler::sanitize_mangled_component(const std::string& value) const
+{
+    std::string result;
+    for (const unsigned char c : value) {
+        if (std::isalnum(c)) {
+            result += static_cast<char>(c);
+        } else {
+            result += "_" + std::to_string(c) + "_";
+        }
+    }
+    return result;
 }
 
 size_t ModuleCompiler::n_scopes() const

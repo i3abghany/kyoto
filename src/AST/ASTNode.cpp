@@ -198,16 +198,7 @@ std::string FunctionNode::to_string() const
 
 llvm::Value* FunctionNode::gen()
 {
-    std::string llvm_name;
-    if (get_linkage_name() == "main" && !is_external_function) {
-        llvm_name = "main";
-    } else if (is_external_function) {
-        llvm_name = linkage_name;
-    } else {
-        llvm_name = linkage_name + "_" + std::to_string(args.size());
-    }
-
-    auto* func = compiler.get_module()->getFunction(llvm_name);
+    auto* func = compiler.get_module()->getFunction(compiler.get_function_llvm_name(this));
     if (body == nullptr) return func;
 
     auto* entry = llvm::BasicBlock::Create(compiler.get_context(), "func_entry", func);
@@ -226,16 +217,8 @@ llvm::Function* FunctionNode::gen_prototype()
     auto* return_ltype = get_llvm_type(ret_type, compiler);
     auto* func_type = llvm::FunctionType::get(return_ltype, get_arg_types(), varargs);
 
-    std::string llvm_name;
-    if (get_linkage_name() == "main" && !is_external_function) {
-        llvm_name = "main";
-    } else if (is_external_function) {
-        llvm_name = linkage_name;
-    } else {
-        llvm_name = linkage_name + "_" + std::to_string(args.size());
-    }
-
-    return llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, llvm_name, compiler.get_module());
+    return llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, compiler.get_function_llvm_name(this),
+                                  compiler.get_module());
 }
 
 std::vector<llvm::Type*> FunctionNode::get_arg_types() const

@@ -20,6 +20,22 @@
 
 namespace {
 
+enum class ArgumentMatch {
+    None,
+    Conversion,
+    Exact,
+};
+
+std::string format_argument_types(const std::vector<ExpressionNode*>& args)
+{
+    std::string result;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (i != 0) result += ", ";
+        result += args[i]->get_ktype()->to_string();
+    }
+    return result;
+}
+
 llvm::FunctionType* build_llvm_function_type(const FunctionType* type, ModuleCompiler& compiler)
 {
     std::vector<llvm::Type*> arg_types;
@@ -29,38 +45,107 @@ llvm::FunctionType* build_llvm_function_type(const FunctionType* type, ModuleCom
     return llvm::FunctionType::get(ASTNode::get_llvm_type(type->get_return_type(), compiler), arg_types, false);
 }
 
-std::vector<llvm::Value*> build_call_arg_values(const std::string& name, const std::vector<ExpressionNode*>& args,
-                                                ModuleCompiler& compiler, llvm::Value* destination = nullptr)
+ArgumentMatch match_argument(ExpressionNode* arg, const KType* param_type, ModuleCompiler& compiler)
 {
-    size_t lookup_arity = args.size();
-    if (destination) {
-        lookup_arity += 1;
+    const auto* arg_type = arg->get_ktype();
+    if (*param_type == *arg_type) return ArgumentMatch::Exact;
+
+    if (!((param_type->is_integer() && arg_type->is_integer())
+            || (param_type->is_boolean() && arg_type->is_boolean()))) {
+        return ArgumentMatch::None;
     }
 
-    auto fn_meta = compiler.get_function(name, lookup_arity);
-    if (!fn_meta.has_value()) {
-        fn_meta = compiler.get_function(name);
+    const auto* primitive_param = param_type->as<PrimitiveType>();
+    const auto* primitive_arg = arg_type->as<PrimitiveType>();
+    if (compiler.get_type_resolver().promotable_to(primitive_arg->get_kind(), primitive_param->get_kind())) {
+        return ArgumentMatch::Conversion;
     }
 
+    return arg->is_trivially_evaluable() ? ArgumentMatch::Conversion : ArgumentMatch::None;
+}
+
+ArgumentMatch match_candidate(FunctionNode* candidate, const std::vector<ExpressionNode*>& args, size_t param_offset,
+                              ModuleCompiler& compiler)
+{
+    const auto& params = candidate->get_params();
+    const auto total_arg_count = args.size() + param_offset;
+    if (candidate->is_varargs()) {
+        if (params.size() > total_arg_count) return ArgumentMatch::None;
+    } else if (params.size() != total_arg_count) {
+        return ArgumentMatch::None;
+    }
+
+    auto result = ArgumentMatch::Exact;
+    for (size_t i = 0; i + param_offset < params.size(); ++i) {
+        const auto arg_match = match_argument(args[i], params[param_offset + i].type, compiler);
+        if (arg_match == ArgumentMatch::None) return ArgumentMatch::None;
+        if (arg_match == ArgumentMatch::Conversion) result = ArgumentMatch::Conversion;
+    }
+
+    return result;
+}
+
+std::optional<FunctionNode*> select_overload(const std::string& name, const std::vector<ExpressionNode*>& args,
+                                             ModuleCompiler& compiler, size_t total_arity, size_t param_offset)
+{
+    auto candidates = compiler.get_functions(name, total_arity);
+    std::vector<FunctionNode*> exact_matches;
+    std::vector<FunctionNode*> conversion_matches;
+
+    for (auto* candidate : candidates) {
+        switch (match_candidate(candidate, args, param_offset, compiler)) {
+        case ArgumentMatch::Exact:
+            exact_matches.push_back(candidate);
+            break;
+        case ArgumentMatch::Conversion:
+            conversion_matches.push_back(candidate);
+            break;
+        case ArgumentMatch::None:
+            break;
+        }
+    }
+
+    if (exact_matches.size() == 1) return exact_matches.front();
+    if (exact_matches.size() > 1) {
+        throw std::runtime_error(std::format("Call to function `{}` with argument types ({}) is ambiguous", name,
+                                             format_argument_types(args)));
+    }
+
+    if (conversion_matches.size() == 1) return conversion_matches.front();
+    if (conversion_matches.size() > 1) {
+        throw std::runtime_error(std::format("Call to function `{}` with argument types ({}) is ambiguous", name,
+                                             format_argument_types(args)));
+    }
+
+    return std::nullopt;
+}
+
+std::optional<FunctionNode*> select_declared_function(const std::string& name, const std::vector<ExpressionNode*>& args,
+                                                      ModuleCompiler& compiler, size_t total_arity,
+                                                      size_t param_offset)
+{
+    if (param_offset == 0) {
+        if (auto fn = compiler.get_external_varargs_function(name, total_arity); fn.has_value()) return fn;
+    }
+    return select_overload(name, args, compiler, total_arity, param_offset);
+}
+
+std::vector<llvm::Value*> build_call_arg_values(FunctionNode* fn_meta, const std::string& name,
+                                                const std::vector<ExpressionNode*>& args, ModuleCompiler& compiler,
+                                                llvm::Value* destination = nullptr)
+{
     std::vector<llvm::Value*> arg_values;
-    size_t arg_index = 0;
+    size_t param_offset = 0;
 
     if (destination) {
         arg_values.push_back(destination);
-        arg_index = 1;
+        param_offset = 1;
     }
 
-    if (!fn_meta.has_value()) {
-        for (auto* arg : args) {
-            arg_values.push_back(arg->gen());
-        }
-        return arg_values;
-    }
-
-    const auto& params = fn_meta.value()->get_params();
+    const auto& params = fn_meta->get_params();
     for (size_t i = 0; i < args.size(); ++i) {
         auto* arg = args[i];
-        const auto param_index = arg_index + i;
+        const auto param_index = param_offset + i;
 
         if (param_index >= params.size()) {
             arg_values.push_back(arg->gen());
@@ -228,24 +313,15 @@ llvm::Value* FunctionCall::gen()
         }
     }
 
-    size_t lookup_arity = args.size();
-    if (is_constructor_call()) {
-        if (destination) {
-            lookup_arity = args.size() + 1;
-        } else {
-            lookup_arity = args.size();
-        }
+    if (is_constructor_call() && !destination) {
+        throw std::runtime_error(std::format("Constructor call `{}` needs a destination object", name));
     }
 
-    auto fn_meta = compiler.get_function(name, lookup_arity);
-    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
-
-    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
-    if (fn_meta.has_value()) {
-        llvm_name = fn_meta.value()->is_external()
-            ? fn_meta.value()->get_linkage_name()
-            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
-    }
+    const size_t param_offset = is_constructor_call() ? 1 : 0;
+    const size_t lookup_arity = args.size() + param_offset;
+    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
+                                               : name + "_" + std::to_string(lookup_arity);
 
     auto* fn = compiler.get_module()->getFunction(llvm_name);
 
@@ -260,9 +336,9 @@ llvm::Value* FunctionCall::gen()
 
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) {
-        arg_values = build_call_arg_values(name, args, compiler, destination);
+        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler, destination);
     } else {
-        arg_values = build_call_arg_values(name, args, compiler);
+        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler);
     }
 
     if (fn->arg_size() != arg_values.size() && (!fn->isVarArg() || fn->arg_size() > arg_values.size())) {
@@ -293,30 +369,21 @@ llvm::Value* FunctionCall::gen_ptr() const
                                                  build_symbol_function_callee(name, compiler), arg_values);
     }
 
+    if (is_constructor_call() && !destination) {
+        throw std::runtime_error(std::format("Constructor call `{}` needs a destination object", name));
+    }
+
+    const size_t param_offset = is_constructor_call() ? 1 : 0;
+    const size_t lookup_arity = args.size() + param_offset;
+    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
+                                               : name + "_" + std::to_string(lookup_arity);
+
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) {
-        arg_values = build_call_arg_values(name, args, compiler, destination);
+        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler, destination);
     } else {
-        arg_values = build_call_arg_values(name, args, compiler);
-    }
-
-    size_t lookup_arity = args.size();
-    if (is_constructor_call()) {
-        if (destination) {
-            lookup_arity = args.size() + 1;
-        } else {
-            lookup_arity = args.size();
-        }
-    }
-
-    auto fn_meta = compiler.get_function(name, lookup_arity);
-    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
-
-    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
-    if (fn_meta.has_value()) {
-        llvm_name = fn_meta.value()->is_external()
-            ? fn_meta.value()->get_linkage_name()
-            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
+        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler);
     }
 
     auto* fn = compiler.get_module()->getFunction(llvm_name);
@@ -342,24 +409,11 @@ llvm::Type* FunctionCall::gen_type() const
         return ASTNode::get_llvm_type(function_type->get_return_type(), compiler);
     }
 
-    size_t lookup_arity = args.size();
-    if (is_constructor_call()) {
-        if (destination) {
-            lookup_arity = args.size() + 1;
-        } else {
-            lookup_arity = args.size();
-        }
-    }
-
-    auto fn_meta = compiler.get_function(name, lookup_arity);
-    if (!fn_meta.has_value()) fn_meta = compiler.get_function(name);
-
-    std::string llvm_name = name + "_" + std::to_string(lookup_arity);
-    if (fn_meta.has_value()) {
-        llvm_name = fn_meta.value()->is_external()
-            ? fn_meta.value()->get_linkage_name()
-            : fn_meta.value()->get_linkage_name() + "_" + std::to_string(lookup_arity);
-    }
+    const size_t param_offset = is_constructor_call() ? 1 : 0;
+    const size_t lookup_arity = args.size() + param_offset;
+    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
+                                               : name + "_" + std::to_string(lookup_arity);
 
     const auto* fn = compiler.get_module()->getFunction(llvm_name);
 
@@ -390,19 +444,9 @@ KType* FunctionCall::get_ktype() const
         return const_cast<FunctionType*>(function_type)->get_return_type();
     }
 
-    size_t lookup_arity = args.size();
-    if (is_constructor_call()) {
-        if (destination) {
-            lookup_arity = args.size() + 1;
-        } else {
-            lookup_arity = args.size();
-        }
-    }
-
-    auto fn = compiler.get_function(name, lookup_arity);
-    if (fn.has_value()) return fn.value()->get_ret_type();
-
-    fn = compiler.get_function(name);
+    const size_t param_offset = is_constructor_call() ? 1 : 0;
+    const size_t lookup_arity = args.size() + param_offset;
+    auto fn = select_declared_function(name, args, compiler, lookup_arity, param_offset);
     if (fn.has_value()) return fn.value()->get_ret_type();
 
     throw std::runtime_error(std::format("Function `{}` with {} arguments not found", name, args.size()));

@@ -114,6 +114,9 @@ std::any ASTBuilderVisitor::visitFunctionDefinition(kyoto::KyotoParser::Function
 
     auto* ret_type = ctx->type() ? std::any_cast<KType*>(visit(ctx->type())) : KType::get_void();
     const auto varargs = ctx->parameterList()->ELLIPSIS() != nullptr;
+    if (varargs) {
+        throw std::runtime_error("Variadic functions are only supported for cdecl declarations");
+    }
     auto* proto = new FunctionNode(name, args, varargs, ret_type, nullptr, compiler, false, linkage_name);
     compiler.add_function(proto);
 

@@ -97,6 +97,7 @@ public:
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return { body }; }
 
     [[nodiscard]] KType* get_ret_type() const { return ret_type; }
+    [[nodiscard]] bool is_varargs() const { return varargs; }
 
     void insert_arg(const Parameter& arg, size_t index);
 

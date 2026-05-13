@@ -380,3 +380,71 @@ fn main() i32 {
 
     return consume(add, mul);
 }
+
+// NAME FunctionOverloadByParameterType
+// ERR 0
+// RET 96
+
+fn pick(x: i32) i32 {
+    return 32;
+}
+
+fn pick(x: i64) i32 {
+    return 64;
+}
+
+fn main() i32 {
+    var wide: i64 = 7;
+    return pick(1) + pick(wide);
+}
+
+// NAME FunctionOverloadSingleLiteralConversion
+// ERR 0
+// RET 64
+
+fn pick(x: i64) i32 {
+    return 64;
+}
+
+fn main() i32 {
+    return pick(1);
+}
+
+// NAME CdeclVarargsWithExtraArguments
+// ERR 0
+// RET 0
+
+cdecl fn printf(fmt: str, ...) i32;
+
+fn main() i32 {
+    printf("%d %d\n", 1, 2);
+    return 0;
+}
+
+// NAME NonCdeclVarargsRejected
+// ERR 1
+// RET 0
+
+fn log(fmt: str, ...) void {
+}
+
+fn main() i32 {
+    log("%d\n", 1);
+    return 0;
+}
+
+// NAME FunctionOverloadAmbiguousPrimitiveConversion
+// ERR 1
+// RET 0
+
+fn pick(x: i8) i32 {
+    return 8;
+}
+
+fn pick(x: char) i32 {
+    return 1;
+}
+
+fn main() i32 {
+    return pick(1);
+}

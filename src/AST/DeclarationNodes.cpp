@@ -6,8 +6,6 @@
 
 #include "kyoto/AST/Expressions/ExpressionNode.h"
 #include "kyoto/AST/Expressions/FunctionCallNode.h"
-#include "kyoto/AST/Expressions/IdentifierNode.h"
-#include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/KType.h"
 #include "kyoto/ModuleCompiler.h"
 #include "kyoto/SymbolTable.h"
@@ -150,11 +148,9 @@ bool FullDeclarationStatementNode::is_assigning_to_class_instance() const
 
 llvm::Value* FullDeclarationStatementNode::handle_constructor_call(llvm::AllocaInst* alloca) const
 {
-    ExpressionNode* self = new IdentifierExpressionNode(name, compiler);
-    self = new UnaryNode(self, UnaryNode::UnaryOp::AddressOf, compiler);
     compiler.add_symbol(name, Symbol { alloca, type });
     auto* f = expr->as<FunctionCall>();
-    f->insert_arg(self, 0);
+    f->set_destination(alloca);
     auto _ = f->gen();
     return alloca;
 }
