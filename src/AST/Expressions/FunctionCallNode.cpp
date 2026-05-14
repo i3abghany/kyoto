@@ -50,8 +50,10 @@ ArgumentMatch match_argument(ExpressionNode* arg, const KType* param_type, Modul
     const auto* arg_type = arg->get_ktype();
     if (*param_type == *arg_type) return ArgumentMatch::Exact;
 
+    if (ExpressionNode::can_convert_array_to_slice(param_type, arg_type)) return ArgumentMatch::Conversion;
+
     if (!((param_type->is_integer() && arg_type->is_integer())
-            || (param_type->is_boolean() && arg_type->is_boolean()))) {
+          || (param_type->is_boolean() && arg_type->is_boolean()))) {
         return ArgumentMatch::None;
     }
 
@@ -121,8 +123,7 @@ std::optional<FunctionNode*> select_overload(const std::string& name, const std:
 }
 
 std::optional<FunctionNode*> select_declared_function(const std::string& name, const std::vector<ExpressionNode*>& args,
-                                                      ModuleCompiler& compiler, size_t total_arity,
-                                                      size_t param_offset)
+                                                      ModuleCompiler& compiler, size_t total_arity, size_t param_offset)
 {
     if (param_offset == 0) {
         if (auto fn = compiler.get_external_varargs_function(name, total_arity); fn.has_value()) return fn;
@@ -165,9 +166,15 @@ std::vector<llvm::Value*> build_call_arg_values(FunctionNode* fn_meta, const std
         if ((param_type->is_pointer() && arg_type->is_pointer() && *param_type == *arg_type)
             || (param_type->is_string() && arg_type->is_string())
             || (param_type->is_array() && arg_type->is_array() && *param_type == *arg_type)
+            || (param_type->is_slice() && arg_type->is_slice() && *param_type == *arg_type)
             || (param_type->is_class() && arg_type->is_class() && *param_type == *arg_type)
             || (param_type->is_function() && arg_type->is_function() && *param_type == *arg_type)) {
             arg_values.push_back(arg->gen());
+            continue;
+        }
+
+        if (ExpressionNode::can_convert_array_to_slice(param_type, arg_type)) {
+            arg_values.push_back(ExpressionNode::convert_array_to_slice(arg, param_type, compiler));
             continue;
         }
 
@@ -206,9 +213,15 @@ std::vector<llvm::Value*> build_call_arg_values(const FunctionType* function_typ
         if ((param_type->is_pointer() && arg_type->is_pointer() && *param_type == *arg_type)
             || (param_type->is_string() && arg_type->is_string())
             || (param_type->is_array() && arg_type->is_array() && *param_type == *arg_type)
+            || (param_type->is_slice() && arg_type->is_slice() && *param_type == *arg_type)
             || (param_type->is_class() && arg_type->is_class() && *param_type == *arg_type)
             || (param_type->is_function() && arg_type->is_function() && *param_type == *arg_type)) {
             arg_values.push_back(arg->gen());
+            continue;
+        }
+
+        if (ExpressionNode::can_convert_array_to_slice(param_type, arg_type)) {
+            arg_values.push_back(ExpressionNode::convert_array_to_slice(arg, param_type, compiler));
             continue;
         }
 

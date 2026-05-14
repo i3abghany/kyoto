@@ -127,6 +127,14 @@ llvm::Value* FullDeclarationStatementNode::generate_expression_value(llvm::Alloc
         return expr->gen();
     }
 
+    if (type->is_slice() && expr_ktype->is_slice() && type->operator==(*expr_ktype)) {
+        return expr->gen();
+    }
+
+    if (ExpressionNode::can_convert_array_to_slice(type, expr_ktype)) {
+        return ExpressionNode::convert_array_to_slice(expr, type, compiler);
+    }
+
     if (type->is_function() && expr_ktype->is_function() && type->operator==(*expr_ktype)) {
         return expr->gen();
     }

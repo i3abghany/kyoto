@@ -45,7 +45,11 @@ void test_driver(const utils::TestCase& test_case)
     } else {
         EXPECT_TRUE(ir.has_value());
         int32_t ret = utils::File::execute_ir(ir.value());
-        EXPECT_EQ(ret, test_case.ret());
+        if (test_case.runerr()) {
+            EXPECT_NE(ret, 0);
+        } else {
+            EXPECT_EQ(ret, test_case.ret());
+        }
     }
 }
 

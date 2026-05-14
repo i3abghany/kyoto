@@ -167,6 +167,7 @@ TestCase File::parse_test_case(const std::string& test_case, const std::filesyst
     int32_t expected_return = 0;
     bool error = false;
     bool skip = false;
+    bool runtime_error = false;
     std::string line;
     std::istringstream iss(test_case);
 
@@ -184,10 +185,14 @@ TestCase File::parse_test_case(const std::string& test_case, const std::filesyst
 
     std::getline(iss, line);
     if (line.starts_with("// SKIP")) skip = true;
-    else code = line;
+    else if (line.starts_with("// RUNERR ")) {
+        runtime_error = std::stoi(line.substr(10)) == 1;
+        std::getline(iss, line);
+        code = line;
+    } else code = line;
 
     code += std::string { std::istreambuf_iterator<char>(iss), {} };
-    return TestCase(name, code, expected_return, error, skip, filename);
+    return TestCase(name, code, expected_return, error, skip, runtime_error, filename);
 }
 
 }

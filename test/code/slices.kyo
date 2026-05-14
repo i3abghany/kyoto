@@ -1,0 +1,166 @@
+// NAME SliceLiteralIndexing
+// ERR 0
+// RET 30
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 20, 30, 40};
+    var s: [i32] = [&arr[0], 4];
+    return s[2];
+}
+
+// NAME SliceAssignmentWritesThrough
+// ERR 0
+// RET 99
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2, 3};
+    var s: [i32] = [&arr[0], 3];
+    s[1] = 99;
+    return arr[1];
+}
+
+// NAME SliceFunctionArgument
+// ERR 0
+// RET 9
+
+fn sum_edges(s: [i32]) i32 {
+    return s[0] + s[2];
+}
+
+fn main() i32 {
+    var arr: i32[] = i32{4, 8, 5};
+    return sum_edges([&arr[0], 3]);
+}
+
+// NAME SliceReturnValue
+// ERR 0
+// RET 7
+
+fn first_two(p: i32*) [i32] {
+    return [p, 2];
+}
+
+fn main() i32 {
+    var arr: i32[] = i32{7, 11, 13};
+    var s: [i32] = first_two(&arr[0]);
+    return s[0];
+}
+
+// NAME SliceSizeInLoop
+// ERR 0
+// RET 15
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2, 3, 4, 5};
+    var s: [i32] = [&arr[0], 5];
+    var sum: i32 = 0;
+    for (var i: i64 = 0; i < s.size; ++i) {
+        sum = sum + s[i];
+    }
+    return sum;
+}
+
+// NAME StackArrayToSliceDeclaration
+// ERR 0
+// RET 6
+
+fn main() i32 {
+    var arr: i32[] = i32{3, 6, 9};
+    var s: [i32] = arr;
+    return s[1];
+}
+
+// NAME StackArrayToSliceArgument
+// ERR 0
+// RET 12
+
+fn second(s: [i32]) i32 {
+    return s[1];
+}
+
+fn main() i32 {
+    var arr: i32[] = i32{4, 12, 20};
+    return second(arr);
+}
+
+// NAME StackArrayToSliceReturn
+// ERR 0
+// RET 3
+
+fn as_slice() [i32] {
+    var arr: i32[] = i32{10, 18, 26};
+    return arr;
+}
+
+fn main() i32 {
+    var s: [i32] = as_slice();
+    var expected: i64 = 3;
+    if (s.size == expected) {
+        return 3;
+    }
+    return 0;
+}
+
+// NAME WrongSlicePointerType
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var chars: char[] = char{'a', 'b'};
+    var s: [i32] = [&chars[0], 2];
+    return s[0];
+}
+
+// NAME NonIntegerSliceSize
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2};
+    var bad: [i32] = [&arr[0], true];
+    return bad[0];
+}
+
+// NAME AssignSliceSize
+// ERR 1
+// RET 0
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2};
+    var s: [i32] = [&arr[0], 2];
+    s.size = 3;
+    return 0;
+}
+
+// NAME RawPointerIsNotSlice
+// ERR 1
+// RET 0
+
+fn takes_slice(s: [i32]) i32 {
+    return s[0];
+}
+
+fn main() i32 {
+    var arr: i32[] = i32{1, 2};
+    return takes_slice(&arr[0]);
+}
+
+// NAME NegativeSliceIndexTraps
+// ERR 0
+// RET 0
+// RUNERR 1
+fn main() i32 {
+    var arr: i32[] = i32{1, 2};
+    var s: [i32] = [&arr[0], 2];
+    return s[-1];
+}
+
+// NAME SliceIndexPastEndTraps
+// ERR 0
+// RET 0
+// RUNERR 1
+fn main() i32 {
+    var arr: i32[] = i32{1, 2};
+    var s: [i32] = [&arr[0], 2];
+    return s[2];
+}

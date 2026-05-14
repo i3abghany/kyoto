@@ -343,3 +343,41 @@ void ArrayType::set_size(size_t n)
 {
     size = n;
 }
+
+SliceType::SliceType(KType* element_type)
+    : element_type(element_type)
+{
+}
+
+SliceType::~SliceType()
+{
+    delete element_type;
+}
+
+std::string SliceType::to_string() const
+{
+    return std::format("[{}]", element_type->to_string());
+}
+
+bool SliceType::operator==(const KType& other) const
+{
+    auto* other_slice = dynamic_cast<const SliceType*>(&other);
+    if (!other_slice) return false;
+
+    return *element_type == *other_slice->element_type;
+}
+
+KType* SliceType::copy() const
+{
+    return new SliceType(element_type->copy());
+}
+
+bool SliceType::is_slice() const
+{
+    return true;
+}
+
+KType* SliceType::get_element_type() const
+{
+    return element_type;
+}

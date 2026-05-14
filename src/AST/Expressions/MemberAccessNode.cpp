@@ -34,6 +34,11 @@ std::string MemberAccessNode::to_string() const
 
 llvm::Value* MemberAccessNode::gen()
 {
+    if (lhs->get_ktype()->is_slice() && member == "size") {
+        auto* slice_value = lhs->gen();
+        return compiler.get_builder().CreateExtractValue(slice_value, { 1 }, "slice.size");
+    }
+
     auto* member_ptr = gen_ptr();
     auto* llvm_type = gen_type();
     return compiler.get_builder().CreateLoad(llvm_type, member_ptr, member);
@@ -41,6 +46,10 @@ llvm::Value* MemberAccessNode::gen()
 
 llvm::Value* MemberAccessNode::gen_ptr() const
 {
+    if (lhs->get_ktype()->is_slice() && member == "size") {
+        throw std::runtime_error("Cannot assign to read-only slice member `size`");
+    }
+
     auto* lhs_val = lhs->gen_ptr();
     auto* lhs_type = lhs->get_ktype();
 
@@ -65,6 +74,13 @@ llvm::Type* MemberAccessNode::gen_type() const
 KType* MemberAccessNode::get_ktype() const
 {
     auto* lhs_type = lhs->get_ktype();
+
+    if (lhs_type->is_slice()) {
+        static PrimitiveType size_type(PrimitiveType::Kind::I64);
+        if (member == "size") return &size_type;
+        throw std::runtime_error(
+            std::format("Slice type `{}` does not have a member with name `{}`", lhs_type->to_string(), member));
+    }
 
     validate_member_access(lhs_type);
 

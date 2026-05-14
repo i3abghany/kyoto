@@ -74,6 +74,14 @@ llvm::Value* ReturnStatementNode::generate_return_value() const
         return generate_pointer_return_value();
     }
 
+    if (fn_ret_type->is_slice() && expr->get_ktype()->is_slice() && fn_ret_type->operator==(*expr->get_ktype())) {
+        return expr->gen();
+    }
+
+    if (ExpressionNode::can_convert_array_to_slice(fn_ret_type, expr->get_ktype())) {
+        return ExpressionNode::convert_array_to_slice(expr, fn_ret_type, compiler);
+    }
+
     throw std::runtime_error(
         std::format("Type of expression `{}` (type: `{}`) can't be returned from the function `{}`. Expected type `{}`",
                     expr->to_string(), expr->get_ktype()->to_string(), fn_name, fn_ret_type->to_string()));

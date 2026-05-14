@@ -26,6 +26,7 @@ public:
     [[nodiscard]] bool is_trivially_evaluable() const override;
 
     [[nodiscard]] std::vector<ASTNode*> get_children() const override { return {}; }
+    [[nodiscard]] int64_t get_value() const { return value; }
 
     void cast_to(PrimitiveType::Kind target_type);
 };

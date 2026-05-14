@@ -92,6 +92,14 @@ llvm::Value* AssignmentNode::generate_expression_value(const KType* type, const 
         return expr->gen();
     }
 
+    if (type->is_slice() && expr->get_ktype()->is_slice() && type->operator==(*expr->get_ktype())) {
+        return expr->gen();
+    }
+
+    if (ExpressionNode::can_convert_array_to_slice(type, expr->get_ktype())) {
+        return ExpressionNode::convert_array_to_slice(expr, type, compiler);
+    }
+
     if (type->is_function() && expr->get_ktype()->is_function() && type->operator==(*expr->get_ktype())) {
         return expr->gen();
     }

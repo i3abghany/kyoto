@@ -18,6 +18,7 @@ public:
     [[nodiscard]] virtual bool is_primitive() const { return false; }
     [[nodiscard]] virtual bool is_pointer() const { return false; }
     [[nodiscard]] virtual bool is_array() const { return false; }
+    [[nodiscard]] virtual bool is_slice() const { return false; }
     [[nodiscard]] virtual bool is_class() const { return false; }
     [[nodiscard]] virtual bool is_function() const { return false; }
     [[nodiscard]] virtual bool is_void() const { return false; }
@@ -135,6 +136,21 @@ public:
 private:
     KType* element_type;
     size_t size;
+};
+
+class SliceType : public KType {
+public:
+    explicit SliceType(KType* element_type);
+    ~SliceType() override;
+    [[nodiscard]] std::string to_string() const override;
+    bool operator==(const KType& other) const override;
+    [[nodiscard]] KType* copy() const override;
+    [[nodiscard]] bool is_slice() const override;
+
+    [[nodiscard]] KType* get_element_type() const;
+
+private:
+    KType* element_type;
 };
 
 class FunctionType : public KType {

@@ -37,6 +37,7 @@ public:
     std::any visitIdentifierExpression(kyoto::KyotoParser::IdentifierExpressionContext* ctx) override;
     std::any visitParenthesizedExpression(kyoto::KyotoParser::ParenthesizedExpressionContext* ctx) override;
     std::any visitMatchExpression(kyoto::KyotoParser::MatchExpressionContext* ctx) override;
+    std::any visitSliceExpression(kyoto::KyotoParser::SliceExpressionContext* ctx) override;
     std::any visitArrayExpression(kyoto::KyotoParser::ArrayExpressionContext* ctx) override;
     std::any visitArrayIndexExpression(kyoto::KyotoParser::ArrayIndexExpressionContext* ctx) override;
     std::any visitCastExpression(kyoto::KyotoParser::CastExpressionContext* ctx) override;
@@ -99,6 +100,7 @@ public:
     std::any visitVoidType(kyoto::KyotoParser::VoidTypeContext* ctx) override;
     std::any visitPointerType(kyoto::KyotoParser::PointerTypeContext* ctx) override;
     std::any visitArrayType(kyoto::KyotoParser::ArrayTypeContext* ctx) override;
+    std::any visitSliceType(kyoto::KyotoParser::SliceTypeContext* ctx) override;
     std::any visitFunctionType(kyoto::KyotoParser::FunctionTypeContext* ctx) override;
     std::any visitClassType(kyoto::KyotoParser::ClassTypeContext* ctx) override;
     std::any visitQualifiedClassType(kyoto::KyotoParser::QualifiedClassTypeContext* ctx) override;

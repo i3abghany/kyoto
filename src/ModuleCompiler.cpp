@@ -782,6 +782,8 @@ std::string ModuleCompiler::mangle_type_name(const KType* type) const
         return "A" + std::to_string(array_type->get_size()) + "_" + mangle_type_name(array_type->get_element_type());
     }
 
+    if (type->is_slice()) return "S_" + mangle_type_name(type->as<SliceType>()->get_element_type());
+
     if (type->is_class()) return "C" + sanitize_mangled_component(type->get_class_name());
 
     if (type->is_function()) {

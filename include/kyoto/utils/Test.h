@@ -31,12 +31,13 @@ class TestCase {
 public:
     TestCase() = default;
     TestCase(std::string name, std::string code, int32_t expected_return, bool error = false, bool skip = false,
-             std::filesystem::path source_file = {})
+             bool runtime_error = false, std::filesystem::path source_file = {})
         : test_name(std::move(name))
         , kyoto_code(std::move(code))
         , expected_return(std::move(expected_return))
         , error(error)
         , should_skip(skip)
+        , should_runtime_error(runtime_error)
         , source_file(std::move(source_file))
     {
     }
@@ -46,6 +47,7 @@ public:
     int32_t ret() const { return expected_return; }
     bool err() const { return error; }
     bool skip() const { return should_skip; }
+    bool runerr() const { return should_runtime_error; }
     const std::filesystem::path& source() const { return source_file; }
 
     friend std::ostream& operator<<(std::ostream& os, const TestCase& test_case)
@@ -63,6 +65,7 @@ private:
     int32_t expected_return {};
     bool error {};
     bool should_skip {};
+    bool should_runtime_error {};
     std::filesystem::path source_file {};
 };
 

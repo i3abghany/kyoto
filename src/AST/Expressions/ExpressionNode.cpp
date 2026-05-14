@@ -9,6 +9,7 @@
 #include "kyoto/TypeResolver.h"
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/Casting.h"
 
@@ -93,4 +94,38 @@ llvm::Value* ExpressionNode::handle_integer_conversion(ExpressionNode* expr, con
     }
 
     assert(false && "Unreachable");
+}
+
+bool ExpressionNode::can_convert_array_to_slice(const KType* target_type, const KType* expr_type)
+{
+    if (!target_type->is_slice() || !expr_type->is_array()) return false;
+
+    const auto* slice_type = target_type->as<SliceType>();
+    const auto* array_type = expr_type->as<ArrayType>();
+    return *slice_type->get_element_type() == *array_type->get_element_type();
+}
+
+llvm::Value* ExpressionNode::convert_array_to_slice(ExpressionNode* expr, const KType* target_type,
+                                                    ModuleCompiler& compiler)
+{
+    if (!can_convert_array_to_slice(target_type, expr->get_ktype())) {
+        throw std::runtime_error(std::format("Cannot convert `{}` from `{}` to `{}`", expr->to_string(),
+                                             expr->get_ktype()->to_string(), target_type->to_string()));
+    }
+
+    auto* array_type = expr->get_ktype()->as<ArrayType>();
+    auto* slice_llvm_type = ASTNode::get_llvm_type(target_type, compiler);
+    auto* array_ptr = expr->gen_ptr();
+    if (!array_ptr) {
+        throw std::runtime_error(
+            std::format("Cannot convert `{}` to slice because it is not addressable", expr->to_string()));
+    }
+
+    auto* zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(compiler.get_context()), 0);
+    auto* data_ptr = compiler.get_builder().CreateGEP(expr->gen_type(), array_ptr, { zero, zero }, "sliceptr");
+    auto* size = llvm::ConstantInt::get(llvm::Type::getInt64Ty(compiler.get_context()), array_type->get_size(), true);
+
+    llvm::Value* slice_value = llvm::UndefValue::get(slice_llvm_type);
+    slice_value = compiler.get_builder().CreateInsertValue(slice_value, data_ptr, { 0 }, "slice.data");
+    return compiler.get_builder().CreateInsertValue(slice_value, size, { 1 }, "slice.size");
 }

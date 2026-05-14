@@ -46,4 +46,8 @@ public:
     static llvm::Value* handle_integer_conversion(ExpressionNode* expr, const KType* target_type,
                                                   ModuleCompiler& compiler, const std::string& what,
                                                   const std::string& target_name = "");
+
+    static bool can_convert_array_to_slice(const KType* target_type, const KType* expr_type);
+    static llvm::Value* convert_array_to_slice(ExpressionNode* expr, const KType* target_type,
+                                               ModuleCompiler& compiler);
 };

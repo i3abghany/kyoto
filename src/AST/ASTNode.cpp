@@ -34,6 +34,10 @@ llvm::Type* ASTNode::get_llvm_type(const KType* type, ModuleCompiler& compiler)
         return llvm::ArrayType::get(get_llvm_type(array_type->get_element_type(), compiler), array_type->get_size());
     }
 
+    if (type->is_slice()) {
+        return llvm::StructType::get(context, { llvm::PointerType::get(context, 0), llvm::Type::getInt64Ty(context) });
+    }
+
     if (!type->is_primitive()) {
         if (!dynamic_cast<const PointerType*>(type)) {
             throw std::runtime_error(std::format("Unsupported type `{}`", type->to_string()));

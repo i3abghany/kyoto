@@ -14,6 +14,39 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Value.h"
 
+namespace {
+
+void cast_literal_to(PrimitiveType* target_type, NumberNode* literal, ModuleCompiler& compiler)
+{
+    if (!target_type->is_integer()) return;
+    if (!compiler.get_type_resolver().fits_in(literal->get_value(), target_type->get_kind())) {
+        throw std::runtime_error(
+            std::format("Value `{}` does not fit in type `{}`", literal->to_string(), target_type->to_string()));
+    }
+    literal->cast_to(target_type->get_kind());
+}
+
+void coerce_integer_literal_operands(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)
+{
+    auto* lhs_type = lhs->get_ktype()->as<PrimitiveType>();
+    auto* rhs_type = rhs->get_ktype()->as<PrimitiveType>();
+
+    if (lhs_type->is_boolean() || rhs_type->is_boolean()) return;
+
+    if (auto* lhs_literal = dynamic_cast<NumberNode*>(lhs);
+        lhs_literal && rhs_type->is_integer() && *lhs_type != *rhs_type) {
+        cast_literal_to(rhs_type, lhs_literal, compiler);
+        return;
+    }
+
+    if (auto* rhs_literal = dynamic_cast<NumberNode*>(rhs);
+        rhs_literal && lhs_type->is_integer() && *lhs_type != *rhs_type) {
+        cast_literal_to(lhs_type, rhs_literal, compiler);
+    }
+}
+
+}
+
 #define ARITH_BINARY_NODE_IMPL_BASE(name, op, llvm_op)                                                            \
     name::name(ExpressionNode* lhs, ExpressionNode* rhs, ModuleCompiler& compiler)                                \
         : lhs(lhs)                                                                                                \
@@ -52,15 +85,9 @@
     }                                                                                                             \
     llvm::Type* name::gen_type() const                                                                            \
     {                                                                                                             \
+        coerce_integer_literal_operands(lhs, rhs, compiler);                                                      \
         auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                  \
         auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                  \
-        if (auto* num = dynamic_cast<NumberNode*>(lhs); num) {                                                    \
-            num->cast_to(rhs_ktype->get_kind());                                                                  \
-            lhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                    \
-        } else if (auto* num = dynamic_cast<NumberNode*>(rhs); num) {                                             \
-            num->cast_to(lhs_ktype->get_kind());                                                                  \
-            rhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                    \
-        }                                                                                                         \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \
         if (!t.has_value()) {                                                                                     \
             throw std::runtime_error(std::format("Operator `{}` cannot be applied to types `{}` and `{}`", #op,   \
@@ -74,6 +101,7 @@
     KType* name::get_ktype() const                                                                                \
     {                                                                                                             \
         if (type) return type;                                                                                    \
+        coerce_integer_literal_operands(lhs, rhs, compiler);                                                      \
         auto* lhs_ktype = lhs->get_ktype()->as<PrimitiveType>();                                                  \
         auto* rhs_ktype = rhs->get_ktype()->as<PrimitiveType>();                                                  \
         auto t = compiler.get_type_resolver().resolve_binary_arith(lhs_ktype->get_kind(), rhs_ktype->get_kind()); \

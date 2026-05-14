@@ -54,6 +54,7 @@ expression:
 	| NEW type OPEN_BRACKET expression CLOSE_BRACKET					# newArrayExpression
 	| SIZEOF LPAREN (expression | type) RPAREN							# sizeofExpression
 	| MATCH expression OPEN_BRACE matchCase+ CLOSE_BRACE				# matchExpression
+	| OPEN_BRACKET expression COMMA expression CLOSE_BRACKET			# sliceExpression
 	| type OPEN_BRACE expressionList CLOSE_BRACE						# arrayExpression
 	| ASTERISK expression												# dereferenceExpression
 	| expression OPEN_BRACKET expression CLOSE_BRACKET					# arrayIndexExpression
@@ -149,5 +150,6 @@ type:
 	| FN LPAREN functionTypeParameterList RPAREN type					# functionType
 	| modulePath DOUBLE_COLON IDENTIFIER (LESS_THAN type GREATER_THAN)?	# qualifiedClassType
 	| IDENTIFIER (LESS_THAN type GREATER_THAN)?							# classType
+	| OPEN_BRACKET type CLOSE_BRACKET									# sliceType
 	| type OPEN_BRACKET CLOSE_BRACKET									# arrayType
 	| type ASTERISK+													# pointerType;

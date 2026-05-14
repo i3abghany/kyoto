@@ -31,6 +31,7 @@
 #include "kyoto/AST/Expressions/NewNode.h"
 #include "kyoto/AST/Expressions/NumberNode.h"
 #include "kyoto/AST/Expressions/SizeofNode.h"
+#include "kyoto/AST/Expressions/SliceNode.h"
 #include "kyoto/AST/Expressions/StringLiteralNode.h"
 #include "kyoto/AST/Expressions/UnaryNode.h"
 #include "kyoto/AST/ForStatementNode.h"
@@ -501,6 +502,13 @@ std::any ASTBuilderVisitor::visitArrayExpression(kyoto::KyotoParser::ArrayExpres
     return (ExpressionNode*)new ArrayNode(elems, type, compiler);
 }
 
+std::any ASTBuilderVisitor::visitSliceExpression(kyoto::KyotoParser::SliceExpressionContext* ctx)
+{
+    auto* ptr = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
+    auto* size = std::any_cast<ExpressionNode*>(visit(ctx->expression(1)));
+    return (ExpressionNode*)new SliceNode(ptr, size, compiler);
+}
+
 std::any ASTBuilderVisitor::visitArrayIndexExpression(kyoto::KyotoParser::ArrayIndexExpressionContext* ctx)
 {
     auto* array = std::any_cast<ExpressionNode*>(visit(ctx->expression(0)));
@@ -731,6 +739,12 @@ std::any ASTBuilderVisitor::visitArrayType(kyoto::KyotoParser::ArrayTypeContext*
     return (KType*)new ArrayType(type, 0);
 }
 
+std::any ASTBuilderVisitor::visitSliceType(kyoto::KyotoParser::SliceTypeContext* ctx)
+{
+    auto* type = std::any_cast<KType*>(visit(ctx->type()));
+    return (KType*)new SliceType(type);
+}
+
 std::any ASTBuilderVisitor::visitFunctionType(kyoto::KyotoParser::FunctionTypeContext* ctx)
 {
     std::vector<KType*> param_types;
@@ -762,6 +776,8 @@ std::any ASTBuilderVisitor::visitClassType(kyoto::KyotoParser::ClassTypeContext*
         std::replace(inner_mangled.begin(), inner_mangled.end(), '*', '_');
         std::replace(inner_mangled.begin(), inner_mangled.end(), '<', '_');
         std::replace(inner_mangled.begin(), inner_mangled.end(), '>', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '[', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), ']', '_');
 
         std::string mangled_name = compiler.qualify_local_name(type_name + "_" + inner_mangled);
         compiler.instantiate_template(compiler.qualify_local_name(type_name), mangled_name, inner_text);
@@ -792,6 +808,8 @@ std::any ASTBuilderVisitor::visitQualifiedClassType(kyoto::KyotoParser::Qualifie
         std::replace(inner_mangled.begin(), inner_mangled.end(), '*', '_');
         std::replace(inner_mangled.begin(), inner_mangled.end(), '<', '_');
         std::replace(inner_mangled.begin(), inner_mangled.end(), '>', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), '[', '_');
+        std::replace(inner_mangled.begin(), inner_mangled.end(), ']', '_');
 
         const auto qualified_template_name = compiler.qualify_imported_name(module_name, alias);
         const auto mangled_name = compiler.qualify_imported_name(module_name, alias + "_" + inner_mangled);
@@ -828,6 +846,10 @@ std::string ASTBuilderVisitor::stringify_type_for_template(const KType* type) co
 
     if (type->is_array()) {
         return stringify_type_for_template(type->as<ArrayType>()->get_element_type()) + "[]";
+    }
+
+    if (type->is_slice()) {
+        return "[" + stringify_type_for_template(type->as<SliceType>()->get_element_type()) + "]";
     }
 
     if (type->is_function()) {

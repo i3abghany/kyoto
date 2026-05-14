@@ -1,0 +1,45 @@
+cdecl fn printf(fmt: str, ...) i32;
+import vec;
+
+
+fn swap(s: [i32], i: i64, j: i64) {
+    var temp: i32 = s[i];
+    s[i] = s[j];
+    s[j] = temp;
+}
+
+fn quicksort(s: [i32]) {
+    if (s.size <= 1) { return; }
+    var p: i64 = partition(s);
+    quicksort([&s[0], p]); quicksort([&s[p + 1], s.size - p - 1]);
+}
+
+fn partition(s: [i32]) i64 {
+    var i: i64 = 0;
+    for (var j: i64 = 0; j < s.size - 1; ++j) { 
+        if (s[j] < s[s.size - 1]) { swap(s, i, j); ++i; } 
+    }
+    swap(s, i, s.size - 1);
+    return i;
+}
+
+fn main() i32 {
+    var arr: i32[] = i32{10, 7, 8, 9, 1, 5};
+    var s: [i32] = [&arr[0], 6];
+
+    printf("Original array: ");
+    for (var i: i64 = 0; i < s.size; ++i) {
+        printf("%d ", s[i]);
+    }
+    printf("\n");
+
+    quicksort(s);
+
+    printf("Sorted array: ");
+    for (var i: i64 = 0; i < s.size; ++i) {
+        printf("%d ", s[i]);
+    }
+    printf("\n");
+    
+    return 0;
+}

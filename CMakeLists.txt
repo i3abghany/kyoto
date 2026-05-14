@@ -42,6 +42,7 @@ set(SOURCES
     src/AST/Expressions/NewArrayNode.cpp
     src/AST/Expressions/NumberNode.cpp
     src/AST/Expressions/SizeofNode.cpp
+    src/AST/Expressions/SliceNode.cpp
     src/AST/Expressions/StringLiteralNode.cpp
     src/AST/Expressions/UnaryNode.cpp
     src/AST/ForStatementNode.cpp
@@ -89,6 +90,7 @@ set(TEST_SOURCES
     test/TestTypeAlias.cpp
     test/TestGenerics.cpp
     test/TestImport.cpp
+    test/TestSlices.cpp
 )
 
 add_executable(

@@ -32,6 +32,8 @@ public:
 private:
     llvm::Value* gen_array_access() const;
     llvm::Value* gen_pointer_access() const;
+    llvm::Value* gen_slice_access() const;
+    llvm::Value* gen_slice_element_ptr() const;
     void validate_index_type() const;
     KType* calculate_result_type() const;
 
