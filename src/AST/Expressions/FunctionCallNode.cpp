@@ -131,6 +131,16 @@ std::optional<FunctionNode*> select_declared_function(const std::string& name, c
     return select_overload(name, args, compiler, total_arity, param_offset);
 }
 
+FunctionNode* require_declared_function(const std::string& name, const std::vector<ExpressionNode*>& args,
+                                        ModuleCompiler& compiler, size_t total_arity, size_t param_offset)
+{
+    auto fn = select_declared_function(name, args, compiler, total_arity, param_offset);
+    if (fn.has_value()) return fn.value();
+
+    throw std::runtime_error(
+        std::format("Function `{}` with argument types ({}) not found", name, format_argument_types(args)));
+}
+
 std::vector<llvm::Value*> build_call_arg_values(FunctionNode* fn_meta, const std::string& name,
                                                 const std::vector<ExpressionNode*>& args, ModuleCompiler& compiler,
                                                 llvm::Value* destination = nullptr)
@@ -332,13 +342,12 @@ llvm::Value* FunctionCall::gen()
 
     const size_t param_offset = is_constructor_call() ? 1 : 0;
     const size_t lookup_arity = args.size() + param_offset;
-    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
-    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
-                                               : name + "_" + std::to_string(lookup_arity);
+    auto* fn_meta = require_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = compiler.get_function_llvm_name(fn_meta);
 
     auto* fn = compiler.get_module()->getFunction(llvm_name);
 
-    if (!fn && fn_meta.has_value() && fn_meta.value()->get_linkage_name() == "main") {
+    if (!fn && fn_meta->get_linkage_name() == "main") {
         fn = compiler.get_module()->getFunction("main");
     }
 
@@ -349,9 +358,9 @@ llvm::Value* FunctionCall::gen()
 
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) {
-        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler, destination);
+        arg_values = build_call_arg_values(fn_meta, name, args, compiler, destination);
     } else {
-        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler);
+        arg_values = build_call_arg_values(fn_meta, name, args, compiler);
     }
 
     if (fn->arg_size() != arg_values.size() && (!fn->isVarArg() || fn->arg_size() > arg_values.size())) {
@@ -388,15 +397,14 @@ llvm::Value* FunctionCall::gen_ptr() const
 
     const size_t param_offset = is_constructor_call() ? 1 : 0;
     const size_t lookup_arity = args.size() + param_offset;
-    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
-    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
-                                               : name + "_" + std::to_string(lookup_arity);
+    auto* fn_meta = require_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = compiler.get_function_llvm_name(fn_meta);
 
     std::vector<llvm::Value*> arg_values;
     if (destination && is_constructor_call()) {
-        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler, destination);
+        arg_values = build_call_arg_values(fn_meta, name, args, compiler, destination);
     } else {
-        arg_values = build_call_arg_values(fn_meta.value(), name, args, compiler);
+        arg_values = build_call_arg_values(fn_meta, name, args, compiler);
     }
 
     auto* fn = compiler.get_module()->getFunction(llvm_name);
@@ -424,9 +432,8 @@ llvm::Type* FunctionCall::gen_type() const
 
     const size_t param_offset = is_constructor_call() ? 1 : 0;
     const size_t lookup_arity = args.size() + param_offset;
-    auto fn_meta = select_declared_function(name, args, compiler, lookup_arity, param_offset);
-    const auto llvm_name = fn_meta.has_value() ? compiler.get_function_llvm_name(fn_meta.value())
-                                               : name + "_" + std::to_string(lookup_arity);
+    auto* fn_meta = require_declared_function(name, args, compiler, lookup_arity, param_offset);
+    const auto llvm_name = compiler.get_function_llvm_name(fn_meta);
 
     const auto* fn = compiler.get_module()->getFunction(llvm_name);
 

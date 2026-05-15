@@ -90,3 +90,14 @@ import mods.outer;
 fn main() i32 {
     return mods.outer::outer_value();
 }
+
+// NAME ImportedUnqualifiedOverloadResolution
+// ERR 0
+// RET 96
+
+import mods.overloads;
+
+fn main() i32 {
+    var wide: i64 = 7;
+    return pick(1) + pick(wide);
+}

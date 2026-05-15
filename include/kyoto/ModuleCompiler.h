@@ -128,6 +128,7 @@ private:
     std::string mangle_module_name(const std::string& module_name) const;
     std::string make_qualified_name(const std::string& module_name, const std::string& name) const;
     std::string module_name_from_qualified_symbol(const std::string& qualified_name) const;
+    std::vector<std::string> resolve_function_lookup_names(const std::string& name) const;
     void enter_module_context(const std::string& module_name);
 
     std::string make_function_key(const FunctionNode* node) const;

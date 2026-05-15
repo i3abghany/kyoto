@@ -187,17 +187,40 @@ std::string ModuleCompiler::make_qualified_name(const std::string& module_name, 
 
 std::string ModuleCompiler::module_name_from_qualified_symbol(const std::string& qualified_name) const
 {
-    const auto pos = qualified_name.find("__");
-    if (pos == std::string::npos) return current_module_name;
-
-    const auto mangled_module = qualified_name.substr(0, pos);
     for (const auto& [module_name, module_info] : loaded_modules) {
-        if (mangle_module_name(module_name) == mangled_module) {
+        const auto prefix = make_qualified_name(module_name, "");
+        if (qualified_name.starts_with(prefix)) {
             return module_name;
         }
     }
 
     return current_module_name;
+}
+
+std::vector<std::string> ModuleCompiler::resolve_function_lookup_names(const std::string& name) const
+{
+    std::vector<std::string> result { name };
+
+    std::string lookup_module = current_module_name;
+    std::string unqualified_name = name;
+    for (const auto& [module_name, module_info] : loaded_modules) {
+        const auto prefix = make_qualified_name(module_name, "");
+        if (name.starts_with(prefix)) {
+            lookup_module = module_name;
+            unqualified_name = name.substr(prefix.size());
+            break;
+        }
+    }
+
+    const auto imports = module_imports.find(lookup_module);
+    if (imports == module_imports.end()) return result;
+
+    for (const auto& imported_module : imports->second) {
+        const auto imported_name = make_qualified_name(imported_module, unqualified_name);
+        if (std::find(result.begin(), result.end(), imported_name) == result.end()) result.push_back(imported_name);
+    }
+
+    return result;
 }
 
 std::string ModuleCompiler::qualify_local_name(const std::string& entity_name) const
@@ -520,8 +543,9 @@ void ModuleCompiler::add_function(FunctionNode* node)
 std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& name)
 {
     FunctionNode* result = nullptr;
+    const auto lookup_names = resolve_function_lookup_names(name);
     for (const auto& [_, func] : functions) {
-        if (func->get_name() != name) continue;
+        if (std::find(lookup_names.begin(), lookup_names.end(), func->get_name()) == lookup_names.end()) continue;
         if (result) return std::nullopt;
         result = func;
     }
@@ -539,8 +563,10 @@ std::optional<FunctionNode*> ModuleCompiler::get_function(const std::string& nam
 std::vector<FunctionNode*> ModuleCompiler::get_functions(const std::string& name, size_t arity) const
 {
     std::vector<FunctionNode*> result;
+    const auto lookup_names = resolve_function_lookup_names(name);
     for (const auto& [_, func] : functions) {
-        if (func->get_name() == name && func->get_params().size() == arity) result.push_back(func);
+        if (std::find(lookup_names.begin(), lookup_names.end(), func->get_name()) == lookup_names.end()) continue;
+        if (func->get_params().size() == arity) result.push_back(func);
     }
     return result;
 }
@@ -548,8 +574,10 @@ std::vector<FunctionNode*> ModuleCompiler::get_functions(const std::string& name
 std::optional<FunctionNode*> ModuleCompiler::get_external_varargs_function(const std::string& name, size_t arity) const
 {
     FunctionNode* result = nullptr;
+    const auto lookup_names = resolve_function_lookup_names(name);
     for (const auto& [_, func] : functions) {
-        if (func->get_name() != name || !func->is_external() || !func->is_varargs()) continue;
+        if (std::find(lookup_names.begin(), lookup_names.end(), func->get_name()) == lookup_names.end()) continue;
+        if (!func->is_external() || !func->is_varargs()) continue;
         if (func->get_params().size() > arity) continue;
         if (result) {
             throw std::runtime_error(std::format("Multiple cdecl varargs declarations match function `{}`", name));
